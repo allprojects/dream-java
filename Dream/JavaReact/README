@@ -1,0 +1,11 @@
+To regenerate the Antlr grammars, run:
+org.antlr.v4.Tool grammars/Integers.g4 grammars/Doubles.g4 grammars/Bools.g4 grammars/Strings.g4 -o src/javareact/common/expressions/antlr -no-listener -visitor -package javareact.common.expressions.antlr
+
+Adopts a modified version of REDS2, in which:
+- The GenericOverlay always creates Broker NodeDescriptor (in the constructor)
+- The TCPTransport uses normal ObjectInput/OutputStream instead of REDSMarshaller/REDSUnmarshaller
+	In the constructor of the local class TCPLink:
+	marshaller = new ObjectOutputStream(sock.getOutputStream());
+    unmarshaller = new ObjectInputStream(sock.getInputStream());
+    
+This second change is required for compatibility with android

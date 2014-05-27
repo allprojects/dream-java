@@ -1,0 +1,19 @@
+- Extend grammars to support cross-type expressions.
+- Define constraints on the values returned by methods.
+- Compute the value of a method only if required by some subscription.
+- Implement aggregate values (hostId = *)
+- Fix the blocking problem with the atomic semantics in the init phase (see example below).
+
+Example:
+Observable A
+Observable B
+Reactive C = f(A, B)
+Reactive D = f(C)
+
+A change to A is propagated to C. Since this is the first value, C does not hold any value for B,
+thus it cannot compute a new value and propagate it to D.
+When B changes, the new value should be propagated to C.
+However, with atomic consistency only a single propagation is possible at any point in time and the
+previous propagation is blocked (never reached D).
+This causes the system to halt.
+A possible solution can be to provide an initial value for both A and B to C.

@@ -3,15 +3,15 @@ package javareact.common.types.observable;
 import java.util.function.Consumer;
 import javareact.common.packets.content.Attribute;
 
-public class Var<T> extends Observable {
+public class RemoteVar<T> extends Subscriber {
   private T val;
 
-  public Var(String observableId, boolean persistent, T val) {
+  public RemoteVar(String observableId, boolean persistent, T val) {
     super(observableId, persistent);
     set(val);
   }
 
-  public Var(String observableId, T val) {
+  public RemoteVar(String observableId, T val) {
     super(observableId);
     set(val);
   }

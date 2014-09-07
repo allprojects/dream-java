@@ -1,0 +1,5 @@
+- Can we create a proxy to a method (not to an object)?
+	- If not, we can get rid of AspectJ and obtain a pure Java project
+- Can we define constraints on the return values of methods?
+- Can we get rid of the non empty constructor for reactive objects?
+	- If so, we can use Lambda in Java 8!

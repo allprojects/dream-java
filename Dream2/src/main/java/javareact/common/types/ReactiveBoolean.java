@@ -1,6 +1,6 @@
 package javareact.common.types;
 
-public abstract class ReactiveBoolean extends Signal<Boolean> {
+public abstract class ReactiveBoolean extends AbstractReactive<Boolean> {
   public ReactiveBoolean(String name, Proxy... proxies) {
     super(name, proxies);
     val = false;

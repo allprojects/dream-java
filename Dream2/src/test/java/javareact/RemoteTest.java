@@ -37,37 +37,30 @@ public class RemoteTest {
 		final RemoteVar<List<Integer>> intList = new ListProxy<Integer>(
 				"def", "intList");
 
-		Signal<Integer> signal = new Signal<Integer>("signal", a) {
-			@Override
-			public Integer evaluate() {
+		Signal<Integer> signal = new Signal<Integer>("signal", () -> {
 				if (a.get() == null)
 					return null;
 				return a.get() * 2;
-			}
-		};
+			},
+			a);
 
 		Signal<Integer> stringandlistlength = new Signal<Integer>(
-				"stringandlistlength", someString, intList) {
-			@Override
-			public Integer evaluate() {
+				"stringandlistlength", () -> {
 				if (someString.get() == null)
 					return null;
 				if (intList.get() == null)
 					return null;
 				return someString.get().length() + intList.get().size();
-			}
-		};
+			}, someString, intList);
 
-		Signal<Integer> lastInList = new Signal<Integer>("lastInList", intList) {
-			@Override
-			public Integer evaluate() {
+		Signal<Integer> lastInList = new Signal<Integer>("lastInList", () -> {
 				if (intList.get() == null)
 					return null;
 				if (intList.get().size() == 0)
 					return null;
 				return intList.get().get(intList.get().size() - 1);
-			}
-		};
+			},
+			intList);
 		
 		//assertEquals(signal.get(), Integer.valueOf(2));
 	}

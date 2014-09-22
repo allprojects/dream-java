@@ -19,29 +19,20 @@ public class LocalExample2 implements ReactiveChangeListener<Double> {
     final RemoteVar<Double> obDouble1Proxy = obDouble1.getProxy();
     final RemoteVar<Double> obDouble2Proxy = obDouble2.getProxy();
 
-    Signal<Double> reactDouble1 = new Signal<Double>("reactDouble1", obDouble1Proxy, obDouble2Proxy) {
-      @Override
-      public Double evaluate() {
-        return obDouble1Proxy.get() * obDouble2Proxy.get();
-      }
-    };
+    Signal<Double> reactDouble1 = new Signal<Double>("reactDouble1",
+    		() -> obDouble1Proxy.get() * obDouble2Proxy.get(),
+    		obDouble1Proxy, obDouble2Proxy);
 
-    Signal<Double> reactDouble2 = new Signal<Double>("reactDouble2", obDouble1Proxy, obDouble2Proxy) {
-      @Override
-      public Double evaluate() {
-        return obDouble1Proxy.get() / obDouble2Proxy.get();
-      }
-    };
+    Signal<Double> reactDouble2 = new Signal<Double>("reactDouble2",
+    		() -> obDouble1Proxy.get() / obDouble2Proxy.get(),
+    		obDouble1Proxy, obDouble2Proxy);
 
     final RemoteVar<Double> reactDouble1Proxy = reactDouble1.getProxy();
     final RemoteVar<Double> reactDouble2Proxy = reactDouble2.getProxy();
 
-    new Signal<Double>("sub", reactDouble1Proxy, reactDouble2Proxy) {
-      @Override
-      public Double evaluate() {
-        return reactDouble1Proxy.get() - reactDouble2Proxy.get();
-      }
-    }.addReactiveChangeListener(this);
+    new Signal<Double>("sub",
+    		() -> reactDouble1Proxy.get() - reactDouble2Proxy.get(),
+    		reactDouble1Proxy, reactDouble2Proxy).addReactiveChangeListener(this);
 
     try {
       Thread.sleep(500);

@@ -19,12 +19,9 @@ public class LocalExample3 {
     Var<List<Integer>> obList = new Var<>("obList", new ArrayList<Integer>());
     final RemoteVar<List<Integer>> obListProxy = obList.getProxy();
 
-    Signal<Integer> reactInt = new Signal<Integer>("reactInt", obListProxy) {
-      @Override
-      public Integer evaluate() {
-        return 1000 + obListProxy.get().size();
-      }
-    };
+    Signal<Integer> reactInt = new Signal<Integer>("reactInt",
+    		() -> 1000 + obListProxy.get().size(),
+    		obListProxy);
 
     reactInt.addReactiveChangeListener(newValue -> System.out.println(newValue));
 

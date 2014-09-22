@@ -1,6 +1,6 @@
 package javareact.common.types;
 
-public abstract class ReactiveInteger extends Signal<Integer> {
+public abstract class ReactiveInteger extends AbstractReactive<Integer> {
   public ReactiveInteger(String name, Proxy... proxies) {
     super(name, proxies);
     val = 0;

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class ReactiveList<T extends Serializable> extends Signal<List<T>> {
+public abstract class ReactiveList<T extends Serializable> extends AbstractReactive<List<T>> {
   public ReactiveList(String name, Proxy... proxies) {
     super(name, proxies);
     val = new ArrayList<T>();

@@ -1,22 +1,42 @@
 package javareact.common.types;
 
-public abstract class Signal<T> extends AbstractReactive<T> {
-  private RemoteVar<T> proxy = null;
+import java.util.function.Supplier;
 
-  public Signal(String name, Proxy... proxies) {
-    super(name, proxies);
-    val = null;
-  }
+public class Signal<T> extends AbstractReactive<T> {
+	private RemoteVar<T> proxy = null;
+	private Supplier<T> evaluation;
 
-  public final T get() {
-    return val;
-  }
+	private static <T> Proxy[] proxiesFromVars(ProxyGenerator[] vars) {
+		Proxy[] proxies = new Proxy[vars.length];
+		for (int i = 0; i < vars.length; i++) {
+			proxies[i] = vars[i].getProxy();
+		}
+		return proxies;
+	}
 
-  @Override
-  public synchronized RemoteVar<T> getProxy() {
-    if (proxy == null) {
-      proxy = new RemoteVar<T>(name);
-    }
-    return proxy;
-  }
+	public Signal(String name, Supplier<T> evaluation, Proxy... proxies) {
+		super(name, proxies);
+		val = null;
+		this.evaluation = evaluation;
+	}
+
+	@SafeVarargs
+  public Signal(String name, Supplier<T> evaluation, ProxyGenerator... vars) {
+		super(name, proxiesFromVars(vars));
+		val = null;
+		this.evaluation = evaluation;
+	}
+
+	@Override
+	public synchronized RemoteVar<T> getProxy() {
+		if (proxy == null) {
+			proxy = new RemoteVar<T>(name);
+		}
+		return proxy;
+	}
+
+	@Override
+	public final T evaluate() {
+		return evaluation.get();
+	}
 }

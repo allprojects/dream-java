@@ -1,6 +1,6 @@
 package javareact.common.types;
 
-public abstract class ReactiveDouble extends Signal<Double> {
+public abstract class ReactiveDouble extends AbstractReactive<Double> {
   public ReactiveDouble(String name, Proxy... proxies) {
     super(name, proxies);
     val = 0.0;

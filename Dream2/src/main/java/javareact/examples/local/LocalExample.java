@@ -19,33 +19,21 @@ public class LocalExample {
     final RemoteVar<String> obString1Proxy = obString1.getProxy();
     final RemoteVar<String> obString2Proxy = obString2.getProxy();
 
-    Signal<Integer> reactInt = new Signal<Integer>("reactInt", obIntProxy) {
-      @Override
-      public Integer evaluate() {
-        return 10 - 2 + ((obIntProxy.get() * 2) + obIntProxy.get()) / 2;
-      }
-    };
+    Signal<Integer> reactInt = new Signal<Integer>("reactInt",
+    		() -> 10 - 2 + ((obIntProxy.get() * 2) + obIntProxy.get()) / 2,
+    		obIntProxy);
 
-    Signal<Double> reactDouble = new Signal<Double>("reactDouble", obDoubleProxy) {
-      @Override
-      public Double evaluate() {
-        return obDoubleProxy.get() + obDoubleProxy.get() * 2;
-      }
-    };
+    Signal<Double> reactDouble = new Signal<Double>("reactDouble", 
+    		() -> obDoubleProxy.get() + obDoubleProxy.get() * 2,
+    		obDoubleProxy);
 
-    Signal<String> reactString = new Signal<String>("reactString", obString1Proxy, obString2Proxy) {
-      @Override
-      public String evaluate() {
-        return obString1Proxy.get() + obString2Proxy.get();
-      }
-    };
+    Signal<String> reactString = new Signal<String>("reactString",
+    		() -> obString1Proxy.get() + obString2Proxy.get(),
+    		obString1Proxy, obString2Proxy);
 
-    Signal<Boolean> reactBool = new Signal<Boolean>("reactBool", obBoolProxy) {
-      @Override
-      public Boolean evaluate() {
-        return !obBoolProxy.get();
-      }
-    };
+    Signal<Boolean> reactBool = new Signal<Boolean>("reactBool", 
+    		() -> !obBoolProxy.get(), 
+    		obBoolProxy);
 
     try {
       Thread.sleep(500);

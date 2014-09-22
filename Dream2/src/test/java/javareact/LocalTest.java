@@ -26,67 +26,56 @@ public class LocalTest {
     Var<String> obString1 = new Var<>("obString1", "");
     Var<String> obString2 = new Var<>("obString2", "");
 
-    final RemoteVar<Integer> obIntProxy = obInt.getProxy();
     final RemoteVar<String> obString1Proxy = obString1.getProxy();
     final RemoteVar<String> obString2Proxy = obString2.getProxy();
     
-    Signal<Integer> reactInt = new Signal<Integer>("reactInt", obIntProxy) {
-      @Override
-      public Integer evaluate() {
-        return 10 - 2 + ((obIntProxy.get() * 2) + obIntProxy.get()) / 2;
-      }
-    };
+    Signal<Integer> reactInt = new Signal<Integer>("reactInt",
+    		() -> {
+    			if(obInt.get() == null) return null;
+    			return 10 - 2 + ((obInt.get() * 2) + obInt.get()) / 2;
+    		},
+    		obInt);
 
-    Signal<String> reactString = new Signal<String>("reactString", obString1Proxy, obString2Proxy) {
-      @Override
-      public String evaluate() {
-        return obString1Proxy.get() + obString2Proxy.get();
-      }
-    };
+    Signal<String> reactString = new Signal<String>("reactString",
+    		() -> obString1Proxy.get() + obString2Proxy.get(),
+    		obString1Proxy, obString2Proxy);
 
-    final RemoteVar<Integer> reactIntProxy = reactInt.getProxy();
-
-    Signal<Integer> reactInt2 = new Signal<Integer>("reactInt2", reactIntProxy) {
-      @Override
-      public Integer evaluate() {
-        return reactIntProxy.get() * 2;
-      }
-    };
+    Signal<Integer> reactInt2 = new Signal<Integer>("reactInt2",
+    		() -> {
+    			if(reactInt.get() == null) return null;
+    			return reactInt.get() * 2;
+    		},
+    		reactInt);
 
     Var<Integer> obIntStart = new Var<>("obIntStart", Integer.valueOf(1));
-    final RemoteVar<Integer> obIntStartProxy = obIntStart.getProxy();
 
-    Signal<Integer> reactInterm1 = new Signal<Integer>("reactInterm1", obIntStartProxy) {
-      @Override
-      public Integer evaluate() {
-        return obIntStartProxy.get() * 2;
-      }
-    };
+    Signal<Integer> reactInterm1 = new Signal<Integer>("reactInterm1",
+    		() -> {
+    			if(obIntStart.get() == null) return null;
+    			return obIntStart.get() * 2;
+    		},
+    		obIntStart);
 
-    final RemoteVar<Integer> intermProxy1 = reactInterm1.getProxy();
+    Signal<Integer> reactInterm2 = new Signal<Integer>("reactInterm2", 
+    		() -> {
+    			if(reactInterm1.get() == null) return null;
+    			return reactInterm1.get() * 2;
+    		},
+    		reactInterm1);
 
-    Signal<Integer> reactInterm2 = new Signal<Integer>("reactInterm2", intermProxy1) {
-      @Override
-      public Integer evaluate() {
-        return intermProxy1.get() * 2;
-      }
-    };
+    Signal<Integer> reactFinal = new Signal<Integer>("reactFinal",
+    		() -> {
+    			if(reactInterm1.get() == null || reactInterm2.get() == null) return null;
+    			return reactInterm1.get() + reactInterm2.get();
+    		},
+    		reactInterm1, reactInterm2);
 
-    final RemoteVar<Integer> intermProxy2 = reactInterm2.getProxy();
-
-    Signal<Integer> reactFinal = new Signal<Integer>("reactFinal", intermProxy1, intermProxy2) {
-      @Override
-      public Integer evaluate() {
-        return intermProxy1.get() + intermProxy2.get();
-      }
-    };
-
-    Signal<Integer> reactFinal2 = new Signal<Integer>("reactFinal2", intermProxy1, obIntStartProxy) {
-      @Override
-      public Integer evaluate() {
-        return intermProxy1.get() + obIntStartProxy.get();
-      }
-    };
+    Signal<Integer> reactFinal2 = new Signal<Integer>("reactFinal2",
+    		() -> {
+    			if(reactInterm1.get() == null || obIntStart.get() == null) return null;
+    		  return reactInterm1.get() + obIntStart.get();
+    		},
+    		reactInterm1, obIntStart);
 
     try {
       Thread.sleep(500);

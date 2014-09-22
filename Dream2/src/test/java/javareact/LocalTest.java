@@ -25,9 +25,6 @@ public class LocalTest {
     Var<Integer> obInt = new Var<>("obInt", Integer.valueOf(1));
     Var<String> obString1 = new Var<>("obString1", "");
     Var<String> obString2 = new Var<>("obString2", "");
-
-    final RemoteVar<String> obString1Proxy = obString1.getProxy();
-    final RemoteVar<String> obString2Proxy = obString2.getProxy();
     
     Signal<Integer> reactInt = new Signal<Integer>("reactInt",
     		() -> {
@@ -37,8 +34,8 @@ public class LocalTest {
     		obInt);
 
     Signal<String> reactString = new Signal<String>("reactString",
-    		() -> obString1Proxy.get() + obString2Proxy.get(),
-    		obString1Proxy, obString2Proxy);
+    		() -> obString1.get() + obString2.get(),
+    		obString1, obString2);
 
     Signal<Integer> reactInt2 = new Signal<Integer>("reactInt2",
     		() -> {

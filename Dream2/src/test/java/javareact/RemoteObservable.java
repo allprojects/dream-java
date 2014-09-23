@@ -15,9 +15,10 @@ import javareact.common.types.ObservableInteger;
 import javareact.common.types.ObservableList;
 import javareact.common.types.ObservableString;
 
-public class RemoteObservable {
+public class RemoteObservable implements Runnable {
 
-  public static void main(String args[]) {
+  @Override
+  public void run() {
 	System.out.println("yaay");
     Consts.hostName = "def";
     Var<Integer> a = new Var<>("a", 1);

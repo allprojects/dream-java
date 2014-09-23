@@ -1,5 +1,7 @@
 package javareact;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -14,15 +16,20 @@ import javareact.common.types.StringProxy;
 import javareact.server.ServerLauncher;
 import javareact.token_service.TokenServiceLauncher;
 
+import org.junit.Test;
+
 public class RemoteTest {
 	private boolean serverStarted = false;
 	private boolean tokenServiceStarted = false;
 	
-	public static void main(String [] args) {
+  @Test
+	public void remoteTest1() {
+    startServerIfNeeded();
+    startTokenServiceIfNeeded();
 		
 		Consts.hostName = "abc";
 		
-		Runtime rt = Runtime.getRuntime();
+    new Thread(new RemoteObservable()).start();
 		
 		try {
 			Thread.sleep(2000);

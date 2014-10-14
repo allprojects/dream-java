@@ -27,7 +27,7 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   protected T val;
-  
+
   private RemoteVar<T> proxy = null;
 
   public AbstractReactive(String name, Proxy... proxies) {
@@ -110,19 +110,20 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
     for (EventProxyPair pair : pairs) {
       results.addAll(pair.getEventPacket().getComputedFrom());
     }
+    results.add(Consts.hostName + "." + name);
     return results;
   }
-  
+
   @Override
-	public synchronized RemoteVar<T> getProxy() {
-		if (proxy == null) {
-			proxy = new RemoteVar<T>(name);
-		}
-		return proxy;
-	}
-  
+  public synchronized RemoteVar<T> getProxy() {
+    if (proxy == null) {
+      proxy = new RemoteVar<T>(name);
+    }
+    return proxy;
+  }
+
   public T get() {
-  	return val;
+    return val;
   }
 
 }

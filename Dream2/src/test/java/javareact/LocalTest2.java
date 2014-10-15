@@ -13,36 +13,14 @@ import javareact.token_service.TokenServiceLauncher;
 
 import org.junit.Test;
 
-public class LocalTest {
+public class LocalTest2 {
   private boolean serverStarted = false;
   private boolean tokenServiceStarted = false;
 
   @Test
-  public void localTest1() {
+  public void localTest2() {
     startServerIfNeeded();
     startTokenServiceIfNeeded();
-
-    Var<Integer> obInt = new Var<>("obInt", Integer.valueOf(1));
-    Var<String> obString1 = new Var<>("obString1", "");
-    Var<String> obString2 = new Var<>("obString2", "");
-    
-    Signal<Integer> reactInt = new Signal<Integer>("reactInt",
-    		() -> {
-    			if(obInt.get() == null) return null;
-    			return 10 - 2 + ((obInt.get() * 2) + obInt.get()) / 2;
-    		},
-    		obInt);
-
-    Signal<String> reactString = new Signal<String>("reactString",
-    		() -> obString1.get() + obString2.get(),
-    		obString1, obString2);
-
-    Signal<Integer> reactInt2 = new Signal<Integer>("reactInt2",
-    		() -> {
-    			if(reactInt.get() == null) return null;
-    			return reactInt.get() * 2;
-    		},
-    		reactInt);
 
     Var<Integer> obIntStart = new Var<>("obIntStart", Integer.valueOf(1));
     RemoteVar<Integer> obIntStartR = obIntStart.getProxy();
@@ -73,13 +51,13 @@ public class LocalTest {
     			return reactInterm1.get() + reactInterm2.get();
     		},
     		reactInterm1R, reactInterm2R);
-
-    Signal<Integer> reactFinal2 = new Signal<Integer>("reactFinal2",
+    
+    /*Signal<Integer> reactFinal2 = new Signal<Integer>("reactFinal2",
     		() -> {
     			if(reactInterm1.get() == null || obIntStart.get() == null) return null;
     		  return reactInterm1.get() + obIntStart.get();
     		},
-    		reactInterm1, obIntStart);
+    		reactInterm1, obIntStart);*/
 
     try {
       Thread.sleep(500);
@@ -87,9 +65,6 @@ public class LocalTest {
       e.printStackTrace();
     }
 
-    obInt.set(100);
-    obString1.set("Hello ");
-    obString2.set("World!");
     obIntStart.set(100);
 
     try {
@@ -98,13 +73,9 @@ public class LocalTest {
       e.printStackTrace();
     }
 
-    assertEquals(reactInt.get(), Integer.valueOf(158));
-    assertEquals(reactString.get(), "Hello World!");
-    assertEquals(reactInt2.get(), Integer.valueOf(316));
     assertEquals(reactInterm1.get(), Integer.valueOf(200));
     assertEquals(reactInterm2.get(), Integer.valueOf(400));
     assertEquals(reactFinal.get(), Integer.valueOf(600));
-    assertEquals(reactFinal2.get(), Integer.valueOf(300));
   }
 
   private final void startServerIfNeeded() {

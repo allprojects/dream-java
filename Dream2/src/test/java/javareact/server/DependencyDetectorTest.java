@@ -293,6 +293,83 @@ public class DependencyDetectorTest {
   }
 
   @Test
+  public void basicDualTriangle() {
+    // B = f(A)
+    // C = f(B)
+    // D = f(B, C)
+    DependencyDetector depDetector = new DependencyDetector();
+
+    Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
+    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+
+    Advertisement advB = new Advertisement("Host", "B");
+    Advertisement advC = new Advertisement("Host", "C");
+    Advertisement advD = new Advertisement("Host", "D");
+
+    // Subscription to A (A generates B)
+    Set<Subscription> subsB = new HashSet<Subscription>();
+    subsB.add(subA);
+    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    depDetector.processAdvertisementPacket(advPktA);
+
+    // Subscription to B (B generates C)
+    Set<Subscription> subsC = new HashSet<Subscription>();
+    subsC.add(subB);
+    AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
+    depDetector.processAdvertisementPacket(advPktC);
+
+    // Subscription to B, C (B, C generate D)
+    Set<Subscription> subsD = new HashSet<Subscription>();
+    subsD.add(subB);
+    subsD.add(subC);
+    AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    depDetector.processAdvertisementPacket(advPktD);
+
+    // Consolidate
+    depDetector.consolidate();
+
+    // Event A
+    Set<String> computedFromA = new HashSet<String>();
+    Event evA = new Event("Host", "A");
+    assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
+
+    // Event B
+    Set<String> computedFromB = new HashSet<String>();
+    Event evB1 = new Event("Host", "B");
+    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
+    computedFromB.add("Host.B");
+    Event evB2 = new Event("Host", "B");
+    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
+    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("Host.D"));
+      assertEquals(wr.getRecommendations().size(), 1);
+      assertTrue(wr.getRecommendations().contains("Host.C"));
+    }
+
+    // Event C
+    Set<String> computedFromC = new HashSet<String>();
+    Event evC1 = new Event("Host", "C");
+    assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
+    computedFromC.add("Host.B");
+    Event evC2 = new Event("Host", "C");
+    assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
+    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("Host.D"));
+      assertEquals(wr.getRecommendations().size(), 1);
+      assertTrue(wr.getRecommendations().contains("Host.B"));
+    }
+
+    // Event D
+    Set<String> computedFromD = new HashSet<String>();
+    Event evD1 = new Event("Host", "D");
+    assertEquals(depDetector.getWaitRecommendations(evD1, computedFromD).size(), 0);
+    computedFromD.add("Host.A");
+    Event evD2 = new Event("Host", "D");
+    assertEquals(depDetector.getWaitRecommendations(evD2, computedFromC).size(), 0);
+  }
+
+  @Test
   public void basicTripleCycleTest() {
     // B = f(A)
     // C = f(A)

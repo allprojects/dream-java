@@ -46,6 +46,7 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
     List<EventProxyPair> pairs = queueManager.processEventPacket(eventProxyPair, Consts.hostName + "." + name);
     logger.finest("The queueManager returned the following pairs " + pairs);
     if (!pairs.isEmpty()) {
+    	System.out.println(name + ": actual update");
       // Compute the new value
       val = evaluate();
       logger.finest("New value computed for the reactive object: " + val);
@@ -76,6 +77,8 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
         Proxy proxy = pair.getProxy();
         proxy.notifyEventProcessed(this, evPkt);
       }
+    } else {
+    	System.out.println(name + ": update call but waiting: " + eventProxyPair.toString());
     }
   }
 

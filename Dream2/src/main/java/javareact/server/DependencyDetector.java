@@ -24,15 +24,16 @@ final class DependencyDetector {
   final Set<WaitRecommendations> getWaitRecommendations(Event event, Set<String> computedFrom) {
     String eventSignature = event.getSignature();
     Map<String, Set<WaitRecommendations>> innerMap = recommendations.get(eventSignature);
+    Set<WaitRecommendations> result = new HashSet<WaitRecommendations>();
     if (innerMap == null) {
-      return new HashSet<WaitRecommendations>();
+      return result;
     }
     for (String exp : innerMap.keySet()) {
       if (computedFrom.contains(exp)) {
-        return innerMap.get(exp);
+        result.addAll(innerMap.get(exp));
       }
     }
-    return new HashSet<WaitRecommendations>();
+    return result;
   }
 
   final void processAdvertisementPacket(AdvertisementPacket advPkt) {

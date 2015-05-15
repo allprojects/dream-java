@@ -1,47 +1,62 @@
 package javareact.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Event;
+import javareact.common.types.EventProxyPair;
+import javareact.common.types.Proxy;
 import javareact.server.WaitRecommendations;
 
 /**
  * This class is responsible for temporarily accumulating events before delivery to make sure that no glitch can occur.
  */
 public class QueueManager {
+  // WaitingElements, partitioned by id
   private final Map<UUID, WaitingElement> waitingElements = new HashMap<UUID, WaitingElement>();
+  // Candidate results to deliver (they can be effectively delivered only there are no waiting elements).
+  private final Set<EventProxyPair> pendingResults = new HashSet<EventProxyPair>();
 
-  public final Set<EventPacket> processEventPacket(EventPacket evPkt, String expression) {
-    Event ev = evPkt.getEvent();
+  public final List<EventProxyPair> processEventPacket(EventProxyPair eventProxyPair, String expression) {
+    EventPacket evPkt = eventProxyPair.getEventPacket();
+    Proxy proxy = eventProxyPair.getProxy();
+
     UUID id = evPkt.getId();
-    Set<String> computedFrom = evPkt.getComputedFrom();
     Set<WaitRecommendations> waitingRecommendations = evPkt.hasRecommendationsFor(expression) ? evPkt.getRecommendationsFor(expression) : new HashSet<WaitRecommendations>();
-    Set<EventPacket> results = new HashSet<EventPacket>();
+
     if (waitingElements.containsKey(id)) {
       WaitingElement elem = waitingElements.get(id);
-      elem.processEvent(ev, computedFrom);
+      elem.processEvent(evPkt, proxy);
       if (elem.hasFinishedWaiting()) {
-        for (Event eventToDeliver : elem.getReceivedEvents()) {
-          EventPacket eventPktToDeliver = new EventPacket(eventToDeliver, id, elem.getComputedFrom(), elem.getTimestamp(), true);
-          results.add(eventPktToDeliver);
+        Map<EventPacket, Proxy> eventProxyMap = elem.getReceivedEvents();
+        for (EventPacket eventToDeliver : eventProxyMap.keySet()) {
+          Proxy proxyToDeliver = eventProxyMap.get(eventToDeliver);
+          pendingResults.add(new EventProxyPair(eventToDeliver, proxyToDeliver));
         }
         waitingElements.remove(id);
       }
     } else {
       Set<String> expressionsToWaitFrom = getExpressionsToWaitFrom(waitingRecommendations);
       if (!expressionsToWaitFrom.isEmpty()) {
-        WaitingElement elem = new WaitingElement(expressionsToWaitFrom, computedFrom, ev, evPkt.getCreationTime());
+        WaitingElement elem = new WaitingElement(expressionsToWaitFrom, evPkt, proxy);
         waitingElements.put(id, elem);
       } else {
-        results.add(new EventPacket(ev, id, computedFrom, evPkt.getCreationTime(), true));
+        pendingResults.add(new EventProxyPair(evPkt, proxy));
       }
     }
-    return results;
+
+    List<EventProxyPair> result = new ArrayList<EventProxyPair>();
+    if (waitingElements.isEmpty()) {
+      result.addAll(pendingResults);
+      pendingResults.clear();
+    }
+    return result;
   }
 
   private final Set<String> getExpressionsToWaitFrom(Set<WaitRecommendations> recommendations) {
@@ -56,41 +71,27 @@ public class QueueManager {
     // Set of expressions we are waiting for before delivering the events with the given id
     private final Set<String> waitingFor = new HashSet<String>();
     // Set of events received with the given id
-    private final Set<Event> receivedEvents = new HashSet<Event>();
-    // Set of computations that triggered the occurrence of the event
-    private final Set<String> computedFrom = new HashSet<String>();
-    // Timestamp
-    private final double timestamp;
+    private final Map<EventPacket, Proxy> receivedEvents = new HashMap<EventPacket, Proxy>();
 
-    WaitingElement(Set<String> waitingFor, Set<String> computedFrom, Event ev, double timestamp) {
+    WaitingElement(Set<String> waitingFor, EventPacket evPkt, Proxy proxy) {
       this.waitingFor.addAll(waitingFor);
-      this.computedFrom.addAll(computedFrom);
-      this.timestamp = timestamp;
-      receivedEvents.add(ev);
+      receivedEvents.put(evPkt, proxy);
     }
 
-    final void processEvent(Event event, Set<String> computedFrom) {
-      String signature = event.getSignature();
+    final void processEvent(EventPacket evPkt, Proxy proxy) {
+      Event ev = evPkt.getEvent();
+      String signature = ev.getSignature();
       assert (waitingFor.contains(signature));
       waitingFor.remove(signature);
-      receivedEvents.add(event);
-      this.computedFrom.addAll(computedFrom);
+      receivedEvents.put(evPkt, proxy);
     }
 
     final boolean hasFinishedWaiting() {
       return waitingFor.isEmpty();
     }
 
-    final Set<Event> getReceivedEvents() {
+    final Map<EventPacket, Proxy> getReceivedEvents() {
       return receivedEvents;
-    }
-
-    final Set<String> getComputedFrom() {
-      return computedFrom;
-    }
-
-    final double getTimestamp() {
-      return timestamp;
     }
   }
 }

@@ -3,6 +3,7 @@ package javareact.common.packets.content;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 public class Subscription implements Serializable {
   private static final long serialVersionUID = -3452847781395458670L;
@@ -13,18 +14,20 @@ public class Subscription implements Serializable {
   private final String hostId;
   private final Collection<Constraint> constraints = new ArrayList<Constraint>();
   private final boolean blocking;
+  private final UUID proxyID;
 
-  public Subscription(String observableId, String hostId, boolean blocking, Constraint... constraints) {
-    this.observableId = observableId;
+  public Subscription(String hostId, String observableId, boolean blocking, UUID proxyID, Constraint... constraints) {
     this.hostId = hostId;
+    this.observableId = observableId;
     this.blocking = blocking;
+    this.proxyID = proxyID;
     for (Constraint constraint : constraints) {
       this.constraints.add(constraint);
     }
   }
 
-  public Subscription(String observableId, String hostId, Constraint... constraints) {
-    this(observableId, hostId, false, constraints);
+  public Subscription(String hostId, String observableId, UUID proxyID, Constraint... constraints) {
+    this(hostId, observableId, false, proxyID, constraints);
   }
 
   public final boolean isSatisfiedBy(Event ev) {
@@ -65,6 +68,10 @@ public class Subscription implements Serializable {
     return blocking;
   }
 
+  public UUID getProxyID() {
+    return proxyID;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -73,6 +80,7 @@ public class Subscription implements Serializable {
     result = prime * result + ((constraints == null) ? 0 : constraints.hashCode());
     result = prime * result + ((hostId == null) ? 0 : hostId.hashCode());
     result = prime * result + ((observableId == null) ? 0 : observableId.hashCode());
+    result = prime * result + ((proxyID == null) ? 0 : proxyID.hashCode());
     return result;
   }
 
@@ -110,6 +118,13 @@ public class Subscription implements Serializable {
         return false;
       }
     } else if (!observableId.equals(other.observableId)) {
+      return false;
+    }
+    if (proxyID == null) {
+      if (other.proxyID != null) {
+        return false;
+      }
+    } else if (!proxyID.equals(other.proxyID)) {
       return false;
     }
     return true;

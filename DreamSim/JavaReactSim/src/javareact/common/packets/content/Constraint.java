@@ -2,14 +2,14 @@ package javareact.common.packets.content;
 
 import java.io.Serializable;
 
-public class Constraint implements Serializable {
+public class Constraint<T> implements Serializable {
   private static final long serialVersionUID = 2361519551421250914L;
 
   private final String name;
   private final ConstraintOp op;
-  private final Value val;
+  private final T val;
 
-  private Constraint(String name, ConstraintOp op, Value val) {
+  public Constraint(String name, ConstraintOp op, T val) {
     this.name = name;
     this.op = op;
     this.val = val;
@@ -21,99 +21,86 @@ public class Constraint implements Serializable {
     val = null;
   }
 
-  public Constraint(String name, ConstraintOp op, int val) {
-    this(name, op, new Value(val));
-  }
-
-  public Constraint(String name, ConstraintOp op, double val) {
-    this(name, op, new Value(val));
-  }
-
-  public Constraint(String name, ConstraintOp op, String val) {
-    this(name, op, new Value(val));
-  }
-
-  public Constraint(String name, ConstraintOp op, boolean val) {
-    this(name, op, new Value(val));
-  }
-
   public final boolean isSatisfiedBy(Event ev) {
     if (!ev.hasAttribute(name)) return false;
     Attribute attr = ev.getAttributeFor(name);
+    
     if (val == null) {
       // ANY
       return true;
     }
-    if (attr.getType() != val.getType()) {
-      return false;
+    
+    if (attr.getValue() instanceof Integer && val instanceof Integer) {
+      Integer intConstrVal = (Integer)val;
+	  Integer intEvVal = (Integer)attr.getValue();
+	  switch (op) {
+		case EQ:
+		  return intEvVal.equals(intConstrVal);
+		case DF:
+		  return !intEvVal.equals(intConstrVal);
+		case GT:
+		  return intEvVal.compareTo(intConstrVal) > 0;
+		case LT:
+		  return intEvVal.compareTo(intConstrVal) < 0;
+		default:
+		  assert false : op;
+		  return false;
+	  }
     }
-    switch (attr.getType()) {
-    case INT:
-      int intConstrVal = val.intVal();
-      int intEvVal = attr.intVal();
-      switch (op) {
-      case EQ:
-        return intEvVal == intConstrVal;
-      case DF:
-        return intEvVal != intConstrVal;
-      case GT:
-        return intEvVal > intConstrVal;
-      case LT:
-        return intEvVal < intConstrVal;
-      default:
-        assert false : op;
-        return false;
-      }
-    case DOUBLE:
-      double doubleConstrVal = val.doubleVal();
-      double doubleEvVal = attr.doubleVal();
-      switch (op) {
-      case EQ:
-        return doubleEvVal == doubleConstrVal;
-      case DF:
-        return doubleEvVal != doubleConstrVal;
-      case GT:
-        return doubleEvVal > doubleConstrVal;
-      case LT:
-        return doubleEvVal < doubleConstrVal;
-      default:
-        assert false : op;
-        return false;
-      }
-    case STRING:
-      String stringConstrVal = val.stringVal();
-      String stringEvVal = attr.stringVal();
-      switch (op) {
-      case EQ:
-        return stringEvVal.equals(stringConstrVal);
-      case DF:
-        return !stringEvVal.equals(stringConstrVal);
-      case IN:
-        return stringEvVal.contains(stringConstrVal);
-      case SW:
-        return stringEvVal.startsWith(stringConstrVal);
-      case EW:
-        return stringEvVal.endsWith(stringConstrVal);
-      default:
-        assert false : op;
-        return false;
-      }
-    case BOOL:
-      boolean boolConstrVal = val.boolVal();
-      boolean boolEvVal = attr.boolVal();
-      switch (op) {
-      case EQ:
-        return boolEvVal == boolConstrVal;
-      case DF:
-        return boolEvVal != boolConstrVal;
-      default:
-        assert false : op;
-        return false;
-      }
-    default:
-      assert false : attr.getType();
-      return false;
+    
+    if (attr.getValue() instanceof Double && val instanceof Double) {
+      Double doubleConstrVal = (Double)val;
+	  Double doubleEvVal = (Double)attr.getValue();
+	  switch (op) {
+		case EQ:
+		  return doubleEvVal.equals(doubleConstrVal);
+		case DF:
+		  return doubleEvVal.equals(doubleConstrVal);
+		case GT:
+		  return doubleEvVal.compareTo(doubleConstrVal) > 0;
+		case LT:
+		  return doubleEvVal.compareTo(doubleConstrVal) < 0;
+		default:
+		  assert false : op;
+		  return false;
+	  }
     }
+    
+    if (attr.getValue() instanceof String && val instanceof String) {
+      String stringConstrVal = (String)val;
+	  String stringEvVal = (String)attr.getValue();
+	  switch (op) {
+		case EQ:
+		  return stringEvVal.equals(stringConstrVal);
+		case DF:
+		  return !stringEvVal.equals(stringConstrVal);
+		case IN:
+		  return stringEvVal.contains(stringConstrVal);
+		case SW:
+		  return stringEvVal.startsWith(stringConstrVal);
+		case EW:
+		  return stringEvVal.endsWith(stringConstrVal);
+		default:
+		  assert false : op;
+		  return false;
+	  }
+    }
+    
+    if (attr.getValue() instanceof Boolean && val instanceof Boolean) {
+      Boolean boolConstrVal = (Boolean)val;
+	  Boolean boolEvVal = (Boolean)attr.getValue();
+	  switch (op) {
+		case EQ:
+		  return boolEvVal.equals(boolConstrVal);
+		case DF:
+		  return !boolEvVal.equals(boolConstrVal);
+		default:
+		  assert false : op;
+		  return false;
+	  }
+    }
+    
+    return false;
   }
 
   @Override

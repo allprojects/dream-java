@@ -3,15 +3,17 @@ package javareact.client;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javareact.common.Consts;
+import javareact.common.types.Proxy;
+import javareact.common.types.RemoteVar;
 import javareact.common.types.Types;
-import javareact.common.types.observable.Observable;
-import javareact.common.types.observable.ObservableBool;
-import javareact.common.types.observable.ObservableDouble;
-import javareact.common.types.observable.ObservableInteger;
-import javareact.common.types.observable.ObservableString;
-import javareact.common.types.reactive.ReactiveFactory;
+import javareact.common.types.Var;
+import javareact.common.types.Signal;
+import javareact.common.types.Observable;
 import javareact.experiments.JavaReactConfiguration;
 import javareact.generator.GraphGeneratorListener;
 import javareact.generator.GraphsGenerator;
@@ -45,44 +47,30 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
 
   @Override
   public void notifyObservable(String observableName, Types type) {
-    Observable obs = null;
     switch (type) {
     case INT:
-      obs = new ObservableInteger(getPeer(), observableName, 0);
+      observables.add(new Var<Integer>(getPeer(), observableName, 0));
       break;
     case DOUBLE:
-      obs = new ObservableDouble(getPeer(), observableName, 0);
+      observables.add(new Var<Double>(getPeer(), observableName, 0.0));
       break;
     case BOOL:
-      obs = new ObservableBool(getPeer(), observableName, false);
+      observables.add(new Var<Boolean>(getPeer(), observableName, false));
       break;
     case STRING:
-      obs = new ObservableString(getPeer(), observableName, "");
+      observables.add(new Var<String>(getPeer(), observableName, ""));
       break;
     default:
       assert false;
     }
-    observables.add(obs);
   }
 
   @Override
-  public void notifyReactive(String reactiveExpression, String observableName, Types type) {
-    switch (type) {
-    case INT:
-      ReactiveFactory.getInteger(getPeer(), reactiveExpression, observableName);
-      break;
-    case DOUBLE:
-      ReactiveFactory.getDouble(getPeer(), reactiveExpression, observableName);
-      break;
-    case BOOL:
-      ReactiveFactory.getBool(getPeer(), reactiveExpression, observableName);
-      break;
-    case STRING:
-      ReactiveFactory.getString(getPeer(), reactiveExpression, observableName);
-      break;
-    default:
-      assert false;
-    }
+  public <T> void notifyReactive(String observableName, Function<List<RemoteVar<T>>, T> expression, List<String> proxyNames) {
+	List<RemoteVar<T>> proxyList = proxyNames.stream().map((s) -> new RemoteVar<T>(getPeer(), s)).collect(Collectors.toList());
+	Proxy[] proxies = new Proxy[proxyNames.size()];
+	proxies = proxyList.toArray(proxies);
+    new Signal<T>(getPeer(), observableName, () -> expression.apply(proxyList), proxies);
   }
 
   public int getClientId() {
@@ -129,7 +117,7 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
       @Override
       public void timerExpired(Timer timer) {
         if (observables.isEmpty()) return;
-        ObservableInteger obsInt = getObservableToUpdate();
+        Var<Integer> obsInt = getObservableToUpdate();
         int value = getNewObservableValue();
         obsInt.set(value);
         timer.schedule(Time.inMilliseconds(getUpdateTimeInMs()));
@@ -146,13 +134,13 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     return (minTime == maxTime) ? maxTime : minTime + rand.nextInt(maxTime - minTime);
   }
 
-  private final ObservableInteger getObservableToUpdate() {
+  private final Var<Integer> getObservableToUpdate() {
     Random rand = RandomGenerator.get();
     int numObservables = observables.size();
     int index = rand.nextInt(numObservables);
     Observable obs = observables.get(index);
-    assert (obs instanceof ObservableInteger);
-    return (ObservableInteger) obs;
+    //assert (obs instanceof Var<Integer>);
+    return (Var<Integer>) obs;
   }
 
   private final int getNewObservableValue() {

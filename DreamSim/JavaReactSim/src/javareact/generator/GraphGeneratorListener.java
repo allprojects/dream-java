@@ -1,5 +1,8 @@
 package javareact.generator;
 
+import java.util.List;
+import java.util.function.Function;
+import javareact.common.types.RemoteVar;
 import javareact.common.types.Types;
 
 /**
@@ -23,6 +26,6 @@ public interface GraphGeneratorListener {
    * @param observableName the name of the associated observable object
    * @param type the type of the associated observable object
    */
-  public void notifyReactive(String reactiveExpression, String observableName, Types type);
+  public <T> void notifyReactive(String observableName, Function<List<RemoteVar<T>>, T> expression, List<String> proxyNames);
 
 }

@@ -5,9 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javareact.common.Consts;
+import javareact.common.types.Proxy;
+import javareact.common.types.RemoteVar;
 import javareact.common.types.Types;
+import javareact.common.types.Var;
 import javareact.experiments.JavaReactConfiguration;
 
 class GraphGenerator {
@@ -18,11 +24,11 @@ class GraphGenerator {
   private int count;
 
   // Node -> List of nodes it depends from
-  private final Map<Node, List<Node>> dependencyMap = new HashMap<Node, List<Node>>();
-  private final List<Node> existingNodes = new ArrayList<Node>();
+  private final Map<Node, List<Node>> dependencyMap = new HashMap<>();
+  private final List<Node> existingNodes = new ArrayList<>();
 
   // NodeId -> Associated listener
-  private final Map<String, GraphGeneratorListener> listeners = new HashMap<String, GraphGeneratorListener>();
+  private final Map<String, GraphGeneratorListener> listeners = new HashMap<>();
 
   GraphGenerator(int graphId) {
     this.graphId = graphId;
@@ -55,8 +61,8 @@ class GraphGenerator {
       if (isObservable) {
         listeners.get(hostId).notifyObservable(node.getName(), Types.INT);
       } else {
-        String reactiveExpression = generateExpression(node);
-        listeners.get(hostId).notifyReactive(reactiveExpression, node.getName(), Types.INT);
+    	Function<List<RemoteVar<Integer>>, Integer> expression = generateExpression(node);
+        listeners.get(hostId).notifyReactive(node.getName(), expression, dependencyMap.get(node).stream().map(Node::getName).collect(Collectors.toList()));
       }
     }
   }
@@ -102,17 +108,12 @@ class GraphGenerator {
     selectedNodes.add(selectedNode);
   }
 
-  private final String generateExpression(Node node) {
-    StringBuilder builder = new StringBuilder();
-    List<Node> depList = dependencyMap.get(node);
-    for (int i = 0; i < depList.size(); i++) {
-      Node dep = depList.get(i);
-      builder.append(dep.getCompleteName());
-      if (i < depList.size() - 1) {
-        builder.append("+");
-      }
-    }
-    return builder.toString();
+  private final Function<List<RemoteVar<Integer>>, Integer> generateExpression(Node node) {
+	return (vars) -> {
+		return vars.stream().reduce(0, (acc, v) -> {
+			return acc + v.get();
+		}, (a, b) -> a + b);
+	};
   }
 
 }

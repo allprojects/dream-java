@@ -1,0 +1,3 @@
+javareact.common.packets.EventPacket	32010	15
+javareact.common.packets.AdvertisementPacket	600	0
+javareact.common.packets.SubscriptionPacket	113	0

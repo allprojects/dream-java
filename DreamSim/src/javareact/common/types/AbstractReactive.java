@@ -111,7 +111,7 @@ public abstract class AbstractReactive<T> implements IReactive<T>, ProxyChangeLi
       Subscription sub = new Subscription(proxy.getHost(), proxy.getObject(), proxy.getProxyID(), new Constraint<T>(proxy.getMethod()));
       subs.add(sub);
     }
-    Advertisement adv = new Advertisement(hostName(), name);
+    Advertisement adv = new Advertisement(name, hostName());
     clientEventForwarder.advertise(adv, subs, true);
   }
 

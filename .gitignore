@@ -4,3 +4,9 @@ pom.xml.releaseBackup
 pom.xml.next
 release.properties
 .DS_STORE
+
+*/bin/
+
+DreamSim/results/
+DreamSim/resultsAvg/
+DreamSim/graphs/

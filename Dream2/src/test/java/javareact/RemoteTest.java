@@ -38,20 +38,20 @@ public class RemoteTest {
 			e.printStackTrace();
 		}
 
-		final RemoteVar<Integer> a = new IntegerProxy("def", "a");
-		final RemoteVar<String> someString = new StringProxy("def",
+		final RemoteVar<Integer> a = new RemoteVar<>("def", "a");
+		final RemoteVar<String> someString = new RemoteVar<>("def",
 				"someString");
-		final RemoteVar<List<Integer>> intList = new ListProxy<Integer>(
+		final RemoteVar<List<Integer>> intList = new RemoteVar<>(
 				"def", "intList");
 
-		Signal<Integer> signal = new Signal<Integer>("signal", () -> {
+		Signal<Integer> signal = new Signal<>("signal", () -> {
 				if (a.get() == null)
 					return null;
 				return a.get() * 2;
 			},
 			a);
 
-		Signal<Integer> stringandlistlength = new Signal<Integer>(
+		Signal<Integer> stringandlistlength = new Signal<>(
 				"stringandlistlength", () -> {
 				if (someString.get() == null)
 					return null;
@@ -60,7 +60,7 @@ public class RemoteTest {
 				return someString.get().length() + intList.get().size();
 			}, someString, intList);
 
-		Signal<Integer> lastInList = new Signal<Integer>("lastInList", () -> {
+		Signal<Integer> lastInList = new Signal<>("lastInList", () -> {
 				if (intList.get() == null)
 					return null;
 				if (intList.get().size() == 0)

@@ -1,5 +1,5 @@
-javareact.common.packets.token_service.TokenAckPacket	16044	8
+javareact.common.packets.token_service.TokenAckPacket	27063	13
 javareact.common.packets.token_service.TokenServiceAdvertisePacket	10	0
-javareact.common.packets.EventPacket	64177	32
+javareact.common.packets.EventPacket	150383	75
 javareact.common.packets.AdvertisementPacket	1100	0
-javareact.common.packets.SubscriptionPacket	111	0
+javareact.common.packets.SubscriptionPacket	146	0

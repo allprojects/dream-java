@@ -21,16 +21,16 @@ import org.junit.Test;
 public class RemoteTest {
 	private boolean serverStarted = false;
 	private boolean tokenServiceStarted = false;
-	
-  @Test
+
+	@Test
 	public void remoteTest1() {
-    startServerIfNeeded();
-    startTokenServiceIfNeeded();
-		
+		startServerIfNeeded();
+		startTokenServiceIfNeeded();
+
 		Consts.hostName = "abc";
-		
-    new Thread(new RemoteObservable()).start();
-		
+
+		new Thread(new RemoteObservable()).start();
+
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -45,30 +45,30 @@ public class RemoteTest {
 				"def", "intList");
 
 		Signal<Integer> signal = new Signal<>("signal", () -> {
-				if (a.get() == null)
-					return null;
-				return a.get() * 2;
-			},
-			a);
+			if (a.get() == null)
+				return null;
+			return a.get() * 2;
+		},
+		a);
 
 		Signal<Integer> stringandlistlength = new Signal<>(
 				"stringandlistlength", () -> {
-				if (someString.get() == null)
-					return null;
-				if (intList.get() == null)
-					return null;
-				return someString.get().length() + intList.get().size();
-			}, someString, intList);
+					if (someString.get() == null)
+						return null;
+					if (intList.get() == null)
+						return null;
+					return someString.get().length() + intList.get().size();
+				}, someString, intList);
 
 		Signal<Integer> lastInList = new Signal<>("lastInList", () -> {
-				if (intList.get() == null)
-					return null;
-				if (intList.get().size() == 0)
-					return null;
-				return intList.get().get(intList.get().size() - 1);
-			},
-			intList);
-		
+			if (intList.get() == null)
+				return null;
+			if (intList.get().size() == 0)
+				return null;
+			return intList.get().get(intList.get().size() - 1);
+		},
+		intList);
+
 		//assertEquals(signal.get(), Integer.valueOf(2));
 	}
 

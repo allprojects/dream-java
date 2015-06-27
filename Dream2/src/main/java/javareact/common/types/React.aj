@@ -1,4 +1,4 @@
-package javareact.common.types;
+/*package javareact.common.types;
 
 import java.lang.reflect.Method;
 
@@ -35,4 +35,4 @@ public aspect React {
     }
   }
   
-}
+}*/

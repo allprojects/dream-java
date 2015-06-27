@@ -67,7 +67,7 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
 
   @Override
   public <T> void notifyReactive(String observableName, Function<List<RemoteVar<T>>, T> expression, List<String> proxyNames) {
-	List<RemoteVar<T>> proxyList = proxyNames.stream().map((s) -> new RemoteVar<T>(getPeer(), s)).collect(Collectors.toList());
+	List<RemoteVar<T>> proxyList = proxyNames.stream().map((s) -> new RemoteVar<T>(getPeer(), s.split("\\.")[0], s.split("\\.")[1])).collect(Collectors.toList());
 	Proxy[] proxies = new Proxy[proxyNames.size()];
 	proxies = proxyList.toArray(proxies);
     new Signal<T>(getPeer(), observableName, () -> expression.apply(proxyList), proxies);

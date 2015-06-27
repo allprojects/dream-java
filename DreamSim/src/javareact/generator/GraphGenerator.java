@@ -62,7 +62,7 @@ class GraphGenerator {
         listeners.get(hostId).notifyObservable(node.getName(), Types.INT);
       } else {
     	Function<List<RemoteVar<Integer>>, Integer> expression = generateExpression(node);
-        listeners.get(hostId).notifyReactive(node.getName(), expression, dependencyMap.get(node).stream().map(Node::getName).collect(Collectors.toList()));
+        listeners.get(hostId).notifyReactive(node.getName(), expression, dependencyMap.get(node).stream().map(n -> n.getHostName() + "." + n.getName()).collect(Collectors.toList()));
       }
     }
   }

@@ -1,5 +1,7 @@
 package javareact.common.types;
 
+import javareact.common.packets.content.ValueType;
+
 public class ObservableInteger extends Var<Integer> {
   public ObservableInteger(String observableId, boolean persistent, Integer val) {
     super(observableId, persistent, val);
@@ -11,8 +13,6 @@ public class ObservableInteger extends Var<Integer> {
   
   @Override
   public final synchronized IntegerProxy getProxy() {
-    RemoteVar<Integer> proxy = super.getProxy();
-    assert proxy instanceof IntegerProxy;
-    return (IntegerProxy)proxy;
+    return (IntegerProxy)super.getProxy().toProxyOfType(ValueType.INT);
   }
 }

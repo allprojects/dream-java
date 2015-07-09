@@ -1,5 +1,7 @@
 package javareact.common.types;
 
+import javareact.common.packets.content.ValueType;
+
 public class ObservableBool extends Var<Boolean> {
   public ObservableBool(String observableId, boolean persistent, Boolean val) {
     super(observableId, persistent, val);
@@ -11,6 +13,6 @@ public class ObservableBool extends Var<Boolean> {
   
   @Override
   public final synchronized BooleanProxy getProxy() {
-    return (BooleanProxy)super.getProxy();
+    return (BooleanProxy)super.getProxy().toProxyOfType(ValueType.BOOL);
   }
 }

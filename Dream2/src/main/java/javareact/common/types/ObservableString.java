@@ -2,6 +2,8 @@ package javareact.common.types;
 
 import java.util.Locale;
 
+import javareact.common.packets.content.ValueType;
+
 public class ObservableString extends Var<String> {
   public ObservableString(String observableId, boolean persistent, String val) {
     super(observableId, persistent, val);
@@ -185,6 +187,6 @@ public class ObservableString extends Var<String> {
   
   @Override
   public final synchronized StringProxy getProxy() {
-    return (StringProxy)super.getProxy();
+    return (StringProxy)super.getProxy().toProxyOfType(ValueType.STRING);
   }
 }

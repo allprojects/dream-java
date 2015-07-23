@@ -10,9 +10,6 @@ import javareact.common.types.ObservableInteger;
 import javareact.common.types.ObservableString;
 import javareact.common.types.ReactiveInteger;
 import javareact.common.types.ReactiveString;
-import javareact.common.types.RemoteVar;
-import javareact.common.types.Signal;
-import javareact.common.types.Var;
 import javareact.server.ServerLauncher;
 import javareact.token_service.TokenServiceLauncher;
 

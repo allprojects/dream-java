@@ -10,6 +10,7 @@ import java.util.Set;
 import javareact.common.Consts;
 import javareact.common.types.IntegerProxy;
 import javareact.common.types.ListProxy;
+import javareact.common.types.ReactiveChangeListener;
 import javareact.common.types.RemoteVar;
 import javareact.common.types.Signal;
 import javareact.common.types.StringProxy;
@@ -18,7 +19,7 @@ import javareact.token_service.TokenServiceLauncher;
 
 import org.junit.Test;
 
-public class RemoteTest {
+public class RemoteTest implements ReactiveChangeListener<Integer> {
 	private boolean serverStarted = false;
 	private boolean tokenServiceStarted = false;
 
@@ -32,27 +33,24 @@ public class RemoteTest {
 		new Thread(new RemoteObservable()).start();
 
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(20000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		final RemoteVar<Integer> a = new RemoteVar<>("def", "a");
-		final RemoteVar<String> someString = new RemoteVar<>("def",
-				"someString");
-		final RemoteVar<List<Integer>> intList = new RemoteVar<>(
-				"def", "intList");
+		final RemoteVar<String> someString = new RemoteVar<>("def", "someString");
+		final RemoteVar<List<Integer>> intList = new RemoteVar<>("def", "intList");
 
 		Signal<Integer> signal = new Signal<>("signal", () -> {
 			if (a.get() == null)
 				return null;
 			return a.get() * 2;
-		},
-		a);
+		}, a);
 
-		Signal<Integer> stringandlistlength = new Signal<>(
-				"stringandlistlength", () -> {
+		Signal<Integer> stringAndListLength = new Signal<>(
+				"stringAndListLength", () -> {
 					if (someString.get() == null)
 						return null;
 					if (intList.get() == null)
@@ -66,10 +64,10 @@ public class RemoteTest {
 			if (intList.get().size() == 0)
 				return null;
 			return intList.get().get(intList.get().size() - 1);
-		},
-		intList);
+		}, intList);
 
-		//assertEquals(signal.get(), Integer.valueOf(2));
+		lastInList.addReactiveChangeListener(this);
+		assertEquals(Integer.valueOf(2), signal.get());
 	}
 
 	private final void startServerIfNeeded() {
@@ -97,6 +95,11 @@ public class RemoteTest {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void notifyReactiveChanged(Integer newValue) {
+		System.out.println(newValue);
 	}
 
 }

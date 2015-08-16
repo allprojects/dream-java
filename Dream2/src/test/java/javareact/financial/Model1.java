@@ -13,8 +13,7 @@ public class Model1 implements ReactiveChangeListener<Integer> {
 		RemoteVar<Integer> marketIndex = new RemoteVar<>("InputModel", "marketIndex");
 		RemoteVar<Integer> stockOpts = new RemoteVar<>("InputModel", "stockOpts");
 		
-		Var<Integer> model1 = new Var<>("model1", 1);
-		model1.set(2);
+	
 		
 		Signal<Integer> f1 = new Signal<>("f1", () -> {
 			if (marketIndex.get() == null || stockOpts.get() == null) { return null; }

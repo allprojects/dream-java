@@ -14,14 +14,14 @@ public class Signal<T> extends AbstractReactive<T> {
 		return proxies;
 	}
 
-	public Signal(String name, Supplier<T> evaluation, Proxy... proxies) {
-		super(name, proxies);
-		val = null;
-		this.evaluation = evaluation;
-	}
+//	public Signal(String name, Supplier<T> evaluation, Proxy... proxies) {
+//		super(name, proxies);
+//		val = null;
+//		this.evaluation = evaluation;
+//	}
 
 	@SafeVarargs
-  public Signal(String name, Supplier<T> evaluation, ProxyGenerator... vars) {
+	public Signal(String name, Supplier<T> evaluation, ProxyGenerator... vars) {
 		super(name, proxiesFromVars(vars));
 		val = null;
 		this.evaluation = evaluation;

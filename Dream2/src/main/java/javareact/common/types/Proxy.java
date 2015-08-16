@@ -15,7 +15,7 @@ import javareact.common.packets.content.Constraint;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-public abstract class Proxy implements Subscriber {
+public abstract class Proxy implements Subscriber, ProxyGenerator {
   private final ClientEventForwarder forwarder;
   private final Set<ProxyChangeListener> listeners = new HashSet<ProxyChangeListener>();
 
@@ -29,17 +29,32 @@ public abstract class Proxy implements Subscriber {
   protected final String method = "get";
   private final UUID proxyID;
 
-  public Proxy(String object) {
-    this(Consts.hostName, object);
-  }
-
-  public Proxy(String host, String object) {
-    this.host = host;
-    this.object = object;
+  public Proxy(String name) {
+    //this(Consts.hostName, object);
+    if (name.contains("@")) {
+    	String[] s = name.split("@", 2);
+    	this.host = s[1];
+    	this.object = s[0];
+    }
+    else {
+    	this.host = Consts.hostName;
+    	this.object = name;
+    }
+    
     forwarder = ClientEventForwarder.get();
     proxyID = UUID.randomUUID();
     Subscription sub = new Subscription(host, object, proxyID, new Constraint(method));
     forwarder.addSubscription(this, sub);
+  }
+
+  public Proxy(String host, String object) {
+	  this(object + "@" + host);
+//    this.host = host;
+//    this.object = object;
+//    forwarder = ClientEventForwarder.get();
+//    proxyID = UUID.randomUUID();
+//    Subscription sub = new Subscription(host, object, proxyID, new Constraint(method));
+//    forwarder.addSubscription(this, sub);
   }
 
   final void addProxyChangeListener(ProxyChangeListener listener) {
@@ -51,7 +66,7 @@ public abstract class Proxy implements Subscriber {
   }
 
   @Override
-  public final void notifyValueChanged(EventPacket evPkt) {
+  public void notifyValueChanged(EventPacket evPkt) {
     eventsQueue.add(evPkt);
     logger.finest("Received event packet " + evPkt + ". Added to the queue.");
     if (eventsQueue.size() == 1) {
@@ -106,6 +121,11 @@ public abstract class Proxy implements Subscriber {
 
   final UUID getProxyID() {
     return proxyID;
+  }
+  
+  @Override
+  public Proxy getProxy() {
+	  return this;
   }
 
 }

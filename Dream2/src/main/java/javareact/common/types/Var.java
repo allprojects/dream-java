@@ -10,12 +10,12 @@ public class Var<T> extends Observable {
 
   public Var(String observableId, boolean persistent, T val) {
     super(observableId, persistent);
-    this.val = val;
+    set(val);
   }
 
   public Var(String observableId, T val) {
     super(observableId);
-    this.val = val;
+    set(val);
   }
 
   public final synchronized void set(T val) {

@@ -23,7 +23,7 @@ public class Signal<T> extends AbstractReactive<T> {
 	@SafeVarargs
 	public Signal(String name, Supplier<T> evaluation, ProxyGenerator... vars) {
 		super(name, proxiesFromVars(vars));
-		val = null;
+		val = evaluation.get();
 		this.evaluation = evaluation;
 	}
 

@@ -86,6 +86,10 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
    */
   final void notifyEventProcessed(ProxyChangeListener proxyChangeListener, EventPacket event) {
     pendingAcks.remove(proxyChangeListener);
+    processNextEvent();
+  }
+
+  private void processNextEvent() {
     if (pendingAcks.isEmpty() && !eventsQueue.isEmpty()) {
       assert (!eventsQueue.isEmpty());
       eventsQueue.poll();
@@ -100,11 +104,14 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
   protected abstract void processEvent(Event ev);
 
   private final void sendEventPacketToListeners(EventPacket evPkt) {
-    pendingAcks.addAll(listeners);
-    EventProxyPair pair = new EventProxyPair(evPkt, this);
-    for (ProxyChangeListener listener : listeners) {
-      listener.update(pair);
-    }
+    if (!listeners.isEmpty()) {
+      pendingAcks.addAll(listeners);
+      EventProxyPair pair = new EventProxyPair(evPkt, this);
+      for (ProxyChangeListener listener : listeners) {
+        listener.update(pair);
+      }
+    } else
+      processNextEvent();
   }
 
   final String getHost() {

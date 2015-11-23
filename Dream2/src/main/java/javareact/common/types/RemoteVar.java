@@ -11,6 +11,7 @@ import javareact.common.packets.content.ValueType;
 public class RemoteVar<T> extends Proxy implements Reactive<T> {
 	private final Set<ReactiveChangeListener<T>> listeners = new HashSet<ReactiveChangeListener<T>>();
 	private T val;
+	private T oldVal;
 
 	public RemoteVar(String host, String object) {
 		super(host, object);
@@ -53,6 +54,7 @@ public class RemoteVar<T> extends Proxy implements Reactive<T> {
 	protected final void processEvent(Event ev) {
 		if (ev.hasAttribute(method)) {
 			Attribute attr = ev.getAttributeFor(method);
+			oldVal = val;
 			val = (T)attr.getValue();
 		}
 	}
@@ -72,16 +74,16 @@ public class RemoteVar<T> extends Proxy implements Reactive<T> {
 		listeners.remove(listener);
 	}
 
-	private final void notifyListeners() {
+	private final void notifyListeners(String host) {
 		for (ReactiveChangeListener<T> listener : listeners) {
-			listener.notifyReactiveChanged(val);
+			listener.notifyReactiveChanged(oldVal, val, host);
 		}
 	}
 	
 	@Override
 	public final void notifyValueChanged(EventPacket evPkt) {
 		super.notifyValueChanged(evPkt);
-		notifyListeners();
+	    notifyListeners(evPkt.getEvent().getHostId());
 	}
 
 }

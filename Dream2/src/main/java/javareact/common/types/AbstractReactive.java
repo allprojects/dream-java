@@ -48,6 +48,7 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
     if (!pairs.isEmpty()) {
     	System.out.println(name + ": actual update");
       // Compute the new value
+      T oldVal = val;
       val = evaluate();
       logger.finest("New value computed for the reactive object: " + val);
 
@@ -69,7 +70,7 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
 
       // Notify listeners
       logger.finest("Notifying registered listeners of the change.");
-      notifyListeners();
+      notifyListeners(oldVal, eventProxyPair.getEventPacket().getEvent().getHostId());
 
       // Acknowledge the proxy
       for (EventProxyPair pair : pairs) {
@@ -92,9 +93,9 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
     listeners.remove(listener);
   }
 
-  private final void notifyListeners() {
+  private final void notifyListeners(T oldVal, String host) {
     for (ReactiveChangeListener<T> listener : listeners) {
-      listener.notifyReactiveChanged(val);
+      listener.notifyReactiveChanged(oldVal, val, host);
     }
   }
 

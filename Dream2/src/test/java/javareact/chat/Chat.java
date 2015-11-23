@@ -50,7 +50,7 @@ public class Chat extends JFrame implements ReactiveChangeListener<String> {
 		s.addReactiveChangeListener(new ReactiveChangeListener<Boolean>() {
 
 			@Override
-			public void notifyReactiveChanged(Boolean newValue) {
+			public void notifyReactiveChanged(Boolean oldValue, Boolean newValue, String host) {
 				System.out.println(newValue);
 
 			}
@@ -173,7 +173,7 @@ public class Chat extends JFrame implements ReactiveChangeListener<String> {
 	}
 
 	protected void sendMessage() {
-		messages.set(userName + ":" + sendText.getText());
+		messages.set(sendText.getText());
 		displayMessage("You: " + sendText.getText());
 		sendText.setText("");
 	}
@@ -186,10 +186,9 @@ public class Chat extends JFrame implements ReactiveChangeListener<String> {
 	}
 
 	@Override
-	public void notifyReactiveChanged(String newValue) {
-		String[] msg = newValue.split(":", 2);
-		if (!msg[0].equals(userName))
-			displayMessage(msg[0] + ": " + msg[1]);
+	public void notifyReactiveChanged(String oldValue, String newValue, String host) {
+		if (!host.equals(userName))
+			displayMessage(host + ": " + newValue);
 	}
 
 	public static void main(String[] args) {

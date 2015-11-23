@@ -5,6 +5,6 @@ package javareact.common.types;
  */
 public interface ReactiveChangeListener<T> {
 
-  public void notifyReactiveChanged(T newValue);
+  public void notifyReactiveChanged(T oldValue, T newValue, String host);
 
 }

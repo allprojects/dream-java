@@ -48,7 +48,7 @@ public class RemoteTest implements ReactiveChangeListener<Integer> {
 	}
 
 	@Override
-	public void notifyReactiveChanged(Integer newValue) {
+	public void notifyReactiveChanged(Integer oldValue, Integer newValue, String host) {
 		assertTrue( signal.get().equals(a.get() * 2));
 	}
 

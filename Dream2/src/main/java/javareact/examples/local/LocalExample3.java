@@ -23,7 +23,7 @@ public class LocalExample3 {
     		() -> 1000 + obListProxy.get().size(),
     		obListProxy);
 
-    reactInt.addReactiveChangeListener(newValue -> System.out.println(newValue));
+    reactInt.addReactiveChangeListener((oldValue, newValue, host) -> System.out.println(newValue));
 
     obList.modify(self -> self.add(10));
     obList.modify(self -> self.add(20));

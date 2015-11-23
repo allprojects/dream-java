@@ -51,7 +51,7 @@ public class LocalExample2 implements ReactiveChangeListener<Double> {
   }
 
   @Override
-  public void notifyReactiveChanged(Double changedReactive) {
+  public void notifyReactiveChanged(Double old, Double changedReactive, String host) {
     System.out.println(changedReactive);
   }
 

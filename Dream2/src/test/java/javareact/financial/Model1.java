@@ -24,7 +24,7 @@ public class Model1 implements ReactiveChangeListener<Integer> {
 	}
 
 	@Override
-	public void notifyReactiveChanged(Integer newValue) {
+	public void notifyReactiveChanged(Integer oldValue, Integer newValue, String host) {
 		System.out.println("New value for f1: " + newValue);
 	}
 	

@@ -59,7 +59,7 @@ public class FinancialApp implements ReactiveChangeListener<Integer> {
 	}
 
 	@Override
-	public void notifyReactiveChanged(Integer newValue) {
+	public void notifyReactiveChanged(Integer oldValue, Integer newValue, String host) {
 		System.out.println("Value changed");
 //		if (f1Signal.get() != null && f2Signal.get() != null && f3Signal.get() != null) {
 //			if ((f1Signal.get() + f2Signal.get() + f3Signal.get()) / 3.0 > 150) {

@@ -2,10 +2,9 @@ package javareact.examples.local;
 
 import javareact.common.types.RemoteVar;
 import javareact.common.types.Var;
-import javareact.common.types.ReactiveChangeListener;
 import javareact.common.types.Signal;
 
-public class LocalExample2 implements ReactiveChangeListener<Double> {
+public class LocalExample2 {
 
   public static void main(String args[]) {
     LocalExample2 example = new LocalExample2();
@@ -32,7 +31,8 @@ public class LocalExample2 implements ReactiveChangeListener<Double> {
 
     new Signal<Double>("sub",
     		() -> reactDouble1Proxy.get() - reactDouble2Proxy.get(),
-    		reactDouble1Proxy, reactDouble2Proxy).addReactiveChangeListener(this);
+    		reactDouble1Proxy, reactDouble2Proxy).change().addHandler(
+              (oldValue, newValue) -> System.out.println(newValue));
 
     try {
       Thread.sleep(500);
@@ -49,10 +49,4 @@ public class LocalExample2 implements ReactiveChangeListener<Double> {
     obDouble1.set(40.0);
     obDouble2.set(50.0);
   }
-
-  @Override
-  public void notifyReactiveChanged(Double changedReactive) {
-    System.out.println(changedReactive);
-  }
-
 }

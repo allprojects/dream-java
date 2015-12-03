@@ -62,26 +62,4 @@ public class RemoteVar<T> extends Proxy implements Reactive<T> {
 		return this.get();
 	}
 
-	@Override
-	public void addReactiveChangeListener(ReactiveChangeListener<T> listener) {
-		listeners.add(listener);
-	}
-
-	@Override
-	public void removeReactiveChangeListener(ReactiveChangeListener<T> listener) {
-		listeners.remove(listener);
-	}
-
-	private final void notifyListeners() {
-		for (ReactiveChangeListener<T> listener : listeners) {
-			listener.notifyReactiveChanged(val);
-		}
-	}
-	
-	@Override
-	public final void notifyValueChanged(EventPacket evPkt) {
-		super.notifyValueChanged(evPkt);
-		notifyListeners();
-	}
-
 }

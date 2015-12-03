@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javareact.common.Consts;
-import javareact.common.types.ReactiveChangeListener;
 import javareact.common.types.RemoteVar;
 import javareact.common.types.Signal;
 import javareact.common.types.Var;
@@ -16,7 +15,7 @@ import javareact.token_service.TokenServiceLauncher;
 
 import org.junit.Test;
 
-public class RemoteTest implements ReactiveChangeListener<Integer> {
+public class RemoteTest {
 	private boolean serverStarted = false;
 	private boolean tokenServiceStarted = false;
 
@@ -35,7 +34,7 @@ public class RemoteTest implements ReactiveChangeListener<Integer> {
 			return a.get() * 2;
 		}, a);
 
-		signal.addReactiveChangeListener(this);
+		signal.change().addHandler((oldValue, newValue) -> assertTrue( signal.get().equals(a.get() * 2)));
 
 		for (int i = 0; i < 10; i++) {
 			try {
@@ -46,10 +45,4 @@ public class RemoteTest implements ReactiveChangeListener<Integer> {
 			}
 		}
 	}
-
-	@Override
-	public void notifyReactiveChanged(Integer newValue) {
-		assertTrue( signal.get().equals(a.get() * 2));
-	}
-
 }

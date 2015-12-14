@@ -18,7 +18,6 @@ import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
 abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
-  private final Set<ReactiveChangeListener<T>> listeners = new HashSet<ReactiveChangeListener<T>>();
   private final ClientEventForwarder clientEventForwarder;
   private final QueueManager queueManager = new QueueManager();
   protected final String name;
@@ -68,10 +67,6 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
       logger.finest("Sending event to dependent reactive objects.");
       clientEventForwarder.sendEvent(id, ev, computedFrom, finalExpressions, true);
 
-      // Notify listeners
-      logger.finest("Notifying registered listeners of the change.");
-      notifyListeners(oldVal, eventProxyPair.getEventPacket().getEvent().getHostId());
-
       // Acknowledge the proxy
       for (EventProxyPair pair : pairs) {
         EventPacket evPkt = pair.getEventPacket();
@@ -83,20 +78,8 @@ abstract class AbstractReactive<T> implements Reactive<T>, ProxyChangeListener {
     }
   }
 
-  @Override
-  public void addReactiveChangeListener(ReactiveChangeListener<T> listener) {
-    listeners.add(listener);
-  }
-
-  @Override
-  public void removeReactiveChangeListener(ReactiveChangeListener<T> listener) {
-    listeners.remove(listener);
-  }
-
-  private final void notifyListeners(T oldVal, String host) {
-    for (ReactiveChangeListener<T> listener : listeners) {
-      listener.notifyReactiveChanged(oldVal, val, host);
-    }
+  public ChangeEvent<T> change() {
+    return new ChangeEvent<T>(this);
   }
 
   private final void sentAdvertisement() {

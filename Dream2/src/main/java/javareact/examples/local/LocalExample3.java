@@ -1,12 +1,6 @@
 package javareact.examples.local;
 
 import java.util.ArrayList;
-
-import javareact.common.types.ListProxy;
-import javareact.common.types.ObservableList;
-import javareact.common.types.ReactiveChangeListener;
-import javareact.common.types.ReactiveInteger;
-
 import java.util.List;
 
 import javareact.common.types.Var;
@@ -23,7 +17,7 @@ public class LocalExample3 {
     		() -> 1000 + obListProxy.get().size(),
     		obListProxy);
 
-    reactInt.addReactiveChangeListener((oldValue, newValue, host) -> System.out.println(newValue));
+    reactInt.change().addHandler((oldValue, newValue) -> System.out.println(newValue));
 
     obList.modify(self -> self.add(10));
     obList.modify(self -> self.add(20));

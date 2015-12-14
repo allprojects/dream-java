@@ -1,11 +1,11 @@
 package javareact.financial;
 
 import javareact.common.Consts;
-import javareact.common.types.ReactiveChangeListener;
+import javareact.common.types.ChangeEventHandler;
 import javareact.common.types.RemoteVar;
 import javareact.common.types.Signal;
 
-public class FinancialApp implements ReactiveChangeListener<Integer> {
+public class FinancialApp implements ChangeEventHandler<Integer> {
 	//private Signal<Integer> f1Signal;
 	//private Signal<Integer> f2Signal;
 	//private Signal<Integer> f3Signal;
@@ -33,13 +33,13 @@ public class FinancialApp implements ReactiveChangeListener<Integer> {
 		
 		RemoteVar<Integer> model1 = new RemoteVar<>("Model1", "model1");
 
-		//f1Signal = new Signal<>("f1Signal", () -> f1.get(), f1);
-		//f2Signal = new Signal<>("f2Signal", () -> f2.get(), f2);
-		//f3Signal = new Signal<>("f3Signal", () -> f3.get(), f3);
+		Signal<Integer> f1Signal = new Signal<>("f1Signal", () -> f1.get(), f1);
+		Signal<Integer> f2Signal = new Signal<>("f2Signal", () -> f2.get(), f2);
+		Signal<Integer> f3Signal = new Signal<>("f3Signal", () -> f3.get(), f3);
 
-		f1.addReactiveChangeListener(this);
-		f2.addReactiveChangeListener(this);
-		f3.addReactiveChangeListener(this);
+		f1Signal.change().addHandler(this);
+		f2Signal.change().addHandler(this);
+		f3Signal.change().addHandler(this);
 		
 		try {
 			Thread.sleep(2000);
@@ -59,7 +59,7 @@ public class FinancialApp implements ReactiveChangeListener<Integer> {
 	}
 
 	@Override
-	public void notifyReactiveChanged(Integer oldValue, Integer newValue, String host) {
+	public void handle(Integer oldValue, Integer newValue) {
 		System.out.println("Value changed");
 //		if (f1Signal.get() != null && f2Signal.get() != null && f3Signal.get() != null) {
 //			if ((f1Signal.get() + f2Signal.get() + f3Signal.get()) / 3.0 > 150) {

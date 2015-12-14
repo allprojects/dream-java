@@ -22,12 +22,11 @@ import javareact.common.types.RemoteVar;
 import javareact.common.types.Signal;
 import javareact.common.types.Var;
 
-public class Chat extends JFrame implements ReactiveChangeListener<String> {
+public class Chat extends JFrame {
 
 	private static final long serialVersionUID = 390641070042167681L;
 	private RemoteVar<String> remoteMessages;
 	private Var<String> messages;
-	private Var<Boolean> status;
 	private String userName;
 	private JTextArea msgs;
 	private JTextField sendText;
@@ -37,24 +36,35 @@ public class Chat extends JFrame implements ReactiveChangeListener<String> {
 		Consts.hostName = username;
 		messages = new Var<String>("message", "");
 		remoteMessages = new RemoteVar<String>("message@*");
-		remoteMessages.addReactiveChangeListener(this);
 
-		status = new Var<Boolean>("status", true);
-		RemoteVar<Boolean> remoteStatus = new RemoteVar<>("status@*");
-		Signal<Boolean> s = new Signal<Boolean>("s", () -> {
-			if (remoteStatus.get() == null)
-				return false;
+		// split Sender + Message into two Signals (sHost + sMessage)
+		Signal<String> sHost = new Signal<String>("sHost", () -> {
+			if (remoteMessages.get() == null)
+				return "";
+			else 
+				return remoteMessages.get().split(":", 2)[0];
+		}, remoteMessages);
+		
+		Signal<String> sMessage = new Signal<String>("sMessage", () -> {
+			if (remoteMessages.get() == null)
+				return "";
+			else 
+				return remoteMessages.get().split(":", 2)[1];
+		}, remoteMessages);
+		
+		Signal<String> display = new Signal<String>("display", () -> {
+			if (!sHost.get().equals(userName))
+				return sMessage.get();
 			else
-				return remoteStatus.get();
-		} , remoteStatus);
-		s.addReactiveChangeListener(new ReactiveChangeListener<Boolean>() {
-
-			@Override
-			public void notifyReactiveChanged(Boolean oldValue, Boolean newValue, String host) {
-				System.out.println(newValue);
-
-			}
+				return "";				
+		}, sHost, sMessage);
+		
+		display.change().addHandler((oldValue, newValue) -> {
+			if (!sHost.get().equals(userName))
+				displayMessage(sHost.get() + ": " + newValue);
 		});
+				
+		
 		this.userName = username;
 		initUI();
 	}
@@ -173,7 +183,7 @@ public class Chat extends JFrame implements ReactiveChangeListener<String> {
 	}
 
 	protected void sendMessage() {
-		messages.set(sendText.getText());
+		messages.set(userName + ":" + sendText.getText());
 		displayMessage("You: " + sendText.getText());
 		sendText.setText("");
 	}
@@ -183,12 +193,6 @@ public class Chat extends JFrame implements ReactiveChangeListener<String> {
 			msgs.append(text);
 		else
 			msgs.append(System.lineSeparator() + text);
-	}
-
-	@Override
-	public void notifyReactiveChanged(String oldValue, String newValue, String host) {
-		if (!host.equals(userName))
-			displayMessage(host + ": " + newValue);
 	}
 
 	public static void main(String[] args) {

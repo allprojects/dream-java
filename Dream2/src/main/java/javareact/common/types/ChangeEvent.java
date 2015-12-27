@@ -10,6 +10,7 @@ public class ChangeEvent<T> implements ProxyChangeListener {
 	private T latest;
 
 	private Set<ChangeEventHandler<T>> handlers = new HashSet<ChangeEventHandler<T>>();
+	private Set<ChangeEventHandler<T>> onetimehandlers = new HashSet<ChangeEventHandler<T>>();
 
 	public ChangeEvent(ProxyGenerator p) {
 		p.getProxy().addProxyChangeListener(this);
@@ -19,19 +20,24 @@ public class ChangeEvent<T> implements ProxyChangeListener {
 		handlers.add(handler);
 	}
 
+	public void addOneTimeHandler(ChangeEventHandler<T> handler) {
+		onetimehandlers.add(handler);
+	}
+
 	public void removeHandler(ChangeEventHandler<T> handler) {
 		handlers.remove(handler);
 	}
 
 	private void notifyHandler(T oldValue) {
 		handlers.forEach(h -> h.handle(oldValue, latest));
+		onetimehandlers.forEach(h -> h.handle(oldValue, latest));
+		onetimehandlers.clear();
 	}
 
 	@Override
 	public void update(EventProxyPair pair) {
 		String method = pair.getProxy().method;
-		Attribute<T> temp = pair.getEventPacket().getEvent()
-				.getAttributeFor(method);
+		Attribute<T> temp = pair.getEventPacket().getEvent().getAttributeFor(method);
 		System.out.println("update called");
 		if (latest == null || !latest.equals(temp.getValue())) {
 			T old = latest;

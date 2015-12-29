@@ -1,15 +1,10 @@
 package javareact.common.types;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class ObservableList<T extends Serializable> extends Var<List<T>> {
-  public ObservableList(String observableId, boolean persistent, List<T> val) {
-    super(observableId, persistent, val);
-  }
-
   public ObservableList(String observableId, List<T> val) {
     super(observableId, val);
   }
@@ -27,13 +22,13 @@ public class ObservableList<T extends Serializable> extends Var<List<T>> {
   }
 
   public synchronized boolean add(T e) {
-    boolean result = false;
+    final boolean result = false;
     modify(self -> self.add(e));
     return result;
   }
 
   public synchronized boolean remove(Object o) {
-    boolean result = false;
+    final boolean result = false;
     modify(self -> self.remove(o));
     return result;
   }
@@ -43,25 +38,25 @@ public class ObservableList<T extends Serializable> extends Var<List<T>> {
   }
 
   public synchronized boolean addAll(Collection<? extends T> c) {
-    boolean result = false;
+    final boolean result = false;
     modify(self -> self.addAll(c));
     return result;
   }
 
   public synchronized boolean addAll(int index, Collection<? extends T> c) {
-    boolean result = false;
+    final boolean result = false;
     modify(self -> self.addAll(index, c));
     return result;
   }
 
   public synchronized boolean removeAll(Collection<?> c) {
-    boolean result = false;
+    final boolean result = false;
     modify(self -> self.removeAll(c));
     return result;
   }
 
   public synchronized boolean retainAll(Collection<?> c) {
-    boolean result = false;
+    final boolean result = false;
     modify(self -> self.retainAll(c));
     return result;
   }
@@ -75,7 +70,7 @@ public class ObservableList<T extends Serializable> extends Var<List<T>> {
   }
 
   public synchronized T set(int index, T element) {
-    T result = null;
+    final T result = null;
     modify(self -> self.set(index, element));
     return result;
   }
@@ -85,7 +80,7 @@ public class ObservableList<T extends Serializable> extends Var<List<T>> {
   }
 
   public synchronized T remove(int index) {
-    T result = null;
+    final T result = null;
     modify(self -> self.remove(index));
     return result;
   }

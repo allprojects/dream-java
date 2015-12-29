@@ -2,13 +2,7 @@ package javareact.common.types;
 
 import java.util.Locale;
 
-import javareact.common.packets.content.ValueType;
-
 public class ObservableString extends Var<String> {
-  public ObservableString(String observableId, boolean persistent, String val) {
-    super(observableId, persistent, val);
-  }
-
   public ObservableString(String observableId, String val) {
     super(observableId, val);
   }
@@ -184,9 +178,9 @@ public class ObservableString extends Var<String> {
   public char[] toCharArray() {
     return super.get().toCharArray();
   }
-  
+
   @Override
   public final synchronized StringProxy getProxy() {
-    return (StringProxy)super.getProxy().toProxyOfType(ValueType.STRING);
+    return (StringProxy) super.getProxy().toStringProxy();
   }
 }

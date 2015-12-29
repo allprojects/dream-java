@@ -4,12 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
-import javareact.common.packets.content.Attribute;
-import javareact.common.packets.content.Event;
-import javareact.common.packets.content.ValueType;
-
 public class StringProxy extends RemoteVar<String> {
-  private String val = "";
+  private final String val = "";
 
   public StringProxy(String host, String object) {
     super(host, object);

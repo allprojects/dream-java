@@ -1,13 +1,8 @@
 package javareact.common.types;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import javareact.common.packets.content.Attribute;
-import javareact.common.packets.content.Event;
-import javareact.common.packets.content.ValueType;
 
 public class ListProxy<T extends Serializable> extends RemoteVar<List<T>> {
   public ListProxy(String host, String object) {

@@ -25,8 +25,8 @@ public class Attribute<T> implements Serializable {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    result = prime * result + (name == null ? 0 : name.hashCode());
+    result = prime * result + (value == null ? 0 : value.hashCode());
     return result;
   }
 
@@ -41,7 +41,7 @@ public class Attribute<T> implements Serializable {
     if (!(obj instanceof Attribute)) {
       return false;
     }
-    Attribute other = (Attribute) obj;
+    final Attribute<?> other = (Attribute<?>) obj;
     if (name == null) {
       if (other.name != null) {
         return false;
@@ -63,7 +63,7 @@ public class Attribute<T> implements Serializable {
   public String toString() {
     return "<" + name + "=" + value + ">";
   }
-  
+
   public static <T> Attribute<T> of(String name, T value) {
     return new Attribute<T>(name, value);
   }

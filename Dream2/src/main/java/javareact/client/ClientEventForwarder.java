@@ -53,13 +53,13 @@ public class ClientEventForwarder implements PacketForwarder {
 
   @Override
   public Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender, Serializable packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
-    Collection<NodeDescriptor> result = new ArrayList<NodeDescriptor>();
+    final Collection<NodeDescriptor> result = new ArrayList<NodeDescriptor>();
     if (subject.equals(EventPacket.subject)) {
-      assert (packet instanceof EventPacket);
+      assert packet instanceof EventPacket;
       logger.finer("Received an event packet " + packet);
       processEventFromServer((EventPacket) packet);
     } else if (subject.equals(SubscriptionPacket.subject)) {
-      assert (packet instanceof SubscriptionPacket);
+      assert packet instanceof SubscriptionPacket;
       logger.fine("Received a subscription packet " + packet);
       processSubscriptionFromServer((SubscriptionPacket) packet);
     } else {
@@ -78,11 +78,11 @@ public class ClientEventForwarder implements PacketForwarder {
     // Indeed, to ensure glitch freedom, all events, including local ones,
     // need to be pass through the server before being delivered
     if (Consts.consistencyType != ConsistencyType.GLITCH_FREE && Consts.consistencyType != ConsistencyType.ATOMIC) {
-      for (Subscriber sub : subTable.getMatchingSubscribers(ev)) {
+      for (final Subscriber sub : subTable.getMatchingSubscribers(ev)) {
         sub.notifyValueChanged(new EventPacket(ev, id, computedFrom, approvedByTokenService));
       }
     }
-    if (subTable.needsToDeliverToServer(ev) || ev.isPersistent()) {
+    if (subTable.needsToDeliverToServer(ev)) {
       connectionManager.sendEvent(id, ev, computedFrom, finalExpressions, approvedByTokenService);
     }
   }
@@ -135,11 +135,11 @@ public class ClientEventForwarder implements PacketForwarder {
   }
 
   private final void processEventFromServer(EventPacket evPkt) {
-    for (Subscriber sub : subTable.getMatchingSubscribers(evPkt.getEvent())) {
+    for (final Subscriber sub : subTable.getMatchingSubscribers(evPkt.getEvent())) {
       sub.notifyValueChanged(evPkt);
     }
     if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
-      for (Subscriber sub : subTable.getSignatureOnlyMatchingSubscribers(evPkt.getEvent())) {
+      for (final Subscriber sub : subTable.getSignatureOnlyMatchingSubscribers(evPkt.getEvent())) {
         sub.notifyValueChanged(evPkt);
       }
     }

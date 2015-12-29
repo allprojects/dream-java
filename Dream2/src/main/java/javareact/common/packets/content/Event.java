@@ -12,19 +12,13 @@ public class Event implements Iterable<Attribute>, Serializable {
   private final String observableId;
   private final String hostId;
   private final Map<String, Attribute> attributes = new HashMap<String, Attribute>();
-  private final boolean persistent;
-
-  public Event(String hostId, String observableId, boolean persistent, Attribute... attributes) {
-    this.hostId = hostId;
-    this.observableId = observableId;
-    this.persistent = persistent;
-    for (Attribute attr : attributes) {
-      this.attributes.put(attr.getName(), attr);
-    }
-  }
 
   public Event(String hostId, String observableId, Attribute... attributes) {
-    this(hostId, observableId, false, attributes);
+    this.hostId = hostId;
+    this.observableId = observableId;
+    for (final Attribute attr : attributes) {
+      this.attributes.put(attr.getName(), attr);
+    }
   }
 
   public boolean hasAttribute(String name) {
@@ -52,24 +46,29 @@ public class Event implements Iterable<Attribute>, Serializable {
     return hostId + "." + observableId;
   }
 
-  public final boolean isPersistent() {
-    return persistent;
-  }
-
   /**
-   * Returns true iff the event carries the same information as ev, i.e., refers to the same observable and contains the
-   * same attributes.
-   * 
-   * @param ev the event.
+   * Returns true iff the event carries the same information as ev, i.e., refers
+   * to the same observable and contains the same attributes.
+   *
+   * @param ev
+   *          the event.
    * @return true iff the event carries the same information as ev.
    */
   public boolean containsTheSameInformationAs(Event ev) {
-    if (!ev.hostId.equals(hostId)) return false;
-    if (!ev.observableId.equals(observableId)) return false;
-    Set<String> names = attributes.keySet();
-    Set<String> evNames = attributes.keySet();
-    if (names.size() != evNames.size()) return false;
-    if (!names.containsAll(evNames)) return false;
+    if (!ev.hostId.equals(hostId)) {
+      return false;
+    }
+    if (!ev.observableId.equals(observableId)) {
+      return false;
+    }
+    final Set<String> names = attributes.keySet();
+    final Set<String> evNames = attributes.keySet();
+    if (names.size() != evNames.size()) {
+      return false;
+    }
+    if (!names.containsAll(evNames)) {
+      return false;
+    }
     return true;
   }
 
@@ -77,10 +76,9 @@ public class Event implements Iterable<Attribute>, Serializable {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((attributes == null) ? 0 : attributes.hashCode());
-    result = prime * result + ((hostId == null) ? 0 : hostId.hashCode());
-    result = prime * result + ((observableId == null) ? 0 : observableId.hashCode());
-    result = prime * result + (persistent ? 1231 : 1237);
+    result = prime * result + (attributes == null ? 0 : attributes.hashCode());
+    result = prime * result + (hostId == null ? 0 : hostId.hashCode());
+    result = prime * result + (observableId == null ? 0 : observableId.hashCode());
     return result;
   }
 
@@ -92,10 +90,10 @@ public class Event implements Iterable<Attribute>, Serializable {
     if (obj == null) {
       return false;
     }
-    if (!(obj instanceof Event)) {
+    if (getClass() != obj.getClass()) {
       return false;
     }
-    Event other = (Event) obj;
+    final Event other = (Event) obj;
     if (attributes == null) {
       if (other.attributes != null) {
         return false;
@@ -115,9 +113,6 @@ public class Event implements Iterable<Attribute>, Serializable {
         return false;
       }
     } else if (!observableId.equals(other.observableId)) {
-      return false;
-    }
-    if (persistent != other.persistent) {
       return false;
     }
     return true;

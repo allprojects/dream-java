@@ -30,31 +30,23 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
   private final UUID proxyID;
 
   public Proxy(String name) {
-    //this(Consts.hostName, object);
     if (name.contains("@")) {
-    	String[] s = name.split("@", 2);
-    	this.host = s[1];
-    	this.object = s[0];
+      final String[] s = name.split("@", 2);
+      this.host = s[1];
+      this.object = s[0];
+    } else {
+      this.host = Consts.hostName;
+      this.object = name;
     }
-    else {
-    	this.host = Consts.hostName;
-    	this.object = name;
-    }
-    
+
     forwarder = ClientEventForwarder.get();
     proxyID = UUID.randomUUID();
-    Subscription sub = new Subscription(host, object, proxyID, new Constraint(method));
+    final Subscription sub = new Subscription(host, object, proxyID, new Constraint(method));
     forwarder.addSubscription(this, sub);
   }
 
   public Proxy(String host, String object) {
-	  this(object + "@" + host);
-//    this.host = host;
-//    this.object = object;
-//    forwarder = ClientEventForwarder.get();
-//    proxyID = UUID.randomUUID();
-//    Subscription sub = new Subscription(host, object, proxyID, new Constraint(method));
-//    forwarder.addSubscription(this, sub);
+    this(object + "@" + host);
   }
 
   final void addProxyChangeListener(ProxyChangeListener listener) {
@@ -77,12 +69,15 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
   }
 
   /**
-   * Method invoked by a ProxyChangeListener to acknowledge that the eventPacket has been processed. After receiving
-   * this acknowledgement from all registered ProxyChangeListeners, the Proxy can safely start processing the next
-   * EventPacket received (if any).
-   * 
-   * @param proxyChangeListener the ProxyChangeListener.
-   * @param event the event processed by the proxy.
+   * Method invoked by a ProxyChangeListener to acknowledge that the eventPacket
+   * has been processed. After receiving this acknowledgement from all
+   * registered ProxyChangeListeners, the Proxy can safely start processing the
+   * next EventPacket received (if any).
+   *
+   * @param proxyChangeListener
+   *          the ProxyChangeListener.
+   * @param event
+   *          the event processed by the proxy.
    */
   final void notifyEventProcessed(ProxyChangeListener proxyChangeListener, EventPacket event) {
     pendingAcks.remove(proxyChangeListener);
@@ -91,9 +86,9 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
 
   private void processNextEvent() {
     if (pendingAcks.isEmpty() && !eventsQueue.isEmpty()) {
-      assert (!eventsQueue.isEmpty());
+      assert!eventsQueue.isEmpty();
       eventsQueue.poll();
-      EventPacket nextPkt = eventsQueue.peek();
+      final EventPacket nextPkt = eventsQueue.peek();
       if (nextPkt != null) {
         processEvent(nextPkt.getEvent());
         sendEventPacketToListeners(nextPkt);
@@ -106,12 +101,13 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
   private final void sendEventPacketToListeners(EventPacket evPkt) {
     if (!listeners.isEmpty()) {
       pendingAcks.addAll(listeners);
-      EventProxyPair pair = new EventProxyPair(evPkt, this);
-      for (ProxyChangeListener listener : listeners) {
+      final EventProxyPair pair = new EventProxyPair(evPkt, this);
+      for (final ProxyChangeListener listener : listeners) {
         listener.update(pair);
       }
-    } else
+    } else {
       processNextEvent();
+    }
   }
 
   final String getHost() {
@@ -129,10 +125,10 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
   final UUID getProxyID() {
     return proxyID;
   }
-  
+
   @Override
   public Proxy getProxy() {
-	  return this;
+    return this;
   }
 
 }

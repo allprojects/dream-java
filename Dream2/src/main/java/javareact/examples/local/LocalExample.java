@@ -1,6 +1,5 @@
 package javareact.examples.local;
 
-import javareact.common.types.RemoteVar;
 import javareact.common.types.Signal;
 import javareact.common.types.Var;
 
@@ -13,19 +12,10 @@ public class LocalExample {
     final Var<String> obString1 = new Var<>("obString1", "");
     final Var<String> obString2 = new Var<>("obString2", "");
 
-    final RemoteVar<Integer> obIntProxy = obInt.getProxy();
-    final RemoteVar<Double> obDoubleProxy = obDouble.getProxy();
-    final RemoteVar<Boolean> obBoolProxy = obBool.getProxy();
-    final RemoteVar<String> obString1Proxy = obString1.getProxy();
-    final RemoteVar<String> obString2Proxy = obString2.getProxy();
-
-    final Signal<Integer> reactInt = new Signal<Integer>("reactInt", () -> 10 - 2 + (obIntProxy.get() * 2 + obIntProxy.get()) / 2, obIntProxy);
-
-    final Signal<Double> reactDouble = new Signal<Double>("reactDouble", () -> obDoubleProxy.get() + obDoubleProxy.get() * 2, obDoubleProxy);
-
-    final Signal<String> reactString = new Signal<String>("reactString", () -> obString1Proxy.get() + obString2Proxy.get(), obString1Proxy, obString2Proxy);
-
-    final Signal<Boolean> reactBool = new Signal<Boolean>("reactBool", () -> !obBoolProxy.get(), obBoolProxy);
+    final Signal<Integer> reactInt = new Signal<Integer>("reactInt", () -> 10 - 2 + (obInt.get() * 2 + obInt.get()) / 2, obInt);
+    final Signal<Double> reactDouble = new Signal<Double>("reactDouble", () -> obDouble.get() + obDouble.get() * 2, obDouble);
+    final Signal<String> reactString = new Signal<String>("reactString", () -> obString1.get() + obString2.get(), obString1, obString2);
+    final Signal<Boolean> reactBool = new Signal<Boolean>("reactBool", () -> !obBool.get(), obBool);
 
     try {
       Thread.sleep(500);

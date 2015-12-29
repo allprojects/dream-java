@@ -1,42 +1,28 @@
 package javareact.examples.local;
 
-import javareact.common.types.RemoteVar;
-import javareact.common.types.Var;
 import javareact.common.types.ReactiveChangeListener;
 import javareact.common.types.Signal;
+import javareact.common.types.Var;
 
 public class LocalExample2 implements ReactiveChangeListener<Double> {
 
   public static void main(String args[]) {
-    LocalExample2 example = new LocalExample2();
+    final LocalExample2 example = new LocalExample2();
     example.launch();
   }
 
   public void launch() {
-    Var<Double> obDouble1 = new Var<>("obDouble1", 1.0);
-    Var<Double> obDouble2 = new Var<>("obDouble2", 1.0);
+    final Var<Double> obDouble1 = new Var<>("obDouble1", 1.0);
+    final Var<Double> obDouble2 = new Var<>("obDouble2", 1.0);
 
-    final RemoteVar<Double> obDouble1Proxy = obDouble1.getProxy();
-    final RemoteVar<Double> obDouble2Proxy = obDouble2.getProxy();
+    final Signal<Double> reactDouble1 = new Signal<Double>("reactDouble1", () -> obDouble1.get() * obDouble2.get(), obDouble1, obDouble2);
+    final Signal<Double> reactDouble2 = new Signal<Double>("reactDouble2", () -> obDouble1.get() / obDouble2.get(), obDouble1, obDouble2);
 
-    Signal<Double> reactDouble1 = new Signal<Double>("reactDouble1",
-    		() -> obDouble1Proxy.get() * obDouble2Proxy.get(),
-    		obDouble1Proxy, obDouble2Proxy);
-
-    Signal<Double> reactDouble2 = new Signal<Double>("reactDouble2",
-    		() -> obDouble1Proxy.get() / obDouble2Proxy.get(),
-    		obDouble1Proxy, obDouble2Proxy);
-
-    final RemoteVar<Double> reactDouble1Proxy = reactDouble1.getProxy();
-    final RemoteVar<Double> reactDouble2Proxy = reactDouble2.getProxy();
-
-    new Signal<Double>("sub",
-    		() -> reactDouble1Proxy.get() - reactDouble2Proxy.get(),
-    		reactDouble1Proxy, reactDouble2Proxy).addReactiveChangeListener(this);
+    new Signal<Double>("sub", () -> reactDouble1.get() - reactDouble2.get(), reactDouble1, reactDouble2).addReactiveChangeListener(this);
 
     try {
       Thread.sleep(500);
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       e.printStackTrace();
     }
 

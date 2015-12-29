@@ -1,15 +1,27 @@
 package javareact.common.types;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 
+import javareact.client.ClientEventForwarder;
+import javareact.common.Consts;
+import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Attribute;
+import javareact.common.packets.content.Event;
 
-public class Var<T> extends Observable {
+public class Var<T> implements ProxyGenerator {
+  protected final String observableId;
+  private final ClientEventForwarder forwarder;
+
   private T val;
   private RemoteVar<T> proxy;
 
   public Var(String observableId, T val) {
-    super(observableId);
+    forwarder = ClientEventForwarder.get();
+    this.observableId = observableId;
+    sendAdvertisement();
     set(val);
   }
 
@@ -43,5 +55,17 @@ public class Var<T> extends Observable {
       e.printStackTrace();
     }
     sendEvent(attrs);
+  }
+
+  private final void sendAdvertisement() {
+    final Advertisement adv = new Advertisement(Consts.hostName, observableId);
+    forwarder.advertise(adv, true);
+  }
+
+  private final synchronized void sendEvent(Attribute[] attributes) {
+    final Event ev = new Event(Consts.hostName, observableId, attributes);
+    final Set<String> computedFrom = new HashSet<String>();
+    computedFrom.add(ev.getSignature());
+    forwarder.sendEvent(UUID.randomUUID(), ev, computedFrom, false);
   }
 }

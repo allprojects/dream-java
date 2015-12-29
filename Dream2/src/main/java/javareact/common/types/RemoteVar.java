@@ -23,26 +23,6 @@ public class RemoteVar<T> extends Proxy implements Reactive<T> {
     return val;
   }
 
-  public final IntegerProxy toIntegerProxy() {
-    return new IntegerProxy(this.host, this.object);
-  }
-
-  public final DoubleProxy toDoubleProxy() {
-    return new DoubleProxy(this.host, this.object);
-  }
-
-  public final BooleanProxy toBooleanProxy() {
-    return new BooleanProxy(this.host, this.object);
-  }
-
-  public final StringProxy toStringProxy() {
-    return new StringProxy(this.host, this.object);
-  }
-
-  public final ListProxy toListProxy() {
-    return new ListProxy(this.host, this.object);
-  }
-
   @Override
   protected final void processEvent(Event ev) {
     if (ev.hasAttribute(method)) {

@@ -1,17 +1,17 @@
 package javareact.examples.local;
 
-import javareact.common.types.Var;
 import javareact.common.types.RemoteVar;
 import javareact.common.types.Signal;
+import javareact.common.types.Var;
 
 public class LocalExample {
 
   public static void main(String args[]) {
-    Var<Integer> obInt = new Var<>("obInt", 1);
-    Var<Double> obDouble = new Var<>("obDouble", 1.0);
-    Var<Boolean> obBool = new Var<>("obBool", false);
-    Var<String> obString1 = new Var<>("obString1", "");
-    Var<String> obString2 = new Var<>("obString2", "");
+    final Var<Integer> obInt = new Var<>("obInt", 1);
+    final Var<Double> obDouble = new Var<>("obDouble", 1.0);
+    final Var<Boolean> obBool = new Var<>("obBool", false);
+    final Var<String> obString1 = new Var<>("obString1", "");
+    final Var<String> obString2 = new Var<>("obString2", "");
 
     final RemoteVar<Integer> obIntProxy = obInt.getProxy();
     final RemoteVar<Double> obDoubleProxy = obDouble.getProxy();
@@ -19,25 +19,17 @@ public class LocalExample {
     final RemoteVar<String> obString1Proxy = obString1.getProxy();
     final RemoteVar<String> obString2Proxy = obString2.getProxy();
 
-    Signal<Integer> reactInt = new Signal<Integer>("reactInt",
-    		() -> 10 - 2 + ((obIntProxy.get() * 2) + obIntProxy.get()) / 2,
-    		obIntProxy);
+    final Signal<Integer> reactInt = new Signal<Integer>("reactInt", () -> 10 - 2 + (obIntProxy.get() * 2 + obIntProxy.get()) / 2, obIntProxy);
 
-    Signal<Double> reactDouble = new Signal<Double>("reactDouble", 
-    		() -> obDoubleProxy.get() + obDoubleProxy.get() * 2,
-    		obDoubleProxy);
+    final Signal<Double> reactDouble = new Signal<Double>("reactDouble", () -> obDoubleProxy.get() + obDoubleProxy.get() * 2, obDoubleProxy);
 
-    Signal<String> reactString = new Signal<String>("reactString",
-    		() -> obString1Proxy.get() + obString2Proxy.get(),
-    		obString1Proxy, obString2Proxy);
+    final Signal<String> reactString = new Signal<String>("reactString", () -> obString1Proxy.get() + obString2Proxy.get(), obString1Proxy, obString2Proxy);
 
-    Signal<Boolean> reactBool = new Signal<Boolean>("reactBool", 
-    		() -> !obBoolProxy.get(), 
-    		obBoolProxy);
+    final Signal<Boolean> reactBool = new Signal<Boolean>("reactBool", () -> !obBoolProxy.get(), obBoolProxy);
 
     try {
       Thread.sleep(500);
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       e.printStackTrace();
     }
 
@@ -49,7 +41,7 @@ public class LocalExample {
 
     try {
       Thread.sleep(500);
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       e.printStackTrace();
     }
 

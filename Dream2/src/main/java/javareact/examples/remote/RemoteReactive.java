@@ -3,8 +3,7 @@ package javareact.examples.remote;
 import javareact.common.Consts;
 import javareact.common.types.IntegerProxy;
 import javareact.common.types.ListProxy;
-import javareact.common.types.ReactiveInteger;
-import javareact.common.types.ReactiveString;
+import javareact.common.types.Signal;
 import javareact.common.types.StringProxy;
 
 public class RemoteReactive {
@@ -17,38 +16,15 @@ public class RemoteReactive {
     final StringProxy obString2Proxy = new StringProxy("Remote", "obString2");
     final ListProxy<Integer> obListProxy = new ListProxy<Integer>("Remote", "obList");
 
-    ReactiveInteger react1 = new ReactiveInteger("react1", obIntProxy, obString1Proxy) {
-      @Override
-      public Integer evaluate() {
-        return obIntProxy.get() + obString1Proxy.get().length();
-      }
-    };
-
-    ReactiveInteger react2 = new ReactiveInteger("react2", obIntProxy) {
-      @Override
-      public Integer evaluate() {
-        return obIntProxy.get();
-      }
-    };
-
-    ReactiveString react3 = new ReactiveString("react3", obString1Proxy, obString2Proxy) {
-      @Override
-      public String evaluate() {
-        return obString1Proxy.get() + obString2Proxy.get();
-      }
-    };
-
-    ReactiveInteger react4 = new ReactiveInteger("react4", obString1Proxy, obListProxy) {
-      @Override
-      public Integer evaluate() {
-        return obString1Proxy.length() + obListProxy.size();
-      }
-    };
+    final Signal<Integer> react1 = new Signal<Integer>("react1", () -> obIntProxy.get() + obString1Proxy.get().length(), obIntProxy, obString1Proxy);
+    final Signal<Integer> react2 = new Signal<Integer>("react2", () -> obIntProxy.get(), obIntProxy);
+    final Signal<String> react3 = new Signal<String>("react3", () -> obString1Proxy.get() + obString2Proxy.get(), obString1Proxy, obString2Proxy);
+    final Signal<Integer> react4 = new Signal<Integer>("react4", () -> obString1Proxy.length() + obListProxy.size(), obString1Proxy, obListProxy);
 
     while (true) {
       try {
         Thread.sleep(1000);
-      } catch (InterruptedException e) {
+      } catch (final InterruptedException e) {
         e.printStackTrace();
       }
       System.out.println("React1: " + react1.get());

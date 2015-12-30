@@ -6,16 +6,16 @@ import javareact.common.types.Var;
 public class LocalExample {
 
   public static void main(String args[]) {
-    final Var<Integer> varInt = new Var<>("obInt", 1);
-    final Var<Double> varDouble = new Var<>("obDouble", 1.0);
-    final Var<Boolean> varBool = new Var<>("obBool", false);
-    final Var<String> varString1 = new Var<>("obString1", "");
-    final Var<String> varString2 = new Var<>("obString2", "");
+    final Var<Integer> varInt = new Var<>("varInt", 1);
+    final Var<Double> varDouble = new Var<>("varDouble", 1.0);
+    final Var<Boolean> varBool = new Var<>("varBool", false);
+    final Var<String> varString1 = new Var<>("varString1", "");
+    final Var<String> varString2 = new Var<>("varString2", "");
 
-    final Signal<Integer> signalInt = new Signal<Integer>("reactInt", () -> 10 - 2 + (varInt.get() * 2 + varInt.get()) / 2, varInt);
-    final Signal<Double> signalDouble = new Signal<Double>("reactDouble", () -> varDouble.get() + varDouble.get() * 2, varDouble);
-    final Signal<String> signalString = new Signal<String>("reactString", () -> varString1.get() + varString2.get(), varString1, varString2);
-    final Signal<Boolean> signalBool = new Signal<Boolean>("reactBool", () -> !varBool.get(), varBool);
+    final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 10 - 2 + (varInt.get() * 2 + varInt.get()) / 2, varInt);
+    final Signal<Double> signalDouble = new Signal<Double>("signalDouble", () -> varDouble.get() + varDouble.get() * 2, varDouble);
+    final Signal<String> signalString = new Signal<String>("signalString", () -> varString1.get() + varString2.get(), varString1, varString2);
+    final Signal<Boolean> signalBool = new Signal<Boolean>("signalBool", () -> !varBool.get(), varBool);
 
     try {
       Thread.sleep(500);

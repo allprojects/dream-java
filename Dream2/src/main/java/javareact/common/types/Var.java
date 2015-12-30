@@ -5,23 +5,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import javareact.client.ClientEventForwarder;
 import javareact.common.Consts;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Attribute;
 import javareact.common.packets.content.Event;
 
-public class Var<T> implements ProxyGenerator {
-  protected final String observableId;
-  private final ClientEventForwarder forwarder;
-
+public class Var<T> extends Proxy {
   private T val;
-  private RemoteVar<T> proxy;
 
   public Var(String observableId, T val) {
-    forwarder = ClientEventForwarder.get();
-    this.observableId = observableId;
-    sendAdvertisement();
+    super(observableId);
+    forwarder.advertise(new Advertisement(Consts.hostName, observableId), true);
     set(val);
   }
 
@@ -31,7 +25,7 @@ public class Var<T> implements ProxyGenerator {
   }
 
   public final synchronized void modify(Consumer<T> modification) {
-    modification.accept(this.val);
+    modification.accept(val);
     impactOnGet();
   }
 
@@ -39,24 +33,16 @@ public class Var<T> implements ProxyGenerator {
     return val;
   }
 
-  @Override
-  public synchronized RemoteVar<T> getProxy() {
-    if (proxy == null) {
-      proxy = new RemoteVar<T>(observableId);
-    }
-    return proxy;
-  }
-
   private final void impactOnGet() {
-    final Event ev = new Event(Consts.hostName, observableId, new Attribute<T>("get", get()));
+    final Event ev = new Event(Consts.hostName, object, new Attribute<T>("get", get()));
     final Set<String> computedFrom = new HashSet<String>();
     computedFrom.add(ev.getSignature());
     forwarder.sendEvent(UUID.randomUUID(), ev, computedFrom, false);
   }
 
-  private final void sendAdvertisement() {
-    final Advertisement adv = new Advertisement(Consts.hostName, observableId);
-    forwarder.advertise(adv, true);
+  @Override
+  protected void processEvent(Event ev) {
+    assert false : "A Var should never receive events";
   }
 
 }

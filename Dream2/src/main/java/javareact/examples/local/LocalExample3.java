@@ -9,16 +9,24 @@ import javareact.common.types.Var;
 public class LocalExample3 {
 
   public static void main(String args[]) {
-    final Var<List<Integer>> obList = new Var<>("obList", new ArrayList<Integer>());
-    final Signal<Integer> reactInt = new Signal<Integer>("reactInt", () -> 1000 + obList.get().size(), obList);
+    final Var<List<Integer>> varList = new Var<>("varList", new ArrayList<Integer>());
+    final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 1000 + varList.get().size(), varList);
 
-    reactInt.addReactiveChangeListener(newValue -> System.out.println(newValue));
+    signalInt.addReactiveChangeListener(System.out::println);
 
-    obList.modify(self -> self.add(10));
-    obList.modify(self -> self.add(20));
-    obList.modify(self -> self.add(30));
-    obList.modify(self -> self.remove(1));
-    obList.modify(self -> self.clear());
+    System.out.println("Expected results: ");
+    System.out.println(1001);
+    System.out.println(1002);
+    System.out.println(1003);
+    System.out.println(1002);
+    System.out.println(1000);
+    System.out.println();
+
+    varList.modify(self -> self.add(10));
+    varList.modify(self -> self.add(20));
+    varList.modify(self -> self.add(30));
+    varList.modify(self -> self.remove(1));
+    varList.modify(self -> self.clear());
 
   }
 

@@ -16,7 +16,7 @@ import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
 public abstract class Proxy implements Subscriber {
-  private final ClientEventForwarder forwarder;
+  protected final ClientEventForwarder forwarder;
   private final Set<ProxyChangeListener> listeners = new HashSet<ProxyChangeListener>();
 
   private final Queue<EventPacket> eventsQueue = new ArrayDeque<EventPacket>();

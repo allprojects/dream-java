@@ -11,10 +11,10 @@ public class RemoteObservable {
 
   public static void main(String args[]) {
     Consts.hostName = "Remote";
-    final Var<Integer> obInt = new Var<Integer>("obInt", 1);
-    final Var<String> obString1 = new Var<String>("obString1", "a");
-    final Var<String> obString2 = new Var<String>("obString2", "b");
-    final Var<List<Integer>> obList = new Var<List<Integer>>("obList", new ArrayList<Integer>());
+    final Var<Integer> obInt = new Var<Integer>("remoteInt", 1);
+    final Var<String> obString1 = new Var<String>("remoteString1", "a");
+    final Var<String> obString2 = new Var<String>("remoteString2", "b");
+    final Var<List<Integer>> obList = new Var<List<Integer>>("remoteList", new ArrayList<Integer>());
     final Random random = new Random();
 
     while (true) {

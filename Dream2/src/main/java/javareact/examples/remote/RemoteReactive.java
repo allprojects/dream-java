@@ -11,28 +11,19 @@ public class RemoteReactive {
   public static void main(String args[]) {
     Consts.hostName = "Reactive";
 
-    final RemoteVar<Integer> obIntProxy = new RemoteVar<Integer>("Remote", "obInt");
-    final RemoteVar<String> obString1Proxy = new RemoteVar<String>("Remote", "obString1");
-    final RemoteVar<String> obString2Proxy = new RemoteVar<String>("Remote", "obString2");
-    final RemoteVar<List<Integer>> obListProxy = new RemoteVar<List<Integer>>("Remote", "obList");
+    final RemoteVar<Integer> remoteInt = new RemoteVar<Integer>("Remote", "remoteInt");
+    final RemoteVar<String> remoteString1 = new RemoteVar<String>("Remote", "remoteString1");
+    final RemoteVar<String> remoteString2 = new RemoteVar<String>("Remote", "remoteString2");
+    final RemoteVar<List<Integer>> remoteList = new RemoteVar<List<Integer>>("Remote", "remoteList");
 
-    final Signal<Integer> react1 = new Signal<Integer>("react1", () -> obIntProxy.get() + obString1Proxy.get().length(), obIntProxy, obString1Proxy);
-    final Signal<Integer> react2 = new Signal<Integer>("react2", () -> obIntProxy.get(), obIntProxy);
-    final Signal<String> react3 = new Signal<String>("react3", () -> obString1Proxy.get() + obString2Proxy.get(), obString1Proxy, obString2Proxy);
-    final Signal<Integer> react4 = new Signal<Integer>("react4", () -> obString1Proxy.get().length() + obListProxy.get().size(), obString1Proxy, obListProxy);
+    final Signal<Integer> react1 = new Signal<Integer>("react1", () -> remoteInt.get() + remoteString1.get().length(), remoteInt, remoteString1);
+    final Signal<Integer> react2 = new Signal<Integer>("react2", () -> remoteInt.get(), remoteInt);
+    final Signal<String> react3 = new Signal<String>("react3", () -> remoteString1.get() + remoteString2.get(), remoteString1, remoteString2);
+    final Signal<Integer> react4 = new Signal<Integer>("react4", () -> remoteString1.get().length() + remoteList.get().size(), remoteString1, remoteList);
 
-    while (true) {
-      try {
-        Thread.sleep(1000);
-      } catch (final InterruptedException e) {
-        e.printStackTrace();
-      }
-      System.out.println("React1: " + react1.get());
-      System.out.println("React2: " + react2.get());
-      System.out.println("React3: " + react3.get());
-      System.out.println("React4: " + react4.get());
-
-    }
-
+    react1.addReactiveChangeListener(val -> System.out.println("React1: " + val));
+    react2.addReactiveChangeListener(val -> System.out.println("React2: " + val));
+    react3.addReactiveChangeListener(val -> System.out.println("React3: " + val));
+    react4.addReactiveChangeListener(val -> System.out.println("React4: " + val));
   }
 }

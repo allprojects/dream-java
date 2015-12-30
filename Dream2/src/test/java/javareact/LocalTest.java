@@ -5,128 +5,86 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashSet;
 import java.util.Set;
 
-import javareact.common.types.Var;
-import javareact.common.types.RemoteVar;
+import org.junit.Test;
+
 import javareact.common.types.Signal;
+import javareact.common.types.Var;
 import javareact.server.ServerLauncher;
 import javareact.token_service.TokenServiceLauncher;
 
-import org.junit.Test;
-
 public class LocalTest {
-	private boolean serverStarted = false;
-	private boolean tokenServiceStarted = false;
+  private boolean serverStarted = false;
+  private boolean tokenServiceStarted = false;
 
-	@Test
-	public void localTest1() {
-		startServerIfNeeded();
-		startTokenServiceIfNeeded();
+  @Test
+  public void localTest1() {
+    startServerIfNeeded();
+    startTokenServiceIfNeeded();
 
-		Var<Integer> obInt = new Var<>("obInt", Integer.valueOf(1));
-		Var<String> obString1 = new Var<>("obString1", "");
-		Var<String> obString2 = new Var<>("obString2", "");
+    final Var<Integer> varInt = new Var<>("varInt", Integer.valueOf(1));
+    final Var<String> varString1 = new Var<>("varString1", "");
+    final Var<String> varString2 = new Var<>("varString2", "");
 
-		Signal<Integer> reactInt = new Signal<Integer>("reactInt",
-				() -> {
-					if(obInt.get() == null) return null;
-					return 10 - 2 + ((obInt.get() * 2) + obInt.get()) / 2;
-				},
-				obInt);
+    final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 10 - 2 + (varInt.get() * 2 + varInt.get()) / 2, varInt);
+    final Signal<String> signalString = new Signal<String>("signalString", () -> varString1.get() + varString2.get(), varString1, varString2);
+    final Signal<Integer> signalInt2 = new Signal<Integer>("signalInt2", () -> signalInt.get() * 2, signalInt);
 
-		Signal<String> reactString = new Signal<String>("reactString",
-				() -> obString1.get() + obString2.get(),
-				obString1, obString2);
+    final Var<Integer> varStart = new Var<>("varIntStart", Integer.valueOf(1));
+    final Signal<Integer> signalMid1 = new Signal<Integer>("signalMid1", () -> varStart.get() * 2, varStart);
+    final Signal<Integer> signalMid2 = new Signal<Integer>("signalMid2", () -> signalMid1.get() * 2, signalMid1);
+    final Signal<Integer> signalFinal = new Signal<Integer>("signalFinal", () -> signalMid1.get() + signalMid2.get(), signalMid1, signalMid2);
+    final Signal<Integer> signalFinal2 = new Signal<Integer>("signalFinal2", () -> signalMid1.get() + varStart.get(), signalMid1, varStart);
 
-		Signal<Integer> reactInt2 = new Signal<Integer>("reactInt2",
-				() -> {
-					if(reactInt.get() == null) return null;
-					return reactInt.get() * 2;
-				},
-				reactInt);
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
 
-		Var<Integer> obIntStart = new Var<>("obIntStart", Integer.valueOf(1));
-		
-		Signal<Integer> reactInterm1 = new Signal<Integer>("reactInterm1",
-				() -> {
-					System.out.println("reactInterm1: " + obIntStart.get());
-					if(obIntStart.get() == null) return null;
-					return obIntStart.get() * 2;
-				},
-				obIntStart);
+    varInt.set(100);
+    varString1.set("Hello ");
+    varString2.set("World!");
+    varStart.set(100);
 
-		Signal<Integer> reactInterm2 = new Signal<Integer>("reactInterm2", 
-				() -> {
-					System.out.println("reactInterm2: " + reactInterm1.get());
-					if(reactInterm1.get() == null) return null;
-					return reactInterm1.get() * 2;
-				},
-				reactInterm1);
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
 
-		Signal<Integer> reactFinal = new Signal<Integer>("reactFinal",
-				() -> {
-					System.out.println("reactFinal: " + reactInterm1.get() + " " + reactInterm2.get());
-					if(reactInterm1.get() == null || reactInterm2.get() == null) return null;
-					return reactInterm1.get() + reactInterm2.get();
-				},
-				reactInterm1, reactInterm2);
+    assertEquals(signalInt.get(), Integer.valueOf(158));
+    assertEquals(signalString.get(), "Hello World!");
+    assertEquals(signalInt2.get(), Integer.valueOf(316));
+    assertEquals(signalMid1.get(), Integer.valueOf(200));
+    assertEquals(signalMid2.get(), Integer.valueOf(400));
+    assertEquals(signalFinal.get(), Integer.valueOf(600));
+    assertEquals(signalFinal2.get(), Integer.valueOf(300));
+  }
 
-		Signal<Integer> reactFinal2 = new Signal<Integer>("reactFinal2",
-				() -> {
-					if(reactInterm1.get() == null || obIntStart.get() == null) return null;
-					return reactInterm1.get() + obIntStart.get();
-				},
-				reactInterm1, obIntStart);
+  private final void startServerIfNeeded() {
+    if (!serverStarted) {
+      ServerLauncher.start();
+      serverStarted = true;
+    }
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
 
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		obInt.set(100);
-		obString1.set("Hello ");
-		obString2.set("World!");
-		obIntStart.set(100);
-
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		assertEquals(reactInt.get(), Integer.valueOf(158));
-		assertEquals(reactString.get(), "Hello World!");
-		assertEquals(reactInt2.get(), Integer.valueOf(316));
-		assertEquals(reactInterm1.get(), Integer.valueOf(200));
-		assertEquals(reactInterm2.get(), Integer.valueOf(400));
-		assertEquals(reactFinal.get(), Integer.valueOf(600));
-		assertEquals(reactFinal2.get(), Integer.valueOf(300));
-	}
-
-	private final void startServerIfNeeded() {
-		if (!serverStarted) {
-			ServerLauncher.start();
-			serverStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private final void startTokenServiceIfNeeded() {
-		if (!tokenServiceStarted) {
-			String serverAddress = "reds-tcp:localhost:9000";
-			Set<String> addresses = new HashSet<String>();
-			addresses.add(serverAddress);
-			TokenServiceLauncher.start(addresses);
-			tokenServiceStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+  private final void startTokenServiceIfNeeded() {
+    if (!tokenServiceStarted) {
+      final String serverAddress = "reds-tcp:localhost:9000";
+      final Set<String> addresses = new HashSet<String>();
+      addresses.add(serverAddress);
+      TokenServiceLauncher.start(addresses);
+      tokenServiceStarted = true;
+    }
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
 }

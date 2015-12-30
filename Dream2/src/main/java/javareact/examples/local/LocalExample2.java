@@ -26,14 +26,33 @@ public class LocalExample2 implements ReactiveChangeListener<Double> {
       e.printStackTrace();
     }
 
-    obDouble1.set(10.0);
-    obDouble2.set(20.0);
+    final double obDouble2V0 = 1;
 
-    obDouble1.set(20.0);
-    obDouble2.set(30.0);
+    final double obDouble1V1 = 10;
+    final double obDouble2V1 = 20;
 
-    obDouble1.set(40.0);
-    obDouble2.set(50.0);
+    final double obDouble1V2 = 20;
+    final double obDouble2V2 = 30;
+
+    final double obDouble1V3 = 40;
+    final double obDouble2V3 = 50;
+
+    System.out.println("Expected values: ");
+    System.out.println("1) " + (obDouble1V1 * obDouble2V0 - obDouble1V1 / obDouble2V0));
+    System.out.println("2) " + (obDouble1V1 * obDouble2V1 - obDouble1V1 / obDouble2V1));
+    System.out.println("3) " + (obDouble1V2 * obDouble2V1 - obDouble1V2 / obDouble2V1));
+    System.out.println("4) " + (obDouble1V2 * obDouble2V2 - obDouble1V2 / obDouble2V2));
+    System.out.println("5) " + (obDouble1V3 * obDouble2V2 - obDouble1V3 / obDouble2V2));
+    System.out.println("6) " + (obDouble1V3 * obDouble2V3 - obDouble1V3 / obDouble2V3));
+
+    obDouble1.set(obDouble1V1);
+    obDouble2.set(obDouble2V1);
+
+    obDouble1.set(obDouble1V2);
+    obDouble2.set(obDouble2V2);
+
+    obDouble1.set(obDouble1V3);
+    obDouble2.set(obDouble2V3);
   }
 
   @Override

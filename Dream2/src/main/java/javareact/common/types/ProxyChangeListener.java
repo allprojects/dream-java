@@ -1,8 +1,8 @@
 package javareact.common.types;
 
-
 /**
- * Interface used to register to a proxy. It exposes an update method called whenever the proxy changes.
+ * Interface used to register to a proxy. It exposes an update method called
+ * whenever the proxy changes.
  */
 interface ProxyChangeListener {
 

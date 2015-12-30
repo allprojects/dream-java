@@ -15,7 +15,7 @@ import javareact.common.packets.content.Constraint;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-public abstract class Proxy implements Subscriber, ProxyGenerator {
+public abstract class Proxy implements Subscriber {
   private final ClientEventForwarder forwarder;
   private final Set<ProxyChangeListener> listeners = new HashSet<ProxyChangeListener>();
 
@@ -102,9 +102,7 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
     if (!listeners.isEmpty()) {
       pendingAcks.addAll(listeners);
       final EventProxyPair pair = new EventProxyPair(evPkt, this);
-      for (final ProxyChangeListener listener : listeners) {
-        listener.update(pair);
-      }
+      listeners.forEach(l -> l.update(pair));
     } else {
       processNextEvent();
     }
@@ -124,11 +122,6 @@ public abstract class Proxy implements Subscriber, ProxyGenerator {
 
   final UUID getProxyID() {
     return proxyID;
-  }
-
-  @Override
-  public Proxy getProxy() {
-    return this;
   }
 
 }

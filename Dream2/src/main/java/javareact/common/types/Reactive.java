@@ -10,7 +10,7 @@ package javareact.common.types;
  * which are automatically notified when the value of the reactive object
  * changes.
  */
-interface Reactive<T> extends ProxyGenerator {
+interface Reactive<T> {
 
   /**
    * The evaluate method is automatically invoked whenever one of the observable

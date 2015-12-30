@@ -7,7 +7,7 @@ import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Attribute;
 import javareact.common.packets.content.Event;
 
-public class RemoteVar<T> extends Proxy implements Reactive<T> {
+public class RemoteVar<T> extends Proxy implements Reactive<T>, ProxyGenerator {
   private final Set<ReactiveChangeListener<T>> listeners = new HashSet<ReactiveChangeListener<T>>();
   private T val;
 
@@ -46,16 +46,15 @@ public class RemoteVar<T> extends Proxy implements Reactive<T> {
     listeners.remove(listener);
   }
 
-  private final void notifyListeners() {
-    for (final ReactiveChangeListener<T> listener : listeners) {
-      listener.notifyReactiveChanged(val);
-    }
-  }
-
   @Override
   public final void notifyValueChanged(EventPacket evPkt) {
     super.notifyValueChanged(evPkt);
-    notifyListeners();
+    listeners.forEach(l -> l.notifyReactiveChanged(val));
+  }
+
+  @Override
+  public RemoteVar<T> getProxy() {
+    return this;
   }
 
 }

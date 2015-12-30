@@ -48,13 +48,10 @@ public class Var<T> implements ProxyGenerator {
   }
 
   private final void impactOnGet() {
-    final Attribute[] attrs = new Attribute[1];
-    try {
-      attrs[0] = new Attribute<T>("get", get());
-    } catch (final Exception e) {
-      e.printStackTrace();
-    }
-    sendEvent(attrs);
+    final Event ev = new Event(Consts.hostName, observableId, new Attribute<T>("get", get()));
+    final Set<String> computedFrom = new HashSet<String>();
+    computedFrom.add(ev.getSignature());
+    forwarder.sendEvent(UUID.randomUUID(), ev, computedFrom, false);
   }
 
   private final void sendAdvertisement() {
@@ -62,10 +59,4 @@ public class Var<T> implements ProxyGenerator {
     forwarder.advertise(adv, true);
   }
 
-  private final synchronized void sendEvent(Attribute[] attributes) {
-    final Event ev = new Event(Consts.hostName, observableId, attributes);
-    final Set<String> computedFrom = new HashSet<String>();
-    computedFrom.add(ev.getSignature());
-    forwarder.sendEvent(UUID.randomUUID(), ev, computedFrom, false);
-  }
 }

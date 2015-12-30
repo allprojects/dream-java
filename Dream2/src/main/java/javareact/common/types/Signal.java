@@ -2,8 +2,8 @@ package javareact.common.types;
 
 import java.util.function.Supplier;
 
-public class Signal<T> extends AbstractReactive<T> {
-  private RemoteVar<T> proxy = null;
+public class Signal<T> extends AbstractReactive<T>implements ProxyGenerator {
+  private final RemoteVar<T> proxy;
   private final Supplier<T> evaluation;
 
   private static <T> Proxy[] proxiesFromVars(ProxyGenerator[] vars) {
@@ -18,14 +18,12 @@ public class Signal<T> extends AbstractReactive<T> {
   public Signal(String name, Supplier<T> evaluation, ProxyGenerator... vars) {
     super(name, proxiesFromVars(vars));
     val = evaluation.get();
+    proxy = new RemoteVar<T>(name);
     this.evaluation = evaluation;
   }
 
   @Override
   public synchronized RemoteVar<T> getProxy() {
-    if (proxy == null) {
-      proxy = new RemoteVar<T>(name);
-    }
     return proxy;
   }
 

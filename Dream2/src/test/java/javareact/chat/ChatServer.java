@@ -1,14 +1,13 @@
 package javareact.chat;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +32,7 @@ public class ChatServer {
 
 	private Var<String> newSessionID;
 	private Var<String> newSessionVAR;
-	private static Random r = new Random();
+	private static SecureRandom r = new SecureRandom();
 
 	private List<String> processedIDs = new ArrayList<String>();
 
@@ -147,15 +146,7 @@ public class ChatServer {
 	 * @return random String hashed with SHA-256
 	 */
 	public static String getRandom() {
-		try {
-			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-			messageDigest.update(String.valueOf(r.nextLong()).getBytes());
-			String encryptedString = new String(messageDigest.digest());
-			return encryptedString.replace("@", "");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		return "";
+		return new BigInteger(130, r).toString(32);
 	}
 
 	public void start() {

@@ -3,14 +3,16 @@ package javareact.client;
 import javareact.common.packets.EventPacket;
 
 /**
- * A subscriber receives events that express some change in the value of an observable variable.
+ * A subscriber receives events that express some change in the value of an
+ * observable variable.
  */
 public interface Subscriber {
 
-  /**
-   * Notifies the subscriber that the given event has occurred.
-   * 
-   * @param event the occurred event.
-   */
-  public void notifyValueChanged(EventPacket event);
+	/**
+	 * Notifies the subscriber that the given event has occurred.
+	 * 
+	 * @param event
+	 *            the occurred event.
+	 */
+	public void notifyValueChanged(EventPacket event);
 }

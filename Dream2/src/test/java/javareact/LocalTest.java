@@ -26,56 +26,49 @@ public class LocalTest {
 		Var<String> obString1 = new Var<>("obString1", "");
 		Var<String> obString2 = new Var<>("obString2", "");
 
-		Signal<Integer> reactInt = new Signal<Integer>("reactInt",
-				() -> {
-					if(obInt.get() == null) return null;
-					return 10 - 2 + ((obInt.get() * 2) + obInt.get()) / 2;
-				},
-				obInt);
+		Signal<Integer> reactInt = new Signal<Integer>("reactInt", () -> {
+			if (obInt.get() == null)
+				return null;
+			return 10 - 2 + ((obInt.get() * 2) + obInt.get()) / 2;
+		}, obInt);
 
-		Signal<String> reactString = new Signal<String>("reactString",
-				() -> obString1.get() + obString2.get(),
+		Signal<String> reactString = new Signal<String>("reactString", () -> obString1.get() + obString2.get(),
 				obString1, obString2);
 
-		Signal<Integer> reactInt2 = new Signal<Integer>("reactInt2",
-				() -> {
-					if(reactInt.get() == null) return null;
-					return reactInt.get() * 2;
-				},
-				reactInt);
+		Signal<Integer> reactInt2 = new Signal<Integer>("reactInt2", () -> {
+			if (reactInt.get() == null)
+				return null;
+			return reactInt.get() * 2;
+		}, reactInt);
 
 		Var<Integer> obIntStart = new Var<>("obIntStart", Integer.valueOf(1));
-		
-		Signal<Integer> reactInterm1 = new Signal<Integer>("reactInterm1",
-				() -> {
-					System.out.println("reactInterm1: " + obIntStart.get());
-					if(obIntStart.get() == null) return null;
-					return obIntStart.get() * 2;
-				},
-				obIntStart);
 
-		Signal<Integer> reactInterm2 = new Signal<Integer>("reactInterm2", 
-				() -> {
-					System.out.println("reactInterm2: " + reactInterm1.get());
-					if(reactInterm1.get() == null) return null;
-					return reactInterm1.get() * 2;
-				},
-				reactInterm1);
+		Signal<Integer> reactInterm1 = new Signal<Integer>("reactInterm1", () -> {
+			System.out.println("reactInterm1: " + obIntStart.get());
+			if (obIntStart.get() == null)
+				return null;
+			return obIntStart.get() * 2;
+		}, obIntStart);
 
-		Signal<Integer> reactFinal = new Signal<Integer>("reactFinal",
-				() -> {
-					System.out.println("reactFinal: " + reactInterm1.get() + " " + reactInterm2.get());
-					if(reactInterm1.get() == null || reactInterm2.get() == null) return null;
-					return reactInterm1.get() + reactInterm2.get();
-				},
-				reactInterm1, reactInterm2);
+		Signal<Integer> reactInterm2 = new Signal<Integer>("reactInterm2", () -> {
+			System.out.println("reactInterm2: " + reactInterm1.get());
+			if (reactInterm1.get() == null)
+				return null;
+			return reactInterm1.get() * 2;
+		}, reactInterm1);
 
-		Signal<Integer> reactFinal2 = new Signal<Integer>("reactFinal2",
-				() -> {
-					if(reactInterm1.get() == null || obIntStart.get() == null) return null;
-					return reactInterm1.get() + obIntStart.get();
-				},
-				reactInterm1, obIntStart);
+		Signal<Integer> reactFinal = new Signal<Integer>("reactFinal", () -> {
+			System.out.println("reactFinal: " + reactInterm1.get() + " " + reactInterm2.get());
+			if (reactInterm1.get() == null || reactInterm2.get() == null)
+				return null;
+			return reactInterm1.get() + reactInterm2.get();
+		}, reactInterm1, reactInterm2);
+
+		Signal<Integer> reactFinal2 = new Signal<Integer>("reactFinal2", () -> {
+			if (reactInterm1.get() == null || obIntStart.get() == null)
+				return null;
+			return reactInterm1.get() + obIntStart.get();
+		}, reactInterm1, obIntStart);
 
 		try {
 			Thread.sleep(500);

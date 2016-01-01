@@ -9,22 +9,20 @@ import javareact.common.types.Signal;
 
 public class LocalExample3 {
 
-  public static void main(String args[]) {
-    Var<List<Integer>> obList = new Var<>("obList", new ArrayList<Integer>());
-    final RemoteVar<List<Integer>> obListProxy = obList.getProxy();
+	public static void main(String args[]) {
+		Var<List<Integer>> obList = new Var<>("obList", new ArrayList<Integer>());
+		final RemoteVar<List<Integer>> obListProxy = obList.getProxy();
 
-    Signal<Integer> reactInt = new Signal<Integer>("reactInt",
-    		() -> 1000 + obListProxy.get().size(),
-    		obListProxy);
+		Signal<Integer> reactInt = new Signal<Integer>("reactInt", () -> 1000 + obListProxy.get().size(), obListProxy);
 
-    reactInt.change().addHandler((oldValue, newValue) -> System.out.println(newValue));
+		reactInt.change().addHandler((oldValue, newValue) -> System.out.println(newValue));
 
-    obList.modify(self -> self.add(10));
-    obList.modify(self -> self.add(20));
-    obList.modify(self -> self.add(30));
-    obList.modify(self -> self.remove(1));
-    obList.modify(self -> self.clear());
+		obList.modify(self -> self.add(10));
+		obList.modify(self -> self.add(20));
+		obList.modify(self -> self.add(30));
+		obList.modify(self -> self.remove(1));
+		obList.modify(self -> self.clear());
 
-  }
+	}
 
 }

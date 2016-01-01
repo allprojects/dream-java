@@ -12,38 +12,38 @@ import javareact.token_service.TokenServiceLauncher;
 public class InputModel {
 	private boolean serverStarted = false;
 	private boolean tokenServiceStarted = false;
-	
+
 	public static void main(String[] args) {
 		new InputModel().start();
 	}
-	
+
 	public void start() {
 		startServerIfNeeded();
 		startTokenServiceIfNeeded();
-		
+
 		Consts.hostName = "InputModel";
-    	
+
 		Var<Integer> marketIndex = new Var<>("marketIndex", 1);
-    	Var<Integer> stockOpts = new Var<>("stockOpts", 1);
-    	Var<Integer> news = new Var<>("news", 1);
-    
-    	Random random = new Random();
+		Var<Integer> stockOpts = new Var<>("stockOpts", 1);
+		Var<Integer> news = new Var<>("news", 1);
 
-	    while (true) {
-	      marketIndex.set(random.nextInt(100));
-	      stockOpts.set(random.nextInt(100));
-	      news.set(random.nextInt(100));
-	      
-	      System.out.println("New values: " + marketIndex.get() + ", " + stockOpts.get() + ", " + news.get());
+		Random random = new Random();
 
-	      try {
-	        Thread.sleep(1000);
-	      } catch (InterruptedException e) {
-	        e.printStackTrace();
-	      }
-	    }
+		while (true) {
+			marketIndex.set(random.nextInt(100));
+			stockOpts.set(random.nextInt(100));
+			news.set(random.nextInt(100));
+
+			System.out.println("New values: " + marketIndex.get() + ", " + stockOpts.get() + ", " + news.get());
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
 	private final void startServerIfNeeded() {
 		if (!serverStarted) {
 			ServerLauncher.start();

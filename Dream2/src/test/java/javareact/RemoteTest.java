@@ -34,13 +34,12 @@ public class RemoteTest {
 			return a.get() * 2;
 		}, a);
 
-		signal.change().addHandler((oldValue, newValue) -> assertTrue( signal.get().equals(a.get() * 2)));
+		signal.change().addHandler((oldValue, newValue) -> assertTrue(signal.get().equals(a.get() * 2)));
 
 		for (int i = 0; i < 10; i++) {
 			try {
 				Thread.sleep(1000);
-			}
-			catch (InterruptedException ex) {
+			} catch (InterruptedException ex) {
 				ex.printStackTrace();
 			}
 		}

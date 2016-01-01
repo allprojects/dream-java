@@ -18,26 +18,26 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
 public class ChatGUI extends JFrame {
-	
+
 	private static final long serialVersionUID = 4659984914364067514L;
 	private JTextArea msgs;
 	private JTextField sendText;
 	private JList<String> statusList;
-	
+
 	private Chat listener;
-	
+
 	public ChatGUI(String userName) {
 		initUI(userName);
 	}
-	
+
 	public void setListener(Chat c) {
 		listener = c;
 	}
-	
+
 	public String getTypedText() {
 		return sendText.getText();
 	}
-	
+
 	public void resetTypedText() {
 		sendText.setText("");
 	}
@@ -48,7 +48,7 @@ public class ChatGUI extends JFrame {
 		else
 			msgs.append(System.lineSeparator() + text);
 	}
-	
+
 	private void initUI(String userName) {
 		sendText = new JTextField(20);
 		sendText.addKeyListener(new KeyListener() {

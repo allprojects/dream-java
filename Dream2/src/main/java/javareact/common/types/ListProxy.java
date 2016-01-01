@@ -10,43 +10,43 @@ import javareact.common.packets.content.Event;
 import javareact.common.packets.content.ValueType;
 
 public class ListProxy<T extends Serializable> extends RemoteVar<List<T>> {
-  public ListProxy(String host, String object) {
-    super(host, object);
-  }
+	public ListProxy(String host, String object) {
+		super(host, object);
+	}
 
-  public ListProxy(String object) {
-    super(object);
-  }
+	public ListProxy(String object) {
+		super(object);
+	}
 
-  public int size() {
-    return super.get().size();
-  }
+	public int size() {
+		return super.get().size();
+	}
 
-  public boolean isEmpty() {
-    return super.get().isEmpty();
-  }
+	public boolean isEmpty() {
+		return super.get().isEmpty();
+	}
 
-  public boolean contains(Object o) {
-    return super.get().contains(o);
-  }
+	public boolean contains(Object o) {
+		return super.get().contains(o);
+	}
 
-  public boolean containsAll(Collection<?> c) {
-    return super.get().containsAll(c);
-  }
+	public boolean containsAll(Collection<?> c) {
+		return super.get().containsAll(c);
+	}
 
-  public T get(int index) {
-    return super.get().get(index);
-  }
+	public T get(int index) {
+		return super.get().get(index);
+	}
 
-  public int indexOf(Object o) {
-    return super.get().indexOf(o);
-  }
+	public int indexOf(Object o) {
+		return super.get().indexOf(o);
+	}
 
-  public int lastIndexOf(Object o) {
-    return super.get().lastIndexOf(o);
-  }
+	public int lastIndexOf(Object o) {
+		return super.get().lastIndexOf(o);
+	}
 
-  public List<T> subList(int fromIndex, int toIndex) {
-    return super.get().subList(fromIndex, toIndex);
-  }
+	public List<T> subList(int fromIndex, int toIndex) {
+		return super.get().subList(fromIndex, toIndex);
+	}
 }

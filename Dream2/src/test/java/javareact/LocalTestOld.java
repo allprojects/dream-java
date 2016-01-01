@@ -31,7 +31,8 @@ public class LocalTestOld {
 		ReactiveInteger reactInt = new ReactiveInteger("reactInt", obInt.getProxy()) {
 			@Override
 			public Integer evaluate() {
-				if(obInt.get() == null) return null;
+				if (obInt.get() == null)
+					return null;
 				return 10 - 2 + ((obInt.get() * 2) + obInt.get()) / 2;
 			}
 		};
@@ -46,7 +47,8 @@ public class LocalTestOld {
 		ReactiveInteger reactInt2 = new ReactiveInteger("reactInt2", reactInt.getProxy()) {
 			@Override
 			public Integer evaluate() {
-				if(reactInt.get() == null) return null;
+				if (reactInt.get() == null)
+					return null;
 				return reactInt.get() * 2;
 			}
 		};
@@ -57,7 +59,8 @@ public class LocalTestOld {
 			@Override
 			public Integer evaluate() {
 				System.out.println("reactInterm1: " + obIntStartR.get());
-				if(obIntStartR.get() == null) return null;
+				if (obIntStartR.get() == null)
+					return null;
 				return obIntStartR.get() * 2;
 			}
 		};
@@ -68,7 +71,8 @@ public class LocalTestOld {
 			@Override
 			public Integer evaluate() {
 				System.out.println("reactInterm2: " + reactInterm1R.get());
-				if(reactInterm1R.get() == null) return null;
+				if (reactInterm1R.get() == null)
+					return null;
 				return reactInterm1R.get() * 2;
 			}
 		};
@@ -79,7 +83,8 @@ public class LocalTestOld {
 			@Override
 			public Integer evaluate() {
 				System.out.println("reactFinal: " + reactInterm1.get() + " " + reactInterm2.get());
-				if(reactInterm1.get() == null || reactInterm2.get() == null) return null;
+				if (reactInterm1.get() == null || reactInterm2.get() == null)
+					return null;
 				return reactInterm1.get() + reactInterm2.get();
 			}
 		};
@@ -87,7 +92,8 @@ public class LocalTestOld {
 		ReactiveInteger reactFinal2 = new ReactiveInteger("reactFinal2", reactInterm1.getProxy(), obIntStart.getProxy()) {
 			@Override
 			public Integer evaluate() {
-				if(reactInterm1.get() == null || obIntStart.get() == null) return null;
+				if (reactInterm1.get() == null || obIntStart.get() == null)
+					return null;
 				return reactInterm1.get() + obIntStart.get();
 			}
 		};

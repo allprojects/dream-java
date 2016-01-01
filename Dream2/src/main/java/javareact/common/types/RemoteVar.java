@@ -43,7 +43,7 @@ public class RemoteVar<T> extends Proxy implements Reactive<T> {
 				protected void processEvent(Event ev) {
 					if (ev.hasAttribute(method)) {
 						Attribute attr = ev.getAttributeFor(method);
-						val = (T)attr.getValue();
+						val = (T) attr.getValue();
 					}
 				}
 			};
@@ -55,7 +55,7 @@ public class RemoteVar<T> extends Proxy implements Reactive<T> {
 		if (ev.hasAttribute(method)) {
 			Attribute attr = ev.getAttributeFor(method);
 			oldVal = val;
-			val = (T)attr.getValue();
+			val = (T) attr.getValue();
 		}
 	}
 

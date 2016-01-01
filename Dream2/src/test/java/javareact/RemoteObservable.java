@@ -16,13 +16,13 @@ public class RemoteObservable {
 	public static void main(String[] args) {
 		new RemoteObservable().start();
 	}
-		
+
 	public void start() {
 		Consts.hostName = "def";
-		
+
 		startServerIfNeeded();
 		startTokenServiceIfNeeded();
-		
+
 		Var<Integer> a = new Var<>("a", 1);
 
 		for (int i = 0; i < 20; i++) {
@@ -33,9 +33,9 @@ public class RemoteObservable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}		
+		}
 	}
-	
+
 	private final void startServerIfNeeded() {
 		if (!serverStarted) {
 			ServerLauncher.start();

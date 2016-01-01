@@ -12,13 +12,16 @@ public class Model2 {
 		RemoteVar<Integer> stockOpts = new RemoteVar<>("InputModel", "stockOpts");
 
 		Signal<Integer> f2 = new Signal<>("f2", () -> {
-			if (marketIndex.get() == null || stockOpts.get() == null) { return null; }
-			else { return marketIndex.get() + stockOpts.get() * 2; }
+			if (marketIndex.get() == null || stockOpts.get() == null) {
+				return null;
+			} else {
+				return marketIndex.get() + stockOpts.get() * 2;
+			}
 		}, marketIndex, stockOpts);
-		
+
 		f2.change().addHandler((oldValue, newValue) -> System.out.println("New value for f2: " + newValue));
 	}
-	
+
 	public static void main(String[] args) {
 		new Model2().start();
 	}

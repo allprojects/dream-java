@@ -22,61 +22,63 @@ import polimi.reds.broker.overlay.Transport;
 import polimi.reds.broker.routing.GenericRouter;
 
 public class TokenServiceLauncher {
-  private static TokenServiceLauncher launcher;
+	private static TokenServiceLauncher launcher;
 
-  private final Overlay overlay;
-  private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private final Overlay overlay;
+	private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-  private TokenServiceLauncher() {
-    Transport tr = null;
-    try {
-      tr = new TCPTransport();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    TopologyManager tm = new SimpleTopologyManager();
-    overlay = new GenericOverlay(tm, tr);
-    GenericRouter router = new GenericRouter(overlay);
-    TokenService registry = new TokenService();
-    router.setPacketForwarder(EventPacket.subject, registry);
-    router.setPacketForwarder(AdvertisementPacket.subject, registry);
-    router.setPacketForwarder(TokenAckPacket.subject, registry);
-  }
+	private TokenServiceLauncher() {
+		Transport tr = null;
+		try {
+			tr = new TCPTransport();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		TopologyManager tm = new SimpleTopologyManager();
+		overlay = new GenericOverlay(tm, tr);
+		GenericRouter router = new GenericRouter(overlay);
+		TokenService registry = new TokenService();
+		router.setPacketForwarder(EventPacket.subject, registry);
+		router.setPacketForwarder(AdvertisementPacket.subject, registry);
+		router.setPacketForwarder(TokenAckPacket.subject, registry);
+	}
 
-  public static final void start(Collection<String> addresses) {
-    if (launcher == null) {
-      launcher = new TokenServiceLauncher();
-    }
-    launcher.logger.fine("Starting registry");
-    launcher.overlay.start();
-    for (String address : addresses) {
-      try {
-        launcher.overlay.addNeighbor(address);
-      } catch (ConnectException | MalformedURLException | NotRunningException e) {
-        e.printStackTrace();
-      }
-    }
-    for (NodeDescriptor node : launcher.overlay.getNeighbors()) {
-      try {
-        launcher.overlay.send(TokenServiceAdvertisePacket.subject, new TokenServiceAdvertisePacket(AdvType.ADV), node);
-      } catch (IOException | NotRunningException e) {
-        e.printStackTrace();
-      }
-    }
-  }
+	public static final void start(Collection<String> addresses) {
+		if (launcher == null) {
+			launcher = new TokenServiceLauncher();
+		}
+		launcher.logger.fine("Starting registry");
+		launcher.overlay.start();
+		for (String address : addresses) {
+			try {
+				launcher.overlay.addNeighbor(address);
+			} catch (ConnectException | MalformedURLException | NotRunningException e) {
+				e.printStackTrace();
+			}
+		}
+		for (NodeDescriptor node : launcher.overlay.getNeighbors()) {
+			try {
+				launcher.overlay.send(TokenServiceAdvertisePacket.subject,
+						new TokenServiceAdvertisePacket(AdvType.ADV), node);
+			} catch (IOException | NotRunningException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
-  public static final void stop() {
-    if (launcher != null) {
-      for (NodeDescriptor node : launcher.overlay.getNeighbors()) {
-        try {
-          launcher.overlay.send(TokenServiceAdvertisePacket.subject, new TokenServiceAdvertisePacket(AdvType.UNADV), node);
-        } catch (IOException | NotRunningException e) {
-          e.printStackTrace();
-        }
-      }
-      launcher.logger.fine("Stopping registry");
-      launcher.overlay.stop();
-    }
-  }
+	public static final void stop() {
+		if (launcher != null) {
+			for (NodeDescriptor node : launcher.overlay.getNeighbors()) {
+				try {
+					launcher.overlay.send(TokenServiceAdvertisePacket.subject, new TokenServiceAdvertisePacket(
+							AdvType.UNADV), node);
+				} catch (IOException | NotRunningException e) {
+					e.printStackTrace();
+				}
+			}
+			launcher.logger.fine("Stopping registry");
+			launcher.overlay.stop();
+		}
+	}
 
 }

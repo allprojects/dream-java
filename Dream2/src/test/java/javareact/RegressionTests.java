@@ -8,8 +8,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ LocalTest.class, //
-    DependencyDetectorTest.class, //
-    FinalExpressionsDetectorTest.class //
+		DependencyDetectorTest.class, //
+		FinalExpressionsDetectorTest.class //
 })
 public class RegressionTests {
 

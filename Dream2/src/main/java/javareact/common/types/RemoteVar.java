@@ -20,12 +20,12 @@ public class RemoteVar<T> extends Proxy implements TimeChangingValue<T> {
     super(object);
   }
 
-  public final T get() {
+  public final synchronized T get() {
     return val;
   }
 
   @Override
-  protected final void processEvent(Event ev) {
+  protected final synchronized void processEvent(Event ev) {
     if (ev.hasAttribute(method)) {
       final Attribute attr = ev.getAttributeFor(method);
       val = (T) attr.getValue();

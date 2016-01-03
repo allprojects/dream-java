@@ -35,7 +35,7 @@ public class Var<T> implements ProxyGenerator {
     impactOnGet();
   }
 
-  public final T get() {
+  public final synchronized T get() {
     return val;
   }
 

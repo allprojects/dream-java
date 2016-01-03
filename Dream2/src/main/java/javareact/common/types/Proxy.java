@@ -58,13 +58,12 @@ public abstract class Proxy implements Subscriber {
   }
 
   @Override
-  public void notifyValueChanged(EventPacket evPkt) {
+  public synchronized void notifyValueChanged(EventPacket evPkt) {
     eventsQueue.add(evPkt);
     logger.finest("Received event packet " + evPkt + ". Added to the queue.");
     if (eventsQueue.size() == 1) {
       logger.finest("The element is the only one in the queue. Let's process it.");
-      processEvent(evPkt.getEvent());
-      sendEventPacketToListeners(evPkt);
+      processNextEvent();
     }
   }
 
@@ -79,20 +78,16 @@ public abstract class Proxy implements Subscriber {
    * @param event
    *          the event processed by the proxy.
    */
-  final void notifyEventProcessed(ProxyChangeListener proxyChangeListener, EventPacket event) {
+  final synchronized void notifyEventProcessed(ProxyChangeListener proxyChangeListener, EventPacket event) {
     pendingAcks.remove(proxyChangeListener);
     processNextEvent();
   }
 
   private void processNextEvent() {
     if (pendingAcks.isEmpty() && !eventsQueue.isEmpty()) {
-      assert!eventsQueue.isEmpty();
-      eventsQueue.poll();
-      final EventPacket nextPkt = eventsQueue.peek();
-      if (nextPkt != null) {
-        processEvent(nextPkt.getEvent());
-        sendEventPacketToListeners(nextPkt);
-      }
+      final EventPacket nextPkt = eventsQueue.poll();
+      processEvent(nextPkt.getEvent());
+      sendEventPacketToListeners(nextPkt);
     }
   }
 

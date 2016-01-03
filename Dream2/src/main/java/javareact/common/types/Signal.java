@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javareact.client.ClientEventForwarder;
 import javareact.client.QueueManager;
@@ -57,11 +58,11 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
         val = evaluate();
         logger.finest("New value computed for the reactive object: " + val);
       } catch (final Exception e) {
-        logger.fine("Exception during the evaluation of the expression.");
+        logger.info("Exception during the evaluation of the expression.");
         return;
       }
 
-      // Notify depending reactive objects
+      // Notify dependent objects
       final EventProxyPair templatePair = pairs.get(0);
       final EventPacket templatePkt = templatePair.getEventPacket();
       final UUID id = templatePkt.getId();
@@ -100,21 +101,22 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
   }
 
   private final void sendAdvertisement() {
-    final Set<Subscription> subs = new HashSet<Subscription>();
-    dependentProxies.forEach(p -> subs.add(new Subscription(p.getHost(), p.getObject(), p.getProxyID(), new Constraint(p.getMethod()))));
-    final Advertisement adv = new Advertisement(Consts.hostName, objectId);
-    clientEventForwarder.advertise(adv, subs, true);
+    final Set<Subscription> subs = dependentProxies.stream().//
+        map(p -> new Subscription(p.getHost(), p.getObject(), p.getProxyID(), new Constraint(p.getMethod()))).//
+        collect(Collectors.toSet());
+    clientEventForwarder.advertise(new Advertisement(Consts.hostName, objectId), subs, true);
   }
 
   private final Set<String> getComputedFrom(Collection<EventProxyPair> pairs) {
-    final Set<String> results = new HashSet<String>();
-    pairs.forEach(pair -> results.addAll(pair.getEventPacket().getComputedFrom()));
+    final Set<String> results = pairs.stream().//
+        map(pair -> pair.getEventPacket().getComputedFrom()).//
+        collect(HashSet::new, HashSet::addAll, HashSet::addAll);
     results.add(objectId + "@" + Consts.hostName);
     return results;
   }
 
   @Override
-  public final T evaluate() {
+  public final synchronized T evaluate() {
     return evaluation.get();
   }
 

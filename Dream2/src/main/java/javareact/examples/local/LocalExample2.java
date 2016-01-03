@@ -46,13 +46,53 @@ public class LocalExample2 {
     System.out.println("6) " + (var1V3 * var2V3 - var1V3 / var2V3));
 
     var1.set(var1V1);
+
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     var2.set(var2V1);
 
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     var1.set(var1V2);
+
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     var2.set(var2V2);
 
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     var1.set(var1V3);
+
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     var2.set(var2V3);
+
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
   }
 
 }

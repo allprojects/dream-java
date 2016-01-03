@@ -22,7 +22,7 @@ public class Var<T> implements ProxyGenerator {
     this.forwarder = ClientEventForwarder.get();
     this.objectId = objectId;
     forwarder.advertise(new Advertisement(Consts.hostName, objectId), true);
-    set(val);
+    this.val = val;
   }
 
   public final synchronized void set(T val) {

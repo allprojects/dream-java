@@ -1,11 +1,11 @@
 package javareact.financial;
 
 import javareact.common.Consts;
-import javareact.common.types.ReactiveChangeListener;
+import javareact.common.ValueChangeListener;
 import javareact.common.types.RemoteVar;
 import javareact.common.types.Signal;
 
-public class Model2 implements ReactiveChangeListener<Integer> {
+public class Model2 implements ValueChangeListener<Integer> {
 	public void start() {
 		Consts.hostName = "Model2";
 
@@ -17,11 +17,11 @@ public class Model2 implements ReactiveChangeListener<Integer> {
 			else { return marketIndex.get() + stockOpts.get() * 2; }
 		}, marketIndex, stockOpts);
 		
-		f2.addReactiveChangeListener(this);
+		f2.addValueChangeListener(this);
 	}
 
 	@Override
-	public void notifyReactiveChanged(Integer newValue) {
+	public void notifyValueChanged(Integer newValue) {
 		System.out.println("New value for f2: " + newValue);
 	}
 	

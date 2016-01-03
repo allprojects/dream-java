@@ -18,7 +18,7 @@ public class LocalExample2 {
     final Signal<Double> signal2 = new Signal<Double>("signal2", () -> var1.get() / var2.get(), var1, var2);
 
     final Signal<Double> finalResult = new Signal<Double>("sub", () -> signal1.get() - signal2.get(), signal1, signal2);
-    finalResult.addReactiveChangeListener(System.out::println);
+    finalResult.addValueChangeListener(System.out::println);
 
     try {
       Thread.sleep(500);

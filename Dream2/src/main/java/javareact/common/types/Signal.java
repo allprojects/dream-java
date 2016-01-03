@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javareact.client.ClientEventForwarder;
 import javareact.client.QueueManager;
 import javareact.common.Consts;
+import javareact.common.ValueChangeListener;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Attribute;
@@ -19,25 +20,26 @@ import javareact.common.packets.content.Constraint;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-public class Signal<T> extends Proxy implements Reactive<T>, ProxyChangeListener {
-  private final Set<ReactiveChangeListener<T>> listeners = new HashSet<ReactiveChangeListener<T>>();
+public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyChangeListener {
+  private final Set<ValueChangeListener<T>> listeners = new HashSet<ValueChangeListener<T>>();
   private final ClientEventForwarder clientEventForwarder;
   private final QueueManager queueManager = new QueueManager();
-  private final String name;
-  private final List<Proxy> dependentProxies = new ArrayList<Proxy>();
+  private final String objectId;
   private final Supplier<T> evaluation;
+  private final List<Proxy> dependentProxies = new ArrayList<Proxy>();
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
+  private RemoteVar<T> proxy = null;
   protected T val;
 
-  public Signal(String name, Supplier<T> evaluation, Proxy... vars) {
-    super(name);
-    this.name = name;
+  public Signal(String name, Supplier<T> evaluation, ProxyGenerator... vars) {
+    this.objectId = name;
     clientEventForwarder = ClientEventForwarder.get();
-    for (final Proxy var : vars) {
-      dependentProxies.add(var);
-      var.addProxyChangeListener(this);
+    for (final ProxyGenerator var : vars) {
+      final Proxy varProxy = var.getProxy();
+      dependentProxies.add(varProxy);
+      varProxy.addProxyChangeListener(this);
     }
     this.evaluation = evaluation;
     sentAdvertisement();
@@ -46,7 +48,7 @@ public class Signal<T> extends Proxy implements Reactive<T>, ProxyChangeListener
   @Override
   public void update(EventProxyPair eventProxyPair) {
     logger.finest("Update method invoked with " + eventProxyPair);
-    final List<EventProxyPair> pairs = queueManager.processEventPacket(eventProxyPair, Consts.hostName + "." + name);
+    final List<EventProxyPair> pairs = queueManager.processEventPacket(eventProxyPair, Consts.hostName + "." + objectId);
     logger.finest("The queueManager returned the following pairs " + pairs);
     if (!pairs.isEmpty()) {
       logger.finest("Actual update");
@@ -68,7 +70,7 @@ public class Signal<T> extends Proxy implements Reactive<T>, ProxyChangeListener
       Event ev = null;
       try {
         // TODO consider methods other than get()!!!
-        ev = new Event(Consts.hostName, name, Attribute.of("get", val));
+        ev = new Event(Consts.hostName, objectId, Attribute.of("get", val));
       } catch (final Exception e) {
         e.printStackTrace();
       }
@@ -77,37 +79,37 @@ public class Signal<T> extends Proxy implements Reactive<T>, ProxyChangeListener
 
       // Notify listeners
       logger.finest("Notifying registered listeners of the change.");
-      listeners.forEach(l -> l.notifyReactiveChanged(val));
+      listeners.forEach(l -> l.notifyValueChanged(val));
 
       // Acknowledge the proxies
       logger.finest("Acknowledging the proxies.");
       pairs.forEach(pair -> pair.getProxy().notifyEventProcessed(this, pair.getEventPacket()));
     } else {
-      logger.finest(name + ": update call but waiting: " + eventProxyPair.toString());
+      logger.finest(objectId + ": update call but waiting: " + eventProxyPair.toString());
     }
   }
 
   @Override
-  public void addReactiveChangeListener(ReactiveChangeListener<T> listener) {
+  public void addValueChangeListener(ValueChangeListener<T> listener) {
     listeners.add(listener);
   }
 
   @Override
-  public void removeReactiveChangeListener(ReactiveChangeListener<T> listener) {
+  public void removeValueChangeListener(ValueChangeListener<T> listener) {
     listeners.remove(listener);
   }
 
   private final void sentAdvertisement() {
     final Set<Subscription> subs = new HashSet<Subscription>();
     dependentProxies.forEach(p -> subs.add(new Subscription(p.getHost(), p.getObject(), p.getProxyID(), new Constraint(p.getMethod()))));
-    final Advertisement adv = new Advertisement(Consts.hostName, name);
+    final Advertisement adv = new Advertisement(Consts.hostName, objectId);
     clientEventForwarder.advertise(adv, subs, true);
   }
 
   private final Set<String> getComputedFrom(Collection<EventProxyPair> pairs) {
     final Set<String> results = new HashSet<String>();
     pairs.forEach(pair -> results.addAll(pair.getEventPacket().getComputedFrom()));
-    results.add(Consts.hostName + "." + name);
+    results.add(Consts.hostName + "." + objectId);
     return results;
   }
 
@@ -121,11 +123,11 @@ public class Signal<T> extends Proxy implements Reactive<T>, ProxyChangeListener
   }
 
   @Override
-  protected void processEvent(Event ev) {
-    if (ev.hasAttribute(method)) {
-      final Attribute attr = ev.getAttributeFor(method);
-      val = (T) attr.getValue();
+  public synchronized RemoteVar<T> getProxy() {
+    if (proxy == null) {
+      proxy = new RemoteVar<T>(objectId);
     }
+    return proxy;
   }
 
 }

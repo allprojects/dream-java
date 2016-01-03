@@ -3,12 +3,13 @@ package javareact.common.types;
 import java.util.HashSet;
 import java.util.Set;
 
+import javareact.common.ValueChangeListener;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Attribute;
 import javareact.common.packets.content.Event;
 
-public class RemoteVar<T> extends Proxy implements Reactive<T> {
-  private final Set<ReactiveChangeListener<T>> listeners = new HashSet<ReactiveChangeListener<T>>();
+public class RemoteVar<T> extends Proxy implements TimeChangingValue<T> {
+  private final Set<ValueChangeListener<T>> listeners = new HashSet<ValueChangeListener<T>>();
   private T val;
 
   public RemoteVar(String host, String object) {
@@ -37,19 +38,24 @@ public class RemoteVar<T> extends Proxy implements Reactive<T> {
   }
 
   @Override
-  public void addReactiveChangeListener(ReactiveChangeListener<T> listener) {
+  public void addValueChangeListener(ValueChangeListener<T> listener) {
     listeners.add(listener);
   }
 
   @Override
-  public void removeReactiveChangeListener(ReactiveChangeListener<T> listener) {
+  public void removeValueChangeListener(ValueChangeListener<T> listener) {
     listeners.remove(listener);
   }
 
   @Override
   public final void notifyValueChanged(EventPacket evPkt) {
     super.notifyValueChanged(evPkt);
-    listeners.forEach(l -> l.notifyReactiveChanged(val));
+    listeners.forEach(l -> l.notifyValueChanged(val));
+  }
+
+  @Override
+  public Proxy getProxy() {
+    return this;
   }
 
 }

@@ -17,6 +17,6 @@ public class RemoteTest {
     final RemoteVar<Integer> a = new RemoteVar<Integer>("a@def");
     final Signal<Integer> signal = new Signal<>("signal", () -> a.get() * 2, a);
 
-    signal.addReactiveChangeListener(val -> assertTrue(val == a.get() * 2));
+    signal.addValueChangeListener(val -> assertTrue(val == a.get() * 2));
   }
 }

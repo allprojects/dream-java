@@ -12,7 +12,7 @@ public class LocalExample3 {
     final Var<List<Integer>> varList = new Var<>("varList", new ArrayList<Integer>());
     final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 1000 + varList.get().size(), varList);
 
-    signalInt.addReactiveChangeListener(System.out::println);
+    signalInt.addValueChangeListener(System.out::println);
 
     System.out.println("Expected results: ");
     System.out.println(1001);

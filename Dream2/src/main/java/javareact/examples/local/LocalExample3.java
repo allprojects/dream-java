@@ -22,10 +22,44 @@ public class LocalExample3 {
     System.out.println(1000);
     System.out.println();
 
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     varList.modify(self -> self.add(10));
+
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     varList.modify(self -> self.add(20));
+
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     varList.modify(self -> self.add(30));
+
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     varList.modify(self -> self.remove(1));
+
+    try {
+      Thread.sleep(500);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     varList.modify(self -> self.clear());
 
   }

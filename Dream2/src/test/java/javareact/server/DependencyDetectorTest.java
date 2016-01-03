@@ -7,13 +7,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.Test;
+
 import javareact.common.packets.AdvertisementPacket;
 import javareact.common.packets.content.AdvType;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
-
-import org.junit.Test;
 
 public class DependencyDetectorTest {
 
@@ -21,49 +21,49 @@ public class DependencyDetectorTest {
   public void noDependencyTest() {
     // B = f(A)
     // D = f(B, C)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
+    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
 
-    Advertisement advB = new Advertisement("Host", "B");
-    Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advD = new Advertisement("Host", "D");
 
     // Subscription to A (A generates B)
-    Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to B and C (B, C generate D)
-    Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
-    AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    Set<String> computedFromA = new HashSet<String>();
-    Event evA = new Event("Host", "A");
+    final Set<String> computedFromA = new HashSet<String>();
+    final Event evA = new Event("Host", "A");
     assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
 
     // Event B
-    Set<String> computedFromB = new HashSet<String>();
-    Event evB = new Event("Host", "B");
+    final Set<String> computedFromB = new HashSet<String>();
+    final Event evB = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB, computedFromB).size(), 0);
 
     // Event C
-    Set<String> computedFromC = new HashSet<String>();
-    Event evC = new Event("Host", "C");
+    final Set<String> computedFromC = new HashSet<String>();
+    final Event evC = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC, computedFromC).size(), 0);
 
     // Event D
-    Set<String> computedFromD = new HashSet<String>();
-    Event evD = new Event("Host", "D");
+    final Set<String> computedFromD = new HashSet<String>();
+    final Event evD = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
   }
 
@@ -71,59 +71,59 @@ public class DependencyDetectorTest {
   public void basicTriangularCycleTest() {
     // B = f(A)
     // C = f(A, B)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
+    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
 
-    Advertisement advB = new Advertisement("Host", "B");
-    Advertisement advC = new Advertisement("Host", "C");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
 
     // Subscription to A (A generates B)
-    Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to A, B (A, B generates C)
-    Set<Subscription> subsC = new HashSet<Subscription>();
+    final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
     subsC.add(subB);
-    AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
+    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
     depDetector.processAdvertisementPacket(advPktC);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    Set<String> computedFromA = new HashSet<String>();
-    Event evA = new Event("Host", "A");
+    final Set<String> computedFromA = new HashSet<String>();
+    final Event evA = new Event("Host", "A");
     assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
-    computedFromA.add("Host.A");
-    Event evA2 = new Event("Host", "A");
+    computedFromA.add("A@Host");
+    final Event evA2 = new Event("Host", "A");
     assertEquals(depDetector.getWaitRecommendations(evA2, computedFromA).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evA2, computedFromA)) {
-      assertTrue(wr.getExpression().equals("Host.C"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evA2, computedFromA)) {
+      assertTrue(wr.getExpression().equals("C@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event B
-    Set<String> computedFromB = new HashSet<String>();
-    Event evB1 = new Event("Host", "B");
+    final Set<String> computedFromB = new HashSet<String>();
+    final Event evB1 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("Host.A");
-    Event evB2 = new Event("Host", "B");
+    computedFromB.add("A@Host");
+    final Event evB2 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
-      assertTrue(wr.getExpression().equals("Host.C"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("C@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.A"));
+      assertTrue(wr.getRecommendations().contains("A@Host"));
     }
 
     // Event C
-    Set<String> computedFromC = new HashSet<String>();
-    Event evC = new Event("Host", "C");
+    final Set<String> computedFromC = new HashSet<String>();
+    final Event evC = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC, computedFromC).size(), 0);
   }
 
@@ -132,72 +132,72 @@ public class DependencyDetectorTest {
     // B = f(A)
     // C = f(A)
     // D = f(B, C)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
+    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
 
-    Advertisement advB = new Advertisement("Host", "B");
-    Advertisement advC = new Advertisement("Host", "C");
-    Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
+    final Advertisement advD = new Advertisement("Host", "D");
 
     // Subscription to A (A generates B)
-    Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to A (A generates C)
-    Set<Subscription> subsC = new HashSet<Subscription>();
+    final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
-    AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
+    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
     depDetector.processAdvertisementPacket(advPktC);
 
     // Subscription to B, C (B, C generate D)
-    Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
-    AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    Set<String> computedFromA = new HashSet<String>();
-    Event evA = new Event("Host", "A");
+    final Set<String> computedFromA = new HashSet<String>();
+    final Event evA = new Event("Host", "A");
     assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
 
     // Event B
-    Set<String> computedFromB = new HashSet<String>();
-    Event evB1 = new Event("Host", "B");
+    final Set<String> computedFromB = new HashSet<String>();
+    final Event evB1 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("Host.A");
-    Event evB2 = new Event("Host", "B");
+    computedFromB.add("A@Host");
+    final Event evB2 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.C"));
+      assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
     // Event C
-    Set<String> computedFromC = new HashSet<String>();
-    Event evC1 = new Event("Host", "C");
+    final Set<String> computedFromC = new HashSet<String>();
+    final Event evC1 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("Host.A");
-    Event evC2 = new Event("Host", "C");
+    computedFromC.add("A@Host");
+    final Event evC2 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event D
-    Set<String> computedFromD = new HashSet<String>();
-    Event evD = new Event("Host", "D");
+    final Set<String> computedFromD = new HashSet<String>();
+    final Event evD = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
   }
 
@@ -207,88 +207,88 @@ public class DependencyDetectorTest {
     // C = f(A)
     // D = f(C)
     // E = f(B, D)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
-    Subscription subD = new Subscription("Host", "D", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
+    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subD = new Subscription("Host", "D", UUID.randomUUID());
 
-    Advertisement advB = new Advertisement("Host", "B");
-    Advertisement advC = new Advertisement("Host", "C");
-    Advertisement advD = new Advertisement("Host", "D");
-    Advertisement advE = new Advertisement("Host", "E");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
+    final Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advE = new Advertisement("Host", "E");
 
     // Subscription to A (A generates B)
-    Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to A (A generates C)
-    Set<Subscription> subsC = new HashSet<Subscription>();
+    final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
-    AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
+    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
     depDetector.processAdvertisementPacket(advPktC);
 
     // Subscription to C (C generate D)
-    Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subC);
-    AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
     // Subscription to B, D (B, D generate E)
-    Set<Subscription> subsE = new HashSet<Subscription>();
+    final Set<Subscription> subsE = new HashSet<Subscription>();
     subsE.add(subB);
     subsE.add(subD);
-    AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
+    final AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
     depDetector.processAdvertisementPacket(advPktE);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    Set<String> computedFromA = new HashSet<String>();
-    Event evA = new Event("Host", "A");
+    final Set<String> computedFromA = new HashSet<String>();
+    final Event evA = new Event("Host", "A");
     assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
 
     // Event B
-    Set<String> computedFromB = new HashSet<String>();
-    Event evB1 = new Event("Host", "B");
+    final Set<String> computedFromB = new HashSet<String>();
+    final Event evB1 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("Host.A");
-    Event evB2 = new Event("Host", "B");
+    computedFromB.add("A@Host");
+    final Event evB2 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
-      assertTrue(wr.getExpression().equals("Host.E"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.D"));
+      assertTrue(wr.getRecommendations().contains("D@Host"));
     }
 
     // Event C
-    Set<String> computedFromC = new HashSet<String>();
-    Event evC1 = new Event("Host", "C");
+    final Set<String> computedFromC = new HashSet<String>();
+    final Event evC1 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("Host.A");
-    Event evC2 = new Event("Host", "C");
+    computedFromC.add("A@Host");
+    final Event evC2 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 0);
 
     // Event D
-    Set<String> computedFromD = new HashSet<String>();
-    Event evD1 = new Event("Host", "D");
+    final Set<String> computedFromD = new HashSet<String>();
+    final Event evD1 = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD1, computedFromD).size(), 0);
-    computedFromD.add("Host.A");
-    Event evD2 = new Event("Host", "D");
+    computedFromD.add("A@Host");
+    final Event evD2 = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD2, computedFromC).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, computedFromC)) {
-      assertTrue(wr.getExpression().equals("Host.E"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, computedFromC)) {
+      assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event E
-    Set<String> computedFromE = new HashSet<String>();
-    Event evE = new Event("E", "Host");
+    final Set<String> computedFromE = new HashSet<String>();
+    final Event evE = new Event("E", "Host");
     assertEquals(depDetector.getWaitRecommendations(evE, computedFromE).size(), 0);
   }
 
@@ -297,75 +297,75 @@ public class DependencyDetectorTest {
     // B = f(A)
     // C = f(B)
     // D = f(B, C)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
+    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
 
-    Advertisement advB = new Advertisement("Host", "B");
-    Advertisement advC = new Advertisement("Host", "C");
-    Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
+    final Advertisement advD = new Advertisement("Host", "D");
 
     // Subscription to A (A generates B)
-    Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to B (B generates C)
-    Set<Subscription> subsC = new HashSet<Subscription>();
+    final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subB);
-    AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
+    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
     depDetector.processAdvertisementPacket(advPktC);
 
     // Subscription to B, C (B, C generate D)
-    Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
-    AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    Set<String> computedFromA = new HashSet<String>();
-    Event evA = new Event("Host", "A");
+    final Set<String> computedFromA = new HashSet<String>();
+    final Event evA = new Event("Host", "A");
     assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
 
     // Event B
-    Set<String> computedFromB = new HashSet<String>();
-    Event evB1 = new Event("Host", "B");
+    final Set<String> computedFromB = new HashSet<String>();
+    final Event evB1 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("Host.B");
-    Event evB2 = new Event("Host", "B");
+    computedFromB.add("B@Host");
+    final Event evB2 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.C"));
+      assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
     // Event C
-    Set<String> computedFromC = new HashSet<String>();
-    Event evC1 = new Event("Host", "C");
+    final Set<String> computedFromC = new HashSet<String>();
+    final Event evC1 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("Host.B");
-    Event evC2 = new Event("Host", "C");
+    computedFromC.add("B@Host");
+    final Event evC2 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromB)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event D
-    Set<String> computedFromD = new HashSet<String>();
-    Event evD1 = new Event("Host", "D");
+    final Set<String> computedFromD = new HashSet<String>();
+    final Event evD1 = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD1, computedFromD).size(), 0);
-    computedFromD.add("Host.A");
-    Event evD2 = new Event("Host", "D");
+    computedFromD.add("A@Host");
+    final Event evD2 = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD2, computedFromC).size(), 0);
   }
 
@@ -375,97 +375,97 @@ public class DependencyDetectorTest {
     // C = f(A)
     // D = f(A)
     // E = f(B, C, D)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
-    Subscription subD = new Subscription("Host", "D", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
+    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subD = new Subscription("Host", "D", UUID.randomUUID());
 
-    Advertisement advB = new Advertisement("Host", "B");
-    Advertisement advC = new Advertisement("Host", "C");
-    Advertisement advD = new Advertisement("Host", "D");
-    Advertisement advE = new Advertisement("Host", "E");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
+    final Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advE = new Advertisement("Host", "E");
 
     // Subscription to A (A generates B)
-    Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to A (A generates C)
-    Set<Subscription> subsC = new HashSet<Subscription>();
+    final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
-    AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
+    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
     depDetector.processAdvertisementPacket(advPktC);
 
     // Subscription to A (A generates D)
-    Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subA);
-    AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
     // Subscription to B, C, D (B, C, D generate E)
-    Set<Subscription> subsE = new HashSet<Subscription>();
+    final Set<Subscription> subsE = new HashSet<Subscription>();
     subsE.add(subB);
     subsE.add(subC);
     subsE.add(subD);
-    AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
+    final AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
     depDetector.processAdvertisementPacket(advPktE);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    Set<String> computedFromA = new HashSet<String>();
-    Event evA = new Event("Host", "A");
+    final Set<String> computedFromA = new HashSet<String>();
+    final Event evA = new Event("Host", "A");
     assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
 
     // Event B
-    Set<String> computedFromB = new HashSet<String>();
-    Event evB1 = new Event("Host", "B");
+    final Set<String> computedFromB = new HashSet<String>();
+    final Event evB1 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("Host.A");
-    Event evB2 = new Event("Host", "B");
+    computedFromB.add("A@Host");
+    final Event evB2 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
-      assertTrue(wr.getExpression().equals("Host.E"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
-      assertTrue(wr.getRecommendations().contains("Host.C"));
-      assertTrue(wr.getRecommendations().contains("Host.D"));
+      assertTrue(wr.getRecommendations().contains("C@Host"));
+      assertTrue(wr.getRecommendations().contains("D@Host"));
     }
 
     // Event C
-    Set<String> computedFromC = new HashSet<String>();
-    Event evC1 = new Event("Host", "C");
+    final Set<String> computedFromC = new HashSet<String>();
+    final Event evC1 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("Host.A");
-    Event evC2 = new Event("Host", "C");
+    computedFromC.add("A@Host");
+    final Event evC2 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
-      assertTrue(wr.getExpression().equals("Host.E"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
+      assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
-      assertTrue(wr.getRecommendations().contains("Host.D"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
+      assertTrue(wr.getRecommendations().contains("D@Host"));
     }
 
     // Event D
-    Set<String> computedFromD = new HashSet<String>();
-    Event evD1 = new Event("Host", "D");
+    final Set<String> computedFromD = new HashSet<String>();
+    final Event evD1 = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD1, computedFromD).size(), 0);
-    computedFromD.add("Host.A");
-    Event evD2 = new Event("Host", "D");
+    computedFromD.add("A@Host");
+    final Event evD2 = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD2, computedFromD).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, computedFromD)) {
-      assertTrue(wr.getExpression().equals("Host.E"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, computedFromD)) {
+      assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
-      assertTrue(wr.getRecommendations().contains("Host.C"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
+      assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
     // Event E
-    Set<String> computedFromE = new HashSet<String>();
-    Event evE = new Event("Host", "E");
+    final Set<String> computedFromE = new HashSet<String>();
+    final Event evE = new Event("Host", "E");
     assertEquals(depDetector.getWaitRecommendations(evE, computedFromE).size(), 0);
   }
 
@@ -476,114 +476,114 @@ public class DependencyDetectorTest {
     // B2 = f(A2)
     // C2 = f(A2)
     // D = f(B1, C1, B2, C2)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA1 = new Subscription("Host", "A1", UUID.randomUUID());
-    Subscription subA2 = new Subscription("Host", "A2", UUID.randomUUID());
-    Subscription subB1 = new Subscription("Host", "B1", UUID.randomUUID());
-    Subscription subB2 = new Subscription("Host", "B2", UUID.randomUUID());
-    Subscription subC1 = new Subscription("Host", "C1", UUID.randomUUID());
-    Subscription subC2 = new Subscription("Host", "C2", UUID.randomUUID());
+    final Subscription subA1 = new Subscription("Host", "A1", UUID.randomUUID());
+    final Subscription subA2 = new Subscription("Host", "A2", UUID.randomUUID());
+    final Subscription subB1 = new Subscription("Host", "B1", UUID.randomUUID());
+    final Subscription subB2 = new Subscription("Host", "B2", UUID.randomUUID());
+    final Subscription subC1 = new Subscription("Host", "C1", UUID.randomUUID());
+    final Subscription subC2 = new Subscription("Host", "C2", UUID.randomUUID());
 
-    Advertisement advB1 = new Advertisement("Host", "B1");
-    Advertisement advB2 = new Advertisement("Host", "B2");
-    Advertisement advC1 = new Advertisement("Host", "C1");
-    Advertisement advC2 = new Advertisement("Host", "C2");
-    Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advB1 = new Advertisement("Host", "B1");
+    final Advertisement advB2 = new Advertisement("Host", "B2");
+    final Advertisement advC1 = new Advertisement("Host", "C1");
+    final Advertisement advC2 = new Advertisement("Host", "C2");
+    final Advertisement advD = new Advertisement("Host", "D");
 
     // Subscription to A1 (A1 generates B2)
-    Set<Subscription> subsB1 = new HashSet<Subscription>();
+    final Set<Subscription> subsB1 = new HashSet<Subscription>();
     subsB1.add(subA1);
-    AdvertisementPacket advPktA1 = new AdvertisementPacket(advB1, AdvType.ADV, subsB1, true);
+    final AdvertisementPacket advPktA1 = new AdvertisementPacket(advB1, AdvType.ADV, subsB1, true);
     depDetector.processAdvertisementPacket(advPktA1);
 
     // Subscription to A2 (A2 generates B2)
-    Set<Subscription> subsB2 = new HashSet<Subscription>();
+    final Set<Subscription> subsB2 = new HashSet<Subscription>();
     subsB2.add(subA2);
-    AdvertisementPacket advPktA2 = new AdvertisementPacket(advB2, AdvType.ADV, subsB2, true);
+    final AdvertisementPacket advPktA2 = new AdvertisementPacket(advB2, AdvType.ADV, subsB2, true);
     depDetector.processAdvertisementPacket(advPktA2);
 
     // Subscription to A1 (A1 generates C1)
-    Set<Subscription> subsC1 = new HashSet<Subscription>();
+    final Set<Subscription> subsC1 = new HashSet<Subscription>();
     subsC1.add(subA1);
-    AdvertisementPacket advPktC1 = new AdvertisementPacket(advC1, AdvType.ADV, subsC1, true);
+    final AdvertisementPacket advPktC1 = new AdvertisementPacket(advC1, AdvType.ADV, subsC1, true);
     depDetector.processAdvertisementPacket(advPktC1);
 
     // Subscription to A2 (A2 generates C2)
-    Set<Subscription> subsC2 = new HashSet<Subscription>();
+    final Set<Subscription> subsC2 = new HashSet<Subscription>();
     subsC2.add(subA2);
-    AdvertisementPacket advPktC2 = new AdvertisementPacket(advC2, AdvType.ADV, subsC2, true);
+    final AdvertisementPacket advPktC2 = new AdvertisementPacket(advC2, AdvType.ADV, subsC2, true);
     depDetector.processAdvertisementPacket(advPktC2);
 
     // Subscription to B1, B2, C1, C2 (B1, B2, C1, C2 generate D)
-    Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB1);
     subsD.add(subB2);
     subsD.add(subC1);
     subsD.add(subC2);
-    AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A1
-    Set<String> computedFromA1 = new HashSet<String>();
-    Event evA1 = new Event("Host", "A1");
+    final Set<String> computedFromA1 = new HashSet<String>();
+    final Event evA1 = new Event("Host", "A1");
     assertEquals(depDetector.getWaitRecommendations(evA1, computedFromA1).size(), 0);
 
     // Event A2
-    Set<String> computedFromA2 = new HashSet<String>();
-    Event evA2 = new Event("Host", "A2");
+    final Set<String> computedFromA2 = new HashSet<String>();
+    final Event evA2 = new Event("Host", "A2");
     assertEquals(depDetector.getWaitRecommendations(evA2, computedFromA2).size(), 0);
 
     // Event B1
-    Set<String> computedFromB1 = new HashSet<String>();
-    computedFromB1.add("Host.A1");
-    Event evB1 = new Event("Host", "B1");
+    final Set<String> computedFromB1 = new HashSet<String>();
+    computedFromB1.add("A1@Host");
+    final Event evB1 = new Event("Host", "B1");
     assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB1).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB1, computedFromB1)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB1, computedFromB1)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.C1"));
+      assertTrue(wr.getRecommendations().contains("C1@Host"));
     }
 
     // Event C1
-    Set<String> computedFromC1 = new HashSet<String>();
-    computedFromC1.add("Host.A1");
-    Event evC1 = new Event("Host", "C1");
+    final Set<String> computedFromC1 = new HashSet<String>();
+    computedFromC1.add("A1@Host");
+    final Event evC1 = new Event("Host", "C1");
     assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC1).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evC1, computedFromC1)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC1, computedFromC1)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.B1"));
+      assertTrue(wr.getRecommendations().contains("B1@Host"));
     }
 
     // Event B2
-    Set<String> computedFromB2 = new HashSet<String>();
-    computedFromB2.add("Host.A2");
-    Event evB2 = new Event("Host", "B2");
+    final Set<String> computedFromB2 = new HashSet<String>();
+    computedFromB2.add("A2@Host");
+    final Event evB2 = new Event("Host", "B2");
     assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB2).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB2)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB2)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.C2"));
+      assertTrue(wr.getRecommendations().contains("C2@Host"));
     }
 
     // Event C2
-    Set<String> computedFromC2 = new HashSet<String>();
-    computedFromC2.add("Host.A2");
-    Event evC2 = new Event("Host", "C2");
+    final Set<String> computedFromC2 = new HashSet<String>();
+    computedFromC2.add("A2@Host");
+    final Event evC2 = new Event("Host", "C2");
     assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC2).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC2)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC2)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.B2"));
+      assertTrue(wr.getRecommendations().contains("B2@Host"));
     }
 
     // Event D
-    Set<String> computedFromD = new HashSet<String>();
-    Event evD = new Event("Host", "D");
+    final Set<String> computedFromD = new HashSet<String>();
+    final Event evD = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
   }
 
@@ -592,87 +592,87 @@ public class DependencyDetectorTest {
     // B = f(A1)
     // C = f(A1, A2)
     // D = f(B, C)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA1 = new Subscription("Host", "A1", UUID.randomUUID());
-    Subscription subA2 = new Subscription("Host", "A2", UUID.randomUUID());
-    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subA1 = new Subscription("Host", "A1", UUID.randomUUID());
+    final Subscription subA2 = new Subscription("Host", "A2", UUID.randomUUID());
+    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
 
-    Advertisement advB = new Advertisement("Host", "B");
-    Advertisement advC = new Advertisement("Host", "C");
-    Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
+    final Advertisement advD = new Advertisement("Host", "D");
 
     // Subscription to A1 (A1 generates B)
-    Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA1);
-    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to A1, A2 (A1, A2 generate C)
-    Set<Subscription> subsC = new HashSet<Subscription>();
+    final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA1);
     subsC.add(subA2);
-    AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
+    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
     depDetector.processAdvertisementPacket(advPktC);
 
     // Subscription to D (B, C generate D)
-    Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
-    AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A1
-    Set<String> computedFromA1 = new HashSet<String>();
-    Event evA1 = new Event("Host", "A1");
+    final Set<String> computedFromA1 = new HashSet<String>();
+    final Event evA1 = new Event("Host", "A1");
     assertEquals(depDetector.getWaitRecommendations(evA1, computedFromA1).size(), 0);
 
     // Event A2
-    Set<String> computedFromA2 = new HashSet<String>();
-    Event evA2 = new Event("Host", "A2");
+    final Set<String> computedFromA2 = new HashSet<String>();
+    final Event evA2 = new Event("Host", "A2");
     assertEquals(depDetector.getWaitRecommendations(evA2, computedFromA2).size(), 0);
 
     // Event B from A1
-    Set<String> computedFromB = new HashSet<String>();
-    Event evB1 = new Event("Host", "B");
+    final Set<String> computedFromB = new HashSet<String>();
+    final Event evB1 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("Host.A1");
-    Event evB2 = new Event("Host", "B");
+    computedFromB.add("A1@Host");
+    final Event evB2 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.C"));
+      assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
     // Event C from A1
-    Set<String> computedFromC1 = new HashSet<String>();
-    Event evC1_1 = new Event("Host", "C");
+    final Set<String> computedFromC1 = new HashSet<String>();
+    final Event evC1_1 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC1_1, computedFromC1).size(), 0);
-    computedFromC1.add("Host.A1");
-    Event evC1_2 = new Event("Host", "C");
+    computedFromC1.add("A1@Host");
+    final Event evC1_2 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC1_2, computedFromC1).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evC1_2, computedFromC1)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC1_2, computedFromC1)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event C from A2
-    Set<String> computedFromC2 = new HashSet<String>();
-    Event evC2_1 = new Event("Host", "C");
+    final Set<String> computedFromC2 = new HashSet<String>();
+    final Event evC2_1 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC2_1, computedFromC2).size(), 0);
-    computedFromC1.add("Host.A2");
-    Event evC2_2 = new Event("Host", "C");
+    computedFromC1.add("A2@Host");
+    final Event evC2_2 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC2_2, computedFromC2).size(), 0);
 
     // Event D
-    Set<String> computedFromD = new HashSet<String>();
-    Event evD = new Event("Host", "D");
+    final Set<String> computedFromD = new HashSet<String>();
+    final Event evD = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
   }
 
@@ -685,153 +685,153 @@ public class DependencyDetectorTest {
     // F = f(E)
     // H = f(F, G)
     // D = f(B, C, H)
-    DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = new DependencyDetector();
 
-    Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
-    Subscription subE = new Subscription("Host", "E", UUID.randomUUID());
-    Subscription subF = new Subscription("Host", "F", UUID.randomUUID());
-    Subscription subG = new Subscription("Host", "G", UUID.randomUUID());
-    Subscription subH = new Subscription("Host", "H", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
+    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subE = new Subscription("Host", "E", UUID.randomUUID());
+    final Subscription subF = new Subscription("Host", "F", UUID.randomUUID());
+    final Subscription subG = new Subscription("Host", "G", UUID.randomUUID());
+    final Subscription subH = new Subscription("Host", "H", UUID.randomUUID());
 
-    Advertisement advB = new Advertisement("Host", "B");
-    Advertisement advC = new Advertisement("Host", "C");
-    Advertisement advD = new Advertisement("Host", "D");
-    Advertisement advE = new Advertisement("Host", "E");
-    Advertisement advF = new Advertisement("Host", "F");
-    Advertisement advG = new Advertisement("Host", "G");
-    Advertisement advH = new Advertisement("Host", "H");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
+    final Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advE = new Advertisement("Host", "E");
+    final Advertisement advF = new Advertisement("Host", "F");
+    final Advertisement advG = new Advertisement("Host", "G");
+    final Advertisement advH = new Advertisement("Host", "H");
 
     // Subscription to A (A generates B)
-    Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
+    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to A (A generates C)
-    Set<Subscription> subsC = new HashSet<Subscription>();
+    final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
-    AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
+    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
     depDetector.processAdvertisementPacket(advPktC);
 
     // Subscription to A (A generates E)
-    Set<Subscription> subsE = new HashSet<Subscription>();
+    final Set<Subscription> subsE = new HashSet<Subscription>();
     subsE.add(subA);
-    AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
+    final AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
     depDetector.processAdvertisementPacket(advPktE);
 
     // Subscription to E (E generates G)
-    Set<Subscription> subsG = new HashSet<Subscription>();
+    final Set<Subscription> subsG = new HashSet<Subscription>();
     subsG.add(subE);
-    AdvertisementPacket advPktG = new AdvertisementPacket(advG, AdvType.ADV, subsG, true);
+    final AdvertisementPacket advPktG = new AdvertisementPacket(advG, AdvType.ADV, subsG, true);
     depDetector.processAdvertisementPacket(advPktG);
 
     // Subscription to E (E generates F)
-    Set<Subscription> subsF = new HashSet<Subscription>();
+    final Set<Subscription> subsF = new HashSet<Subscription>();
     subsF.add(subE);
-    AdvertisementPacket advPktF = new AdvertisementPacket(advF, AdvType.ADV, subsF, true);
+    final AdvertisementPacket advPktF = new AdvertisementPacket(advF, AdvType.ADV, subsF, true);
     depDetector.processAdvertisementPacket(advPktF);
 
     // Subscription to F, G (F, G generate H)
-    Set<Subscription> subsH = new HashSet<Subscription>();
+    final Set<Subscription> subsH = new HashSet<Subscription>();
     subsH.add(subF);
     subsH.add(subG);
-    AdvertisementPacket advPktH = new AdvertisementPacket(advH, AdvType.ADV, subsH, true);
+    final AdvertisementPacket advPktH = new AdvertisementPacket(advH, AdvType.ADV, subsH, true);
     depDetector.processAdvertisementPacket(advPktH);
 
     // Subscription to B, C, H (B, C, H generate D)
-    Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
     subsD.add(subH);
-    AdvertisementPacket subPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
+    final AdvertisementPacket subPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(subPktD);
 
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    Set<String> computedFromA = new HashSet<String>();
-    Event evA = new Event("Host", "A");
+    final Set<String> computedFromA = new HashSet<String>();
+    final Event evA = new Event("Host", "A");
     assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
 
     // Event B
-    Set<String> computedFromB = new HashSet<String>();
-    Event evB1 = new Event("Host", "B");
+    final Set<String> computedFromB = new HashSet<String>();
+    final Event evB1 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("Host.A");
-    Event evB2 = new Event("Host", "B");
+    computedFromB.add("A@Host");
+    final Event evB2 = new Event("Host", "B");
     assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
-      assertTrue(wr.getRecommendations().contains("Host.C"));
-      assertTrue(wr.getRecommendations().contains("Host.H"));
+      assertTrue(wr.getRecommendations().contains("C@Host"));
+      assertTrue(wr.getRecommendations().contains("H@Host"));
     }
 
     // Event C
-    Set<String> computedFromC = new HashSet<String>();
-    Event evC1 = new Event("Host", "C");
+    final Set<String> computedFromC = new HashSet<String>();
+    final Event evC1 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("Host.A");
-    Event evC2 = new Event("Host", "C");
+    computedFromC.add("A@Host");
+    final Event evC2 = new Event("Host", "C");
     assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
-      assertTrue(wr.getRecommendations().contains("Host.H"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
+      assertTrue(wr.getRecommendations().contains("H@Host"));
     }
 
     // Event E
-    Set<String> computedFromE = new HashSet<String>();
-    Event evE = new Event("Host", "E");
+    final Set<String> computedFromE = new HashSet<String>();
+    final Event evE = new Event("Host", "E");
     assertEquals(depDetector.getWaitRecommendations(evE, computedFromE).size(), 0);
 
     // Event F
-    Set<String> computedFromF = new HashSet<String>();
-    Event evF1 = new Event("Host", "F");
+    final Set<String> computedFromF = new HashSet<String>();
+    final Event evF1 = new Event("Host", "F");
     assertEquals(depDetector.getWaitRecommendations(evF1, computedFromF).size(), 0);
-    computedFromF.add("Host.E");
-    Event evF2 = new Event("Host", "F");
+    computedFromF.add("E@Host");
+    final Event evF2 = new Event("Host", "F");
     assertEquals(depDetector.getWaitRecommendations(evF2, computedFromF).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evF2, computedFromF)) {
-      assertTrue(wr.getExpression().equals("Host.H"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evF2, computedFromF)) {
+      assertTrue(wr.getExpression().equals("H@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.G"));
+      assertTrue(wr.getRecommendations().contains("G@Host"));
     }
 
     // Event G
-    Set<String> computedFromG = new HashSet<String>();
-    Event evG1 = new Event("Host", "G");
+    final Set<String> computedFromG = new HashSet<String>();
+    final Event evG1 = new Event("Host", "G");
     assertEquals(depDetector.getWaitRecommendations(evG1, computedFromG).size(), 0);
-    computedFromG.add("Host.E");
-    Event evG2 = new Event("Host", "G");
+    computedFromG.add("E@Host");
+    final Event evG2 = new Event("Host", "G");
     assertEquals(depDetector.getWaitRecommendations(evG2, computedFromG).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evG2, computedFromG)) {
-      assertTrue(wr.getExpression().equals("Host.H"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evG2, computedFromG)) {
+      assertTrue(wr.getExpression().equals("H@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
-      assertTrue(wr.getRecommendations().contains("Host.F"));
+      assertTrue(wr.getRecommendations().contains("F@Host"));
     }
 
     // Event H
-    Set<String> computedFromH = new HashSet<String>();
-    Event evH1 = new Event("Host", "H");
+    final Set<String> computedFromH = new HashSet<String>();
+    final Event evH1 = new Event("Host", "H");
     assertEquals(depDetector.getWaitRecommendations(evH1, computedFromH).size(), 0);
-    computedFromH.add("Host.A");
-    Event evH2 = new Event("Host", "H");
+    computedFromH.add("A@Host");
+    final Event evH2 = new Event("Host", "H");
     assertEquals(depDetector.getWaitRecommendations(evH2, computedFromH).size(), 1);
-    for (WaitRecommendations wr : depDetector.getWaitRecommendations(evH2, computedFromH)) {
-      assertTrue(wr.getExpression().equals("Host.D"));
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evH2, computedFromH)) {
+      assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
-      assertTrue(wr.getRecommendations().contains("Host.B"));
-      assertTrue(wr.getRecommendations().contains("Host.C"));
+      assertTrue(wr.getRecommendations().contains("B@Host"));
+      assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
     // Event D
-    Set<String> computedFromD = new HashSet<String>();
-    Event evD = new Event("Host", "D");
+    final Set<String> computedFromD = new HashSet<String>();
+    final Event evD = new Event("Host", "D");
     assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
   }
 }

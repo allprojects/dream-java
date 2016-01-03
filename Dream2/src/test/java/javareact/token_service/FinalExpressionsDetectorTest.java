@@ -8,26 +8,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.Test;
+
 import javareact.common.packets.AdvertisementPacket;
 import javareact.common.packets.content.AdvType;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Subscription;
 
-import org.junit.Test;
-
 public class FinalExpressionsDetectorTest {
 
   private static final String hostId = "hostId";
-  private static final String hostIdDot = hostId + ".";
+  private static final String atHostId = "@" + hostId;
 
   @Test
   public void singleExpressionTest() {
     // A
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 0);
   }
 
@@ -35,15 +35,15 @@ public class FinalExpressionsDetectorTest {
   public void simpleDependencyTest() {
     // A
     // B = f(A)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 1);
-    assertTrue(results.containsKey(hostIdDot + "A"));
-    assertTrue(results.get(hostIdDot + "A") == 1);
+    assertTrue(results.containsKey("A" + atHostId));
+    assertTrue(results.get("A" + atHostId) == 1);
   }
 
   @Test
@@ -52,17 +52,17 @@ public class FinalExpressionsDetectorTest {
     // B = f(A)
     // C = f(B)
     // D = f(C)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "B");
     generateAdvertisementPacket(finalExpressionsDetector, "D", "C");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 1);
-    assertTrue(results.containsKey(hostIdDot + "C"));
-    assertTrue(results.get(hostIdDot + "C") == 1);
+    assertTrue(results.containsKey("C" + atHostId));
+    assertTrue(results.get("C" + atHostId) == 1);
   }
 
   @Test
@@ -70,16 +70,16 @@ public class FinalExpressionsDetectorTest {
     // A
     // B = f(A)
     // C = f(A)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "A");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 1);
-    assertTrue(results.containsKey(hostIdDot + "A"));
-    assertTrue(results.get(hostIdDot + "A") == 2);
+    assertTrue(results.containsKey("A" + atHostId));
+    assertTrue(results.get("A" + atHostId) == 2);
   }
 
   @Test
@@ -88,17 +88,17 @@ public class FinalExpressionsDetectorTest {
     // B = f(A)
     // C = f(B)
     // D = f(B)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "B");
     generateAdvertisementPacket(finalExpressionsDetector, "D", "B");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 1);
-    assertTrue(results.containsKey(hostIdDot + "B"));
-    assertTrue(results.get(hostIdDot + "B") == 2);
+    assertTrue(results.containsKey("B" + atHostId));
+    assertTrue(results.get("B" + atHostId) == 2);
   }
 
   @Test
@@ -108,7 +108,7 @@ public class FinalExpressionsDetectorTest {
     // C = f(B)
     // D = f(B)
     // E = f(D)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "B");
@@ -116,10 +116,10 @@ public class FinalExpressionsDetectorTest {
     generateAdvertisementPacket(finalExpressionsDetector, "E", "D");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 1);
-    assertTrue(results.containsKey(hostIdDot + "D"));
-    assertTrue(results.get(hostIdDot + "D") == 1);
+    assertTrue(results.containsKey("D" + atHostId));
+    assertTrue(results.get("D" + atHostId) == 1);
   }
 
   @Test
@@ -131,7 +131,7 @@ public class FinalExpressionsDetectorTest {
     // E = f(B)
     // F = f(C)
     // G = f(C)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "A");
@@ -141,12 +141,12 @@ public class FinalExpressionsDetectorTest {
     generateAdvertisementPacket(finalExpressionsDetector, "G", "C");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 2);
-    assertTrue(results.containsKey(hostIdDot + "B"));
-    assertTrue(results.containsKey(hostIdDot + "C"));
-    assertTrue(results.get(hostIdDot + "B") == 2);
-    assertTrue(results.get(hostIdDot + "C") == 2);
+    assertTrue(results.containsKey("B" + atHostId));
+    assertTrue(results.containsKey("C" + atHostId));
+    assertTrue(results.get("B" + atHostId) == 2);
+    assertTrue(results.get("C" + atHostId) == 2);
   }
 
   @Test
@@ -159,7 +159,7 @@ public class FinalExpressionsDetectorTest {
     // F = f(C)
     // G = f(C)
     // H = f(G)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "A");
@@ -170,12 +170,12 @@ public class FinalExpressionsDetectorTest {
     generateAdvertisementPacket(finalExpressionsDetector, "H", "G");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 2);
-    assertTrue(results.containsKey(hostIdDot + "B"));
-    assertTrue(results.containsKey(hostIdDot + "G"));
-    assertTrue(results.get(hostIdDot + "B") == 2);
-    assertTrue(results.get(hostIdDot + "G") == 1);
+    assertTrue(results.containsKey("B" + atHostId));
+    assertTrue(results.containsKey("G" + atHostId));
+    assertTrue(results.get("B" + atHostId) == 2);
+    assertTrue(results.get("G" + atHostId) == 1);
   }
 
   @Test
@@ -185,7 +185,7 @@ public class FinalExpressionsDetectorTest {
     // C = f(A, B)
     // D = f(A, B)
     // E = f(C, D)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "A", "B");
@@ -193,19 +193,19 @@ public class FinalExpressionsDetectorTest {
     generateAdvertisementPacket(finalExpressionsDetector, "E", "C", "D");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> resultsA = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> resultsA = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(resultsA.size(), 2);
-    assertTrue(resultsA.containsKey(hostIdDot + "C"));
-    assertTrue(resultsA.containsKey(hostIdDot + "D"));
-    assertTrue(resultsA.get(hostIdDot + "C") == 1);
-    assertTrue(resultsA.get(hostIdDot + "D") == 1);
+    assertTrue(resultsA.containsKey("C" + atHostId));
+    assertTrue(resultsA.containsKey("D" + atHostId));
+    assertTrue(resultsA.get("C" + atHostId) == 1);
+    assertTrue(resultsA.get("D" + atHostId) == 1);
 
-    Map<String, Integer> resultsB = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "B");
+    final Map<String, Integer> resultsB = finalExpressionsDetector.getFinalExpressionsFor("B" + atHostId);
     assertEquals(resultsB.size(), 2);
-    assertTrue(resultsB.containsKey(hostIdDot + "C"));
-    assertTrue(resultsB.containsKey(hostIdDot + "D"));
-    assertTrue(resultsB.get(hostIdDot + "C") == 1);
-    assertTrue(resultsB.get(hostIdDot + "D") == 1);
+    assertTrue(resultsB.containsKey("C" + atHostId));
+    assertTrue(resultsB.containsKey("D" + atHostId));
+    assertTrue(resultsB.get("C" + atHostId) == 1);
+    assertTrue(resultsB.get("D" + atHostId) == 1);
   }
 
   @Test
@@ -213,16 +213,16 @@ public class FinalExpressionsDetectorTest {
     // A
     // B = f(A)
     // C = f(A, B)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "A", "B");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 1);
-    assertTrue(results.containsKey(hostIdDot + "B"));
-    assertTrue(results.get(hostIdDot + "B") == 1);
+    assertTrue(results.containsKey("B" + atHostId));
+    assertTrue(results.get("B" + atHostId) == 1);
   }
 
   @Test
@@ -231,31 +231,31 @@ public class FinalExpressionsDetectorTest {
     // B = f(A)
     // C = f(A)
     // D = f(B, C)
-    FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
+    final FinalExpressionsDetector finalExpressionsDetector = new FinalExpressionsDetector();
     generateAdvertisementPacket(finalExpressionsDetector, "A");
     generateAdvertisementPacket(finalExpressionsDetector, "B", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "C", "A");
     generateAdvertisementPacket(finalExpressionsDetector, "D", "B", "C");
     finalExpressionsDetector.consolidate();
 
-    Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor(hostIdDot + "A");
+    final Map<String, Integer> results = finalExpressionsDetector.getFinalExpressionsFor("A" + atHostId);
     assertEquals(results.size(), 2);
-    assertTrue(results.containsKey(hostIdDot + "B"));
-    assertTrue(results.containsKey(hostIdDot + "C"));
-    assertTrue(results.get(hostIdDot + "B") == 1);
-    assertTrue(results.get(hostIdDot + "C") == 1);
+    assertTrue(results.containsKey("B" + atHostId));
+    assertTrue(results.containsKey("C" + atHostId));
+    assertTrue(results.get("B" + atHostId) == 1);
+    assertTrue(results.get("C" + atHostId) == 1);
   }
 
   private final void generateAdvertisementPacket(FinalExpressionsDetector finalExpressionsDetector, String name, String... subsNames) {
-    AdvertisementPacket advPkt = generateAdvertisementPacket(name, subsNames);
+    final AdvertisementPacket advPkt = generateAdvertisementPacket(name, subsNames);
     finalExpressionsDetector.processAdvertisementPacket(advPkt);
   }
 
   private final AdvertisementPacket generateAdvertisementPacket(String name, String... subsNames) {
-    Advertisement adv = new Advertisement(hostId, name);
-    Set<Subscription> subscriptions = new HashSet<Subscription>();
-    for (String subName : subsNames) {
-      Subscription sub = new Subscription(hostId, subName, UUID.randomUUID());
+    final Advertisement adv = new Advertisement(hostId, name);
+    final Set<Subscription> subscriptions = new HashSet<Subscription>();
+    for (final String subName : subsNames) {
+      final Subscription sub = new Subscription(hostId, subName, UUID.randomUUID());
       subscriptions.add(sub);
     }
     if (subscriptions.isEmpty()) {

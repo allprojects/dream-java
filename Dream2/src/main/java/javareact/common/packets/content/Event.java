@@ -9,13 +9,13 @@ import java.util.Set;
 public class Event implements Iterable<Attribute>, Serializable {
   private static final long serialVersionUID = 831217881290695190L;
 
-  private final String observableId;
+  private final String objectId;
   private final String hostId;
   private final Map<String, Attribute> attributes = new HashMap<String, Attribute>();
 
-  public Event(String hostId, String observableId, Attribute... attributes) {
+  public Event(String hostId, String objectId, Attribute... attributes) {
     this.hostId = hostId;
-    this.observableId = observableId;
+    this.objectId = objectId;
     for (final Attribute attr : attributes) {
       this.attributes.put(attr.getName(), attr);
     }
@@ -34,8 +34,8 @@ public class Event implements Iterable<Attribute>, Serializable {
     return attributes.values().iterator();
   }
 
-  public final String getObservableId() {
-    return observableId;
+  public final String getObjectId() {
+    return objectId;
   }
 
   public final String getHostId() {
@@ -43,12 +43,12 @@ public class Event implements Iterable<Attribute>, Serializable {
   }
 
   public final String getSignature() {
-    return hostId + "." + observableId;
+    return objectId + "@" + hostId;
   }
 
   /**
    * Returns true iff the event carries the same information as ev, i.e., refers
-   * to the same observable and contains the same attributes.
+   * to the same time changing values and contains the same attributes.
    *
    * @param ev
    *          the event.
@@ -58,7 +58,7 @@ public class Event implements Iterable<Attribute>, Serializable {
     if (!ev.hostId.equals(hostId)) {
       return false;
     }
-    if (!ev.observableId.equals(observableId)) {
+    if (!ev.objectId.equals(objectId)) {
       return false;
     }
     final Set<String> names = attributes.keySet();
@@ -78,7 +78,7 @@ public class Event implements Iterable<Attribute>, Serializable {
     int result = 1;
     result = prime * result + (attributes == null ? 0 : attributes.hashCode());
     result = prime * result + (hostId == null ? 0 : hostId.hashCode());
-    result = prime * result + (observableId == null ? 0 : observableId.hashCode());
+    result = prime * result + (objectId == null ? 0 : objectId.hashCode());
     return result;
   }
 
@@ -108,11 +108,11 @@ public class Event implements Iterable<Attribute>, Serializable {
     } else if (!hostId.equals(other.hostId)) {
       return false;
     }
-    if (observableId == null) {
-      if (other.observableId != null) {
+    if (objectId == null) {
+      if (other.objectId != null) {
         return false;
       }
-    } else if (!observableId.equals(other.observableId)) {
+    } else if (!objectId.equals(other.objectId)) {
       return false;
     }
     return true;
@@ -120,7 +120,7 @@ public class Event implements Iterable<Attribute>, Serializable {
 
   @Override
   public String toString() {
-    return hostId + "." + observableId + "(" + attributes.values() + ")";
+    return hostId + "." + objectId + "(" + attributes.values() + ")";
   }
 
 }

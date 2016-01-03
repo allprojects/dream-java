@@ -48,7 +48,7 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
   @Override
   public void update(EventProxyPair eventProxyPair) {
     logger.finest("Update method invoked with " + eventProxyPair);
-    final List<EventProxyPair> pairs = queueManager.processEventPacket(eventProxyPair, Consts.hostName + "." + objectId);
+    final List<EventProxyPair> pairs = queueManager.processEventPacket(eventProxyPair, objectId + "@" + Consts.hostName);
     logger.finest("The queueManager returned the following pairs " + pairs);
     if (!pairs.isEmpty()) {
       logger.finest("Actual update");
@@ -109,7 +109,7 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
   private final Set<String> getComputedFrom(Collection<EventProxyPair> pairs) {
     final Set<String> results = new HashSet<String>();
     pairs.forEach(pair -> results.addAll(pair.getEventPacket().getComputedFrom()));
-    results.add(Consts.hostName + "." + objectId);
+    results.add(objectId + "@" + Consts.hostName);
     return results;
   }
 

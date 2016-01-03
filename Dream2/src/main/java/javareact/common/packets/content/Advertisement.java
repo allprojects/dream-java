@@ -6,21 +6,25 @@ public class Advertisement implements Serializable {
   private static final long serialVersionUID = -6636280874981657399L;
 
   private final String hostId;
-  private final String observableId;
+  private final String objectId;
 
-  public Advertisement(String hostId, String observableId) {
+  public Advertisement(String hostId, String objectId) {
     this.hostId = hostId;
-    this.observableId = observableId;
+    this.objectId = objectId;
   }
 
   public boolean isSatisfiedBy(Subscription sub) {
-    if (!sub.isBroadcast() && !hostId.equals(sub.getHostId())) return false;
-    if (!observableId.equals(sub.getObservableId())) return false;
+    if (!sub.isBroadcast() && !hostId.equals(sub.getHostId())) {
+      return false;
+    }
+    if (!objectId.equals(sub.getObjectId())) {
+      return false;
+    }
     return true;
   }
 
-  public final String getObservableId() {
-    return observableId;
+  public final String getObjectId() {
+    return objectId;
   }
 
   public final String getHostId() {
@@ -28,15 +32,15 @@ public class Advertisement implements Serializable {
   }
 
   public final String getSignature() {
-    return hostId + "." + observableId;
+    return objectId + "@" + hostId;
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((hostId == null) ? 0 : hostId.hashCode());
-    result = prime * result + ((observableId == null) ? 0 : observableId.hashCode());
+    result = prime * result + (hostId == null ? 0 : hostId.hashCode());
+    result = prime * result + (objectId == null ? 0 : objectId.hashCode());
     return result;
   }
 
@@ -51,7 +55,7 @@ public class Advertisement implements Serializable {
     if (!(obj instanceof Advertisement)) {
       return false;
     }
-    Advertisement other = (Advertisement) obj;
+    final Advertisement other = (Advertisement) obj;
     if (hostId == null) {
       if (other.hostId != null) {
         return false;
@@ -59,11 +63,11 @@ public class Advertisement implements Serializable {
     } else if (!hostId.equals(other.hostId)) {
       return false;
     }
-    if (observableId == null) {
-      if (other.observableId != null) {
+    if (objectId == null) {
+      if (other.objectId != null) {
         return false;
       }
-    } else if (!observableId.equals(other.observableId)) {
+    } else if (!objectId.equals(other.objectId)) {
       return false;
     }
     return true;
@@ -71,7 +75,7 @@ public class Advertisement implements Serializable {
 
   @Override
   public String toString() {
-    return "Advertisement [" + hostId + "." + observableId + "]";
+    return "Advertisement [" + objectId + "@" + hostId + "]";
   }
 
 }

@@ -14,8 +14,8 @@ import javareact.common.ValueChangeListener;
 interface TimeChangingValue<T> extends ProxyGenerator {
 
   /**
-   * The evaluate method is automatically invoked whenever one of the observable
-   * methods this object depends on changes.
+   * The evaluate method is automatically invoked whenever one of the values
+   * this object depends on changes.
    */
   public T evaluate();
 

@@ -10,13 +10,15 @@ import javareact.common.packets.AdvertisementPacket;
 import javareact.common.packets.content.Subscription;
 
 /**
- * A FinalExpressionsDetector is used by the token service in case of atomic consistency. It detects all the final
- * expressions in a reactive graph. Final expressions travel with an event packet. The token service waits until all the
- * final expressions have been processed before releasing the token. To enable this, each server notifies the token
- * service when processing a final expression.
+ * A FinalExpressionsDetector is used by the token service in case of atomic
+ * consistency. It detects all the final expressions in a reactive graph. Final
+ * expressions travel with an event packet. The token service waits until all
+ * the final expressions have been processed before releasing the token. To
+ * enable this, each server notifies the token service when processing a final
+ * expression.
  */
 final class FinalExpressionsDetector {
-  // Initial expressions (pure observables)
+  // Initial expressions
   private final Set<String> initialExpressions = new HashSet<String>();
   // Expression E -> expressions that directly depend from E
   private final Map<String, Map<String, UUID>> dependencyGraph = new HashMap<String, Map<String, UUID>>();
@@ -42,17 +44,17 @@ final class FinalExpressionsDetector {
   }
 
   final Map<String, Integer> getFinalExpressionsFor(String expr) {
-    assert (finalExpressions.containsKey(expr));
+    assert finalExpressions.containsKey(expr);
     return finalExpressions.get(expr);
   }
 
   private final void processAdv(AdvertisementPacket advPkt) {
-    String advSignature = advPkt.getAdvertisement().getSignature();
+    final String advSignature = advPkt.getAdvertisement().getSignature();
     if (!advPkt.containtsSubscriptions()) {
       initialExpressions.add(advSignature);
     } else {
-      for (Subscription sub : advPkt.getSubscriptions()) {
-        String subSignature = sub.getSignature();
+      for (final Subscription sub : advPkt.getSubscriptions()) {
+        final String subSignature = sub.getSignature();
         addDependency(subSignature, advSignature, sub.getProxyID());
       }
     }
@@ -72,24 +74,24 @@ final class FinalExpressionsDetector {
   }
 
   private final void computeFinalExpressions() {
-    for (String initialExpr : initialExpressions) {
+    for (final String initialExpr : initialExpressions) {
       computeFinalExpressionsFor(initialExpr);
     }
   }
 
   private final void computeFinalExpressionsFor(String initialExpr) {
-    Map<String, Integer> finalExpressionsMap = new HashMap<String, Integer>();
+    final Map<String, Integer> finalExpressionsMap = new HashMap<String, Integer>();
     computeFinalExpressionsFor(initialExpr, finalExpressionsMap);
     finalExpressions.put(initialExpr, finalExpressionsMap);
   }
 
   private final void computeFinalExpressionsFor(String currentExpr, Map<String, Integer> results) {
-    int count = getFinalLinksFor(currentExpr);
+    final int count = getFinalLinksFor(currentExpr);
     if (count != 0) {
       results.put(currentExpr, count);
     }
     if (dependencyGraph.containsKey(currentExpr)) {
-      for (String expr : dependencyGraph.get(currentExpr).keySet()) {
+      for (final String expr : dependencyGraph.get(currentExpr).keySet()) {
         computeFinalExpressionsFor(expr, results);
       }
     }
@@ -97,11 +99,11 @@ final class FinalExpressionsDetector {
 
   private final int getFinalLinksFor(String expr) {
     int count = 0;
-    Set<UUID> alreadyUsedIds = new HashSet<UUID>();
+    final Set<UUID> alreadyUsedIds = new HashSet<UUID>();
     if (dependencyGraph.containsKey(expr)) {
-      Map<String, UUID> innerMap = dependencyGraph.get(expr);
-      for (String e : innerMap.keySet()) {
-        UUID proxyID = innerMap.get(e);
+      final Map<String, UUID> innerMap = dependencyGraph.get(expr);
+      for (final String e : innerMap.keySet()) {
+        final UUID proxyID = innerMap.get(e);
         if (alreadyUsedIds.contains(proxyID)) {
           continue;
         }

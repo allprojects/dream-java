@@ -10,46 +10,58 @@ public class Subscription implements Serializable {
 
   public static final String wildcard = "*";
 
-  private final String observableId;
+  private final String objectId;
   private final String hostId;
   private final Collection<Constraint> constraints = new ArrayList<Constraint>();
   private final boolean blocking;
   private final UUID proxyID;
 
-  public Subscription(String hostId, String observableId, boolean blocking, UUID proxyID, Constraint... constraints) {
+  public Subscription(String hostId, String objectId, boolean blocking, UUID proxyID, Constraint... constraints) {
     this.hostId = hostId;
-    this.observableId = observableId;
+    this.objectId = objectId;
     this.blocking = blocking;
     this.proxyID = proxyID;
-    for (Constraint constraint : constraints) {
+    for (final Constraint constraint : constraints) {
       this.constraints.add(constraint);
     }
   }
 
-  public Subscription(String hostId, String observableId, UUID proxyID, Constraint... constraints) {
-    this(hostId, observableId, false, proxyID, constraints);
+  public Subscription(String hostId, String objectId, UUID proxyID, Constraint... constraints) {
+    this(hostId, objectId, false, proxyID, constraints);
   }
 
   public final boolean isSatisfiedBy(Event ev) {
-    if (!isBroadcast() && !hostId.equals(ev.getHostId())) return false;
-    if (!observableId.equals(ev.getObservableId())) return false;
-    for (Constraint c : constraints) {
-      if (!c.isSatisfiedBy(ev)) return false;
+    if (!isBroadcast() && !hostId.equals(ev.getHostId())) {
+      return false;
+    }
+    if (!objectId.equals(ev.getObjectId())) {
+      return false;
+    }
+    for (final Constraint c : constraints) {
+      if (!c.isSatisfiedBy(ev)) {
+        return false;
+      }
     }
     return true;
   }
 
   public final boolean matchesOnlySignatureOf(Event ev) {
-    if (!isBroadcast() && !hostId.equals(ev.getHostId())) return false;
-    if (!observableId.equals(ev.getObservableId())) return false;
-    for (Constraint c : constraints) {
-      if (!c.isSatisfiedBy(ev)) return true;
+    if (!isBroadcast() && !hostId.equals(ev.getHostId())) {
+      return false;
+    }
+    if (!objectId.equals(ev.getObjectId())) {
+      return false;
+    }
+    for (final Constraint c : constraints) {
+      if (!c.isSatisfiedBy(ev)) {
+        return true;
+      }
     }
     return false;
   }
 
-  public final String getObservableId() {
-    return observableId;
+  public final String getObjectId() {
+    return objectId;
   }
 
   public final String getHostId() {
@@ -57,7 +69,7 @@ public class Subscription implements Serializable {
   }
 
   public final String getSignature() {
-    return hostId + "." + observableId;
+    return objectId + "@" + hostId;
   }
 
   public final boolean isBroadcast() {
@@ -77,10 +89,10 @@ public class Subscription implements Serializable {
     final int prime = 31;
     int result = 1;
     result = prime * result + (blocking ? 1231 : 1237);
-    result = prime * result + ((constraints == null) ? 0 : constraints.hashCode());
-    result = prime * result + ((hostId == null) ? 0 : hostId.hashCode());
-    result = prime * result + ((observableId == null) ? 0 : observableId.hashCode());
-    result = prime * result + ((proxyID == null) ? 0 : proxyID.hashCode());
+    result = prime * result + (constraints == null ? 0 : constraints.hashCode());
+    result = prime * result + (hostId == null ? 0 : hostId.hashCode());
+    result = prime * result + (objectId == null ? 0 : objectId.hashCode());
+    result = prime * result + (proxyID == null ? 0 : proxyID.hashCode());
     return result;
   }
 
@@ -95,7 +107,7 @@ public class Subscription implements Serializable {
     if (!(obj instanceof Subscription)) {
       return false;
     }
-    Subscription other = (Subscription) obj;
+    final Subscription other = (Subscription) obj;
     if (blocking != other.blocking) {
       return false;
     }
@@ -113,11 +125,11 @@ public class Subscription implements Serializable {
     } else if (!hostId.equals(other.hostId)) {
       return false;
     }
-    if (observableId == null) {
-      if (other.observableId != null) {
+    if (objectId == null) {
+      if (other.objectId != null) {
         return false;
       }
-    } else if (!observableId.equals(other.observableId)) {
+    } else if (!objectId.equals(other.objectId)) {
       return false;
     }
     if (proxyID == null) {
@@ -132,7 +144,7 @@ public class Subscription implements Serializable {
 
   @Override
   public String toString() {
-    return hostId + "." + observableId + "(" + constraints + ")";
+    return objectId + "@" + hostId + "(" + constraints + ")";
   }
 
 }

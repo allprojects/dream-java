@@ -9,9 +9,9 @@ import javareact.common.packets.content.Subscription;
 
 /**
  * Packets used to advertise the presence of a given observer.
- * 
- * If the packet is advertising a reactive observable object, it also includes the set of subscriptions required to
- * define all the observable methods the reactive object depends from.
+ *
+ * If the packet is advertising an object the depends on other objects, it also
+ * includes the set of subscriptions that define such dependencies.
  */
 public class AdvertisementPacket implements Serializable {
   private static final long serialVersionUID = 5219175796450319466L;
@@ -57,9 +57,9 @@ public class AdvertisementPacket implements Serializable {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((advType == null) ? 0 : advType.hashCode());
-    result = prime * result + ((advertisement == null) ? 0 : advertisement.hashCode());
-    result = prime * result + ((subscriptions == null) ? 0 : subscriptions.hashCode());
+    result = prime * result + (advType == null ? 0 : advType.hashCode());
+    result = prime * result + (advertisement == null ? 0 : advertisement.hashCode());
+    result = prime * result + (subscriptions == null ? 0 : subscriptions.hashCode());
     return result;
   }
 
@@ -74,7 +74,7 @@ public class AdvertisementPacket implements Serializable {
     if (!(obj instanceof AdvertisementPacket)) {
       return false;
     }
-    AdvertisementPacket other = (AdvertisementPacket) obj;
+    final AdvertisementPacket other = (AdvertisementPacket) obj;
     if (advType != other.advType) {
       return false;
     }

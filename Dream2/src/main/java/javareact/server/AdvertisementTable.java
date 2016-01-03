@@ -3,9 +3,10 @@ package javareact.server;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Subscription;
@@ -24,8 +25,10 @@ final class AdvertisementTable {
   }
 
   final void removeAdvertisement(NodeDescriptor node, Advertisement adv) {
-    Collection<Advertisement> advsList = advs.get(node);
-    if (advsList == null) return;
+    final Collection<Advertisement> advsList = advs.get(node);
+    if (advsList == null) {
+      return;
+    }
     advsList.remove(adv);
     if (advsList.isEmpty()) {
       advs.remove(node);
@@ -33,16 +36,11 @@ final class AdvertisementTable {
   }
 
   final Set<NodeDescriptor> getMatchingNodes(Subscription sub) {
-    Set<NodeDescriptor> nodes = new HashSet<NodeDescriptor>();
-    nodesLoop: for (NodeDescriptor node : advs.keySet()) {
-      for (Advertisement adv : advs.get(node)) {
-        if (adv.isSatisfiedBy(sub)) {
-          nodes.add(node);
-          continue nodesLoop;
-        }
-      }
-    }
-    return nodes;
+    final Predicate<Advertisement> isAdvSat = adv -> adv.isSatisfiedBy(sub);
+    final Predicate<NodeDescriptor> hasAdvSat = node -> advs.get(node).stream().anyMatch(isAdvSat);
+    return advs.keySet().stream().//
+        filter(hasAdvSat).//
+        collect(Collectors.toSet());
   }
 
   final void removeAllAdvertisementsFor(NodeDescriptor node) {

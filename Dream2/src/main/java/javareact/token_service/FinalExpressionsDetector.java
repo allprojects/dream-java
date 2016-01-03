@@ -20,7 +20,7 @@ import javareact.common.packets.content.Subscription;
 final class FinalExpressionsDetector {
   // Initial expressions
   private final Set<String> initialExpressions = new HashSet<String>();
-  // Expression E -> expressions that directly depend from E
+  // Expression E -> expressions that directly depend on E
   private final Map<String, Map<String, UUID>> dependencyGraph = new HashMap<String, Map<String, UUID>>();
   // Expression E -> final expressions generated from E
   private final Map<String, Map<String, Integer>> finalExpressions = new HashMap<String, Map<String, Integer>>();

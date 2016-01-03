@@ -35,10 +35,10 @@ class ConnectionManager {
     Transport tr = null;
     try {
       tr = new TCPTransport();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
     }
-    TopologyManager tm = new SimpleTopologyManager();
+    final TopologyManager tm = new SimpleTopologyManager();
     overlay = new GenericOverlay(tm, tr, false);
     router = new GenericRouter(overlay);
     overlay.start();
@@ -50,20 +50,18 @@ class ConnectionManager {
   }
 
   final void sendEvent(UUID id, Event event, Set<String> computedFrom, Set<String> finalExpressions, boolean approvedByTokenService) {
-    EventPacket pkt = new EventPacket(event, id, computedFrom, approvedByTokenService);
-    for (String finalExpression : finalExpressions) {
-      pkt.addFinalExpression(finalExpression);
-    }
+    final EventPacket pkt = new EventPacket(event, id, computedFrom, approvedByTokenService);
+    finalExpressions.forEach(pkt::addFinalExpression);
     send(EventPacket.subject, pkt);
   }
 
   final void sendSubscription(Subscription sub) {
-    SubscriptionPacket pkt = new SubscriptionPacket(sub, SubType.SUB);
+    final SubscriptionPacket pkt = new SubscriptionPacket(sub, SubType.SUB);
     send(SubscriptionPacket.subject, pkt);
   }
 
   final void sendUnsubscription(Subscription sub) {
-    SubscriptionPacket pkt = new SubscriptionPacket(sub, SubType.UNSUB);
+    final SubscriptionPacket pkt = new SubscriptionPacket(sub, SubType.UNSUB);
     send(SubscriptionPacket.subject, pkt);
   }
 
@@ -84,7 +82,7 @@ class ConnectionManager {
   }
 
   private final void sendAdvertisement(Advertisement adv, AdvType advType, Set<Subscription> subs, boolean isPublic) {
-    AdvertisementPacket pkt = (subs != null) ? new AdvertisementPacket(adv, advType, subs, isPublic) : new AdvertisementPacket(adv, advType, isPublic);
+    final AdvertisementPacket pkt = subs != null ? new AdvertisementPacket(adv, advType, subs, isPublic) : new AdvertisementPacket(adv, advType, isPublic);
     send(AdvertisementPacket.subject, pkt);
   }
 
@@ -99,7 +97,7 @@ class ConnectionManager {
   private final void send(String subject, Serializable packet) {
     assert overlay.getNumberOfBrokers() == 1;
     assert overlay.getNumberOfClients() == 0;
-    for (NodeDescriptor node : overlay.getNeighbors()) {
+    for (final NodeDescriptor node : overlay.getNeighbors()) {
       try {
         overlay.send(subject, packet, node);
       } catch (IOException | NotRunningException e) {

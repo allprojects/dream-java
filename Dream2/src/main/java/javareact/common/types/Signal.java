@@ -42,7 +42,7 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
       varProxy.addProxyChangeListener(this);
     }
     this.evaluation = evaluation;
-    sentAdvertisement();
+    sendAdvertisement();
   }
 
   @Override
@@ -99,7 +99,7 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
     listeners.remove(listener);
   }
 
-  private final void sentAdvertisement() {
+  private final void sendAdvertisement() {
     final Set<Subscription> subs = new HashSet<Subscription>();
     dependentProxies.forEach(p -> subs.add(new Subscription(p.getHost(), p.getObject(), p.getProxyID(), new Constraint(p.getMethod()))));
     final Advertisement adv = new Advertisement(Consts.hostName, objectId);

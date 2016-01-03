@@ -98,7 +98,7 @@ public class AdvertisementPacket implements Serializable {
   @Override
   public String toString() {
     if (subscriptions != null) {
-      return advType + ": " + advertisement.toString() + " - Depending from: " + subscriptions;
+      return advType + ": " + advertisement.toString() + " - Depending on: " + subscriptions;
     } else {
       return advType + ": " + advertisement.toString();
     }

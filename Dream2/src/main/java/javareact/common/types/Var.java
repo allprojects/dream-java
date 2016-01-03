@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import javareact.client.ClientEventForwarder;
 import javareact.common.Consts;
+import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Attribute;
 import javareact.common.packets.content.Event;
 
@@ -15,11 +16,12 @@ public class Var<T> implements ProxyGenerator {
   private final String objectId;
 
   private T val;
-  private RemoteVar<T> proxy = null;
+  private RemoteVar<T> proxy;
 
   public Var(String objectId, T val) {
     this.forwarder = ClientEventForwarder.get();
     this.objectId = objectId;
+    forwarder.advertise(new Advertisement(Consts.hostName, objectId), true);
     set(val);
   }
 

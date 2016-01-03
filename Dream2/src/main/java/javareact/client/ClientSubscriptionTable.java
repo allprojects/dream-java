@@ -3,9 +3,10 @@ package javareact.client;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
@@ -24,9 +25,7 @@ final class ClientSubscriptionTable {
   }
 
   final void addSubscriptions(Subscriber subscriber, Collection<Subscription> subs) {
-    for (Subscription sub : subs) {
-      addSubscription(subscriber, sub);
-    }
+    subs.forEach(sub -> addSubscription(subscriber, sub));
   }
 
   final void addServerSubscription(Subscription sub) {
@@ -34,8 +33,10 @@ final class ClientSubscriptionTable {
   }
 
   final void removeSubscription(Subscriber subscriber, Subscription sub) {
-    Collection<Subscription> subscriptions = subs.get(subscriber);
-    if (subscriptions == null) return;
+    final Collection<Subscription> subscriptions = subs.get(subscriber);
+    if (subscriptions == null) {
+      return;
+    }
     subscriptions.remove(sub);
     if (subscriptions.isEmpty()) {
       subs.remove(subscriber);
@@ -43,9 +44,7 @@ final class ClientSubscriptionTable {
   }
 
   final void removeSubscriptions(Subscriber subscriber, Collection<Subscription> subs) {
-    for (Subscription sub : subs) {
-      removeSubscription(subscriber, sub);
-    }
+    subs.forEach(sub -> removeSubscription(subscriber, sub));
   }
 
   final void removeServerSubscription(Subscription sub) {
@@ -53,41 +52,20 @@ final class ClientSubscriptionTable {
   }
 
   final Set<Subscriber> getMatchingSubscribers(Event ev) {
-    Set<Subscriber> subscribers = new HashSet<Subscriber>();
-    subscribersLoop: for (Subscriber subscriber : subs.keySet()) {
-      for (Subscription sub : subs.get(subscriber)) {
-        if (sub.isSatisfiedBy(ev)) {
-          subscribers.add(subscriber);
-          continue subscribersLoop;
-        }
-      }
-    }
-    return subscribers;
+    return getSubscribersWithAnySubscriptionMatching(sub -> sub.isSatisfiedBy(ev));
   }
 
   final Set<Subscriber> getSignatureOnlyMatchingSubscribers(Event ev) {
-    Set<Subscriber> subscribers = new HashSet<Subscriber>();
-    subscribersLoop: for (Subscriber subscriber : subs.keySet()) {
-      boolean matchesSignature = false;
-      for (Subscription sub : subs.get(subscriber)) {
-        if (sub.isSatisfiedBy(ev)) {
-          continue subscribersLoop;
-        } else if (sub.matchesOnlySignatureOf(ev)) {
-          matchesSignature = true;
-        }
-      }
-      if (matchesSignature) {
-        subscribers.add(subscriber);
-      }
-    }
-    return subscribers;
+    return getSubscribersWithAnySubscriptionMatching(sub -> sub.matchesOnlySignatureOf(ev) && !sub.isSatisfiedBy(ev));
+  }
+
+  private final Set<Subscriber> getSubscribersWithAnySubscriptionMatching(Predicate<Subscription> predicate) {
+    final Predicate<Subscriber> hasSubscriptionMatchingOnlySignature = subscriber -> subs.get(subscriber).stream().anyMatch(predicate);
+    return subs.keySet().stream().filter(hasSubscriptionMatchingOnlySignature).collect(Collectors.toSet());
   }
 
   final boolean needsToDeliverToServer(Event ev) {
-    for (Subscription sub : serverSubscriptions) {
-      if (sub.isSatisfiedBy(ev)) return true;
-    }
-    return false;
+    return serverSubscriptions.stream().anyMatch(sub -> sub.isSatisfiedBy(ev));
   }
 
   @Override

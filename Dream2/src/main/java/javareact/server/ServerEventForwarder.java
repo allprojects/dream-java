@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javareact.common.ConsistencyType;
 import javareact.common.Consts;
@@ -68,9 +70,9 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 
   private final void processSubscription(NodeDescriptor sender, SubscriptionPacket packet, Collection<NodeDescriptor> neighbors, Outbox box) {
     updateSubscriptionTables(sender, packet);
-    final Set<NodeDescriptor> mathingNodes = advTable.getMatchingNodes(packet.getSubscription());
-    if (!mathingNodes.isEmpty()) {
-      sendTo(SubscriptionPacket.subject, packet, box, mathingNodes);
+    final Set<NodeDescriptor> matchingNodes = advTable.getMatchingNodes(packet.getSubscription());
+    if (!matchingNodes.isEmpty()) {
+      sendTo(SubscriptionPacket.subject, packet, box, matchingNodes);
     }
   }
 
@@ -108,9 +110,7 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
   }
 
   private final void sendEvent(EventPacket pkt, Set<WaitRecommendations> waitRecommendations, Outbox outbox) {
-    for (final WaitRecommendations wr : waitRecommendations) {
-      pkt.addWaitRecommendations(wr);
-    }
+    waitRecommendations.forEach(pkt::addWaitRecommendations);
     final Map<NodeDescriptor, Integer> matchingClients = clientsSubTable.getMatchingNodes(pkt.getEvent());
     final Map<NodeDescriptor, Integer> matchingBrokers = brokersSubTable.getMatchingNodes(pkt.getEvent());
     sendTo(EventPacket.subject, pkt, outbox, matchingClients.keySet());
@@ -197,23 +197,14 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
   }
 
   private final Collection<NodeDescriptor> getAllBrokersExcept(NodeDescriptor nodeToSkip, Collection<NodeDescriptor> neighbors) {
-    final Collection<NodeDescriptor> result = new ArrayList<NodeDescriptor>();
-    for (final NodeDescriptor neighbor : neighbors) {
-      if (!neighbor.isBroker()) {
-        continue;
-      }
-      if (neighbor.equals(nodeToSkip)) {
-        continue;
-      }
-      if (registry != null && neighbor.equals(registry)) {
-        continue;
-      }
-      if (tokenService != null && neighbor.equals(tokenService)) {
-        continue;
-      }
-      result.add(neighbor);
-    }
-    return result;
+    final Predicate<NodeDescriptor> isBroker = node -> node.isBroker();
+    final Predicate<NodeDescriptor> isNotRegistry = node -> registry != null && node.equals(registry);
+    final Predicate<NodeDescriptor> isNotTokenService = node -> tokenService != null && node.equals(tokenService);
+    return neighbors.stream().//
+        filter(isBroker).//
+        filter(isNotRegistry).//
+        filter(isNotTokenService).//
+        collect(Collectors.toList());
   }
 
   private final void reactToRemovedNeighbor(NodeDescriptor node) {

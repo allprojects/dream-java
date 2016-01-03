@@ -23,7 +23,7 @@ public class RemoteVarExample {
       remoteString2.set(String.valueOf(random.nextInt(10)) + "!");
       remoteList.modify(t -> t.add(random.nextInt(1000)));
       try {
-        Thread.sleep(1000);
+        Thread.sleep(2000);
       } catch (final InterruptedException e) {
         e.printStackTrace();
       }

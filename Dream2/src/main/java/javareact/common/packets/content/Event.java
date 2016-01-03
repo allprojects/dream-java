@@ -120,7 +120,7 @@ public class Event implements Iterable<Attribute>, Serializable {
 
   @Override
   public String toString() {
-    return hostId + "." + objectId + "(" + attributes.values() + ")";
+    return objectId + "@" + hostId + "(" + attributes.values() + ")";
   }
 
 }

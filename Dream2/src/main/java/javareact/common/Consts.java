@@ -23,23 +23,23 @@ public final class Consts {
      * Load properties
      */
     try {
-      FileInputStream input = new FileInputStream("jr.properties");
+      final FileInputStream input = new FileInputStream("jr.properties");
       properties.load(input);
       input.close();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
     }
 
-    String serverPortProperty = properties.getProperty("serverPort", "9000");
+    final String serverPortProperty = properties.getProperty("serverPort", "9000");
     serverPort = Integer.parseInt(serverPortProperty);
 
-    String serverAddrProperty = properties.getProperty("serverAddr", "localhost");
+    final String serverAddrProperty = properties.getProperty("serverAddr", "localhost");
     serverAddr = "reds-tcp:" + serverAddrProperty + ":" + serverPort;
 
-    String hostNameProperty = properties.getProperty("hostName", "local");
+    final String hostNameProperty = properties.getProperty("hostName", "local");
     hostName = hostNameProperty;
 
-    String consistencyTypeProperty = properties.getProperty("consistencyType", "glitch_free").toLowerCase();
+    final String consistencyTypeProperty = properties.getProperty("consistencyType", "glitch_free").toLowerCase();
     if (consistencyTypeProperty.equals("causal")) {
       consistencyType = ConsistencyType.CAUSAL;
     } else if (consistencyTypeProperty.equals("glitch_free")) {
@@ -51,14 +51,14 @@ public final class Consts {
     /**
      * Read logging properties
      */
-    LogManager manager = LogManager.getLogManager();
+    final LogManager manager = LogManager.getLogManager();
     try {
       manager.readConfiguration(new FileInputStream(new File(LOGGING_PROPERTIES_FILE_NAME)));
     } catch (SecurityException | IOException e) {
       e.printStackTrace();
     }
-    Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    ConsoleHandler consoleHandler = new ConsoleHandler();
+    final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    final ConsoleHandler consoleHandler = new ConsoleHandler();
     logger.addHandler(consoleHandler);
   }
 }

@@ -29,6 +29,11 @@ public class LocalExample {
     varString1.set("Hello ");
     varString2.set("World!");
 
+    signalInt.addValueChangeListener(val -> System.out.println("signalInt: " + val + " (correct value: 158)"));
+    signalDouble.addValueChangeListener(val -> System.out.println("signalDouble: " + val + " (correct value: 4.8)"));
+    signalString.addValueChangeListener(val -> System.out.println("signalString: " + val + " (correct value: false)"));
+    signalBool.addValueChangeListener(val -> System.out.println("signalBool: " + val + " (correct value: Hello World!)"));
+
     try {
       Thread.sleep(500);
     } catch (final InterruptedException e) {

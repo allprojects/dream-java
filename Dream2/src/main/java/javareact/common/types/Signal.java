@@ -66,7 +66,7 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
       final EventProxyPair templatePair = pairs.get(0);
       final EventPacket templatePkt = templatePair.getEventPacket();
       final UUID id = templatePkt.getId();
-      final Set<String> computedFrom = getComputedFrom(pairs);
+      final String initialVar = getInitialVar(pairs);
       final Set<String> finalExpressions = templatePkt.getFinalExpressions();
       Event ev = null;
       try {
@@ -76,7 +76,7 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
         e.printStackTrace();
       }
       logger.finest("Sending event to dependent reactive objects.");
-      clientEventForwarder.sendEvent(id, ev, computedFrom, finalExpressions, true);
+      clientEventForwarder.sendEvent(id, ev, initialVar, finalExpressions, true);
 
       // Notify listeners
       logger.finest("Notifying registered listeners of the change.");
@@ -107,12 +107,13 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
     clientEventForwarder.advertise(new Advertisement(Consts.hostName, objectId), subs, true);
   }
 
-  private final Set<String> getComputedFrom(Collection<EventProxyPair> pairs) {
-    final Set<String> results = pairs.stream().//
-        map(pair -> pair.getEventPacket().getComputedFrom()).//
-        collect(HashSet::new, HashSet::addAll, HashSet::addAll);
-    results.add(objectId + "@" + Consts.hostName);
-    return results;
+  private final String getInitialVar(Collection<EventProxyPair> pairs) {
+    // All pairs are generated from the same initial var, so we can retrieve the
+    // initial var from any event
+    return pairs.stream().//
+        findAny().//
+        map(p -> p.getEventPacket().getInitialVar()).//
+        get();
   }
 
   @Override

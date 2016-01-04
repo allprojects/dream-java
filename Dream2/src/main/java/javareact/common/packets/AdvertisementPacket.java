@@ -1,6 +1,7 @@
 package javareact.common.packets;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import javareact.common.packets.content.AdvType;
@@ -19,18 +20,18 @@ public class AdvertisementPacket implements Serializable {
 
   private final Advertisement advertisement;
   private final AdvType advType;
-  private final Set<Subscription> subscriptions;
+  private final Set<Subscription> subscriptions = new HashSet<Subscription>();
   private final boolean isPublic;
 
   public AdvertisementPacket(Advertisement advertisement, AdvType advType, Set<Subscription> subscriptions, boolean isPublic) {
-    this.advertisement = advertisement;
-    this.advType = advType;
-    this.subscriptions = subscriptions;
-    this.isPublic = isPublic;
+    this(advertisement, advType, isPublic);
+    this.subscriptions.addAll(subscriptions);
   }
 
   public AdvertisementPacket(Advertisement advertisement, AdvType advType, boolean isPublic) {
-    this(advertisement, advType, null, isPublic);
+    this.advertisement = advertisement;
+    this.advType = advType;
+    this.isPublic = isPublic;
   }
 
   public Advertisement getAdvertisement() {
@@ -39,10 +40,6 @@ public class AdvertisementPacket implements Serializable {
 
   public AdvType getAdvType() {
     return advType;
-  }
-
-  public final boolean containtsSubscriptions() {
-    return subscriptions != null;
   }
 
   public final Set<Subscription> getSubscriptions() {

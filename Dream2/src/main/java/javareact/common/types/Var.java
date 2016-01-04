@@ -1,7 +1,5 @@
 package javareact.common.types;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -41,9 +39,8 @@ public class Var<T> implements ProxyGenerator {
 
   private final void impactOnGet() {
     final Event ev = new Event(Consts.hostName, objectId, new Attribute<T>("get", get()));
-    final Set<String> computedFrom = new HashSet<String>();
-    computedFrom.add(ev.getSignature());
-    forwarder.sendEvent(UUID.randomUUID(), ev, computedFrom, false);
+    final String initialVar = ev.getSignature();
+    forwarder.sendEvent(UUID.randomUUID(), ev, initialVar, false);
   }
 
   @Override

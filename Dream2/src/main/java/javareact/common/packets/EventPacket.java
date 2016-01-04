@@ -19,26 +19,23 @@ public class EventPacket implements Serializable {
 
   private final Event event;
   private final UUID id;
-  private final Set<String> computedFrom = new HashSet<String>();
+  private final String initialVar;
   private boolean approvedByTokenService = false;
 
-  // Wait recommendations are used in glitch free protocols to tell the client to wait before processing an event
+  // Wait recommendations are used in glitch free protocols to tell the client
+  // to wait before processing an event
   private final Map<String, Set<WaitRecommendations>> waitRecommendations = new HashMap<String, Set<WaitRecommendations>>();
 
-  // Final expressions are used in the atomic protocol to determine when the token can be released
-  // Upon receiving a final expression, the server acknowledges the token manager
+  // Final expressions are used in the atomic protocol to determine when the
+  // token can be released
+  // Upon receiving a final expression, the server acknowledges the token
+  // manager
   private final Set<String> finalExpressions = new HashSet<String>();
 
-  public EventPacket(Event event, UUID id, Set<String> computedFrom, boolean approvedByTokenService) {
+  public EventPacket(Event event, UUID id, String initialVar, boolean approvedByTokenService) {
     this.event = event;
     this.id = id;
-    this.computedFrom.addAll(computedFrom);
-    this.approvedByTokenService = approvedByTokenService;
-  }
-
-  public EventPacket(Event event, UUID id, boolean approvedByTokenService) {
-    this.event = event;
-    this.id = id;
+    this.initialVar = initialVar;
     this.approvedByTokenService = approvedByTokenService;
   }
 
@@ -50,12 +47,12 @@ public class EventPacket implements Serializable {
     return id;
   }
 
-  public final Set<String> getComputedFrom() {
-    return computedFrom;
+  public final String getInitialVar() {
+    return initialVar;
   }
 
   public final void addWaitRecommendations(WaitRecommendations recommendations) {
-    String expression = recommendations.getExpression();
+    final String expression = recommendations.getExpression();
     Set<WaitRecommendations> innerSet = waitRecommendations.get(expression);
     if (innerSet == null) {
       innerSet = new HashSet<WaitRecommendations>();
@@ -85,8 +82,7 @@ public class EventPacket implements Serializable {
   }
 
   public final EventPacket dup() {
-    EventPacket result = new EventPacket(event, id, approvedByTokenService);
-    result.computedFrom.addAll(computedFrom);
+    final EventPacket result = new EventPacket(event, id, initialVar, approvedByTokenService);
     result.finalExpressions.addAll(finalExpressions);
     result.waitRecommendations.putAll(waitRecommendations);
     return result;
@@ -102,7 +98,7 @@ public class EventPacket implements Serializable {
 
   @Override
   public String toString() {
-    return "EventPacket [event=" + event + ", id=" + id + ", computedFrom=" + computedFrom + ", waitRecommendations=" + waitRecommendations + ", finalExpressions=" + finalExpressions + "]";
+    return "EventPacket [event=" + event + ", id=" + id + ", initialVar=" + initialVar + ", waitRecommendations=" + waitRecommendations + ", finalExpressions=" + finalExpressions + "]";
   }
 
 }

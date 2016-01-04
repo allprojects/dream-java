@@ -50,7 +50,8 @@ final class FinalExpressionsDetector {
 
   private final void processAdv(AdvertisementPacket advPkt) {
     final String advSignature = advPkt.getAdvertisement().getSignature();
-    if (!advPkt.containtsSubscriptions()) {
+    final Set<Subscription> subs = advPkt.getSubscriptions();
+    if (subs.isEmpty()) {
       initialExpressions.add(advSignature);
     } else {
       for (final Subscription sub : advPkt.getSubscriptions()) {

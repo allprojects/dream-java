@@ -1,14 +1,11 @@
 package javareact.server;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javareact.common.packets.AdvertisementPacket;
 import javareact.common.packets.content.Event;
@@ -16,24 +13,23 @@ import javareact.common.packets.content.Subscription;
 
 final class DependencyDetector {
   private final Map<String, Collection<String>> dependencyGraph = new HashMap<String, Collection<String>>();
+  private final Set<String> initialExpressions = new HashSet<String>();
 
-  // Stores the dependencies for computing expressions
-  // Expression (A) -> Changed expression (B) that led to the re-computation of (A) -> Wait recommendations
+  // Expression -> set of initial expressions it (directly or indirectly)
+  // depends on
+  private final Map<String, Set<String>> initialDependency = new HashMap<String, Set<String>>();
+
+  // Stores the dependencies to compute expressions
+  // Expression Expr -> Expression that led to the re-computation of Expr ->
+  // Wait recommendations
   private final Map<String, Map<String, Set<WaitRecommendations>>> recommendations = new HashMap<String, Map<String, Set<WaitRecommendations>>>();
 
-  final Set<WaitRecommendations> getWaitRecommendations(Event event, Set<String> computedFrom) {
-    String eventSignature = event.getSignature();
-    Map<String, Set<WaitRecommendations>> innerMap = recommendations.get(eventSignature);
-    Set<WaitRecommendations> result = new HashSet<WaitRecommendations>();
+  final Set<WaitRecommendations> getWaitRecommendations(Event event, String initialVar) {
+    final Map<String, Set<WaitRecommendations>> innerMap = recommendations.get(event.getSignature());
     if (innerMap == null) {
-      return result;
+      return new HashSet<>();
     }
-    for (String exp : innerMap.keySet()) {
-      if (computedFrom.contains(exp)) {
-        result.addAll(innerMap.get(exp));
-      }
-    }
-    return result;
+    return innerMap.containsKey(initialVar) ? innerMap.get(initialVar) : new HashSet<>();
   }
 
   final void processAdvertisementPacket(AdvertisementPacket advPkt) {
@@ -55,16 +51,15 @@ final class DependencyDetector {
   }
 
   private final void processAdv(AdvertisementPacket advPkt) {
-    if (!advPkt.containtsSubscriptions()) return;
-    for (Subscription sub : advPkt.getSubscriptions()) {
-      String advSignature = advPkt.getAdvertisement().getSignature();
-      String subSignature = sub.getSignature();
-      Collection<String> subSignatures = dependencyGraph.get(advSignature);
-      if (subSignatures == null) {
-        subSignatures = new HashSet<String>();
-        dependencyGraph.put(advSignature, subSignatures);
-      }
-      subSignatures.add(subSignature);
+    final String advSignature = advPkt.getAdvertisement().getSignature();
+    final Set<Subscription> subs = advPkt.getSubscriptions();
+    if (!subs.isEmpty()) {
+      final Set<String> subSignatures = subs.stream().//
+          map(sub -> sub.getSignature()).//
+          collect(Collectors.toSet());
+      dependencyGraph.put(advSignature, subSignatures);
+    } else {
+      initialExpressions.add(advSignature);
     }
   }
 
@@ -73,167 +68,77 @@ final class DependencyDetector {
   }
 
   private final void computeRecommendations() {
-    for (String expression : dependencyGraph.keySet()) {
-      Collection<String> dependingFrom = dependencyGraph.get(expression);
-      if (dependingFrom.size() > 1) {
-        List<Path> paths = generatePathsFor(expression);
-        computeRecommendationsFromPaths(expression, paths);
-      }
-    }
+    recommendations.clear();
+    computeInitialDependencies();
+    dependencyGraph.keySet().forEach(expr -> {
+      initialDependency.get(expr).forEach(initialExpr -> storeRecommendationsFor(expr, initialExpr));
+    });
   }
 
-  private final List<Path> generatePathsFor(String expression) {
-    List<Path> results = new ArrayList<Path>();
-    generatePathsFor(expression, new Path(), results);
-    Collections.sort(results);
-    return results;
-  }
-
-  private final void generatePathsFor(String expression, Path path, List<Path> paths) {
-    path.addFirst(expression);
-    if (!dependencyGraph.containsKey(expression)) {
-      paths.add(path);
-    } else {
-      for (String depNode : dependencyGraph.get(expression)) {
-        generatePathsFor(depNode, new Path(path), paths);
-      }
-    }
-  }
-
-  private final void computeRecommendationsFromPaths(String expression, List<Path> paths) {
-    Path firstPath = paths.get(0);
-    Path prefix = firstPath;
-    List<Path> consideredPaths = new ArrayList<Path>();
-    consideredPaths.add(firstPath);
-    for (int i = 1; i < paths.size(); i++) {
-      Path path = paths.get(i);
-      Path newPrefix = prefix.getCommonPrefix(path);
-      // The path is the new element of a new dependency
-      if (newPrefix.isEmpty()) {
-        // Save the computed dependency
-        storeRecommendationsFromPath(prefix, consideredPaths);
-        // Initialize variables for new iteration (if any)
-        consideredPaths.clear();
-        consideredPaths.add(path);
-        prefix = path;
-      } else {
-        // Initialize variables for new iteration  (if any)
-        prefix = newPrefix;
-        consideredPaths.add(path);
-        // If it is the last iteration, then save the computed dependency
-        if (i == paths.size() - 1) {
-          storeRecommendationsFromPath(newPrefix, consideredPaths);
+  private final void storeRecommendationsFor(String expr, String initialExpr) {
+    final Set<String> dependentSiblings = computeDependentSiblingsFor(expr, initialExpr);
+    if (dependentSiblings.size() > 1) {
+      dependentSiblings.forEach(sibling -> {
+        Map<String, Set<WaitRecommendations>> recommendationsMap = recommendations.get(sibling);
+        if (recommendationsMap == null) {
+          recommendationsMap = new HashMap<>();
+          recommendations.put(sibling, recommendationsMap);
         }
-      }
+        final Set<WaitRecommendations> recommendationsSet = new HashSet<>();
+        recommendationsMap.put(initialExpr, recommendationsSet);
+        final WaitRecommendations wr = new WaitRecommendations(expr);
+        recommendationsSet.add(wr);
+        dependentSiblings.stream().//
+            filter(e -> !e.equals(sibling)).//
+            forEach(wr::addRecommendation);
+      });
     }
-  }
-
-  private final void storeRecommendationsFromPath(Path prefix, List<Path> consideredPaths) {
-    String lastCommonExpression = prefix.getLastExpression();
-    WaitRecommendations waitRecommendations = getRecommendationsFor(consideredPaths);
-    Set<String> recommendationsSet = waitRecommendations.getRecommendations();
-    for (String expressionToWaitFor : recommendationsSet) {
-      WaitRecommendations recommendationsToStore = waitRecommendations.dup();
-      recommendationsToStore.removeExpressionToWaitFor(expressionToWaitFor);
-      Map<String, Set<WaitRecommendations>> innerMap = recommendations.get(expressionToWaitFor);
-      if (innerMap == null) {
-        innerMap = new HashMap<String, Set<WaitRecommendations>>();
-        recommendations.put(expressionToWaitFor, innerMap);
-      }
-      Set<WaitRecommendations> waitSet = innerMap.get(lastCommonExpression);
-      if (waitSet == null) {
-        waitSet = new HashSet<WaitRecommendations>();
-        innerMap.put(lastCommonExpression, waitSet);
-      }
-      waitSet.add(recommendationsToStore);
-    }
-  }
-
-  private final WaitRecommendations getRecommendationsFor(List<Path> paths) {
-    WaitRecommendations result = null;
-    for (Path path : paths) {
-      if (result == null) {
-        String lastExpression = path.getLastExpression();
-        result = new WaitRecommendations(lastExpression);
-      }
-      String waitForExpression = path.getSecondLastExpression();
-      result.addRecommendation(waitForExpression);
-    }
-    return result;
   }
 
   /**
-   * Represents a path in the expression graph as a list of expressions.
+   * Compute the set of all expressions with the following properties:
+   *
+   * 1) expr directly depends on them
+   *
+   * 2) they directly or indirectly depend on the initialExpression
    */
-  private class Path implements Comparable<Path> {
-    private final LinkedList<String> expressions;
+  private final Set<String> computeDependentSiblingsFor(String expr, String initialExpression) {
+    return dependencyGraph.get(expr).stream().//
+        filter(dep -> initialDependency.get(dep).contains(initialExpression)).//
+        collect(Collectors.toSet());
+  }
 
-    Path() {
-      expressions = new LinkedList<String>();
+  private final void computeInitialDependencies() {
+    initialDependency.clear();
+    initialExpressions.forEach(expr -> {
+      final HashSet<String> initialExpressionsSet = new HashSet<>();
+      initialExpressionsSet.add(expr);
+      initialDependency.put(expr, initialExpressionsSet);
+    });
+    dependencyGraph.keySet().forEach(expr -> initialDependency.put(expr, computeInitialDependenciesFor(expr)));
+  }
+
+  private final Set<String> computeInitialDependenciesFor(String expression) {
+    final Set<String> newExpressions = new HashSet<String>();
+    final Set<String> accumulator = new HashSet<String>();
+    newExpressions.add(expression);
+    computeInitialDependenciesFor(newExpressions, accumulator);
+    return accumulator;
+  }
+
+  private final void computeInitialDependenciesFor(Set<String> newExpressions, Set<String> accumulator) {
+    newExpressions.stream().//
+        filter(initialExpressions::contains).//
+        collect(() -> accumulator, Set::add, Set::addAll);
+
+    final Set<String> newExpressionsToEvaluate = newExpressions.stream().//
+        filter(expr -> !initialExpressions.contains(expr)).//
+        map(dependencyGraph::get).//
+        collect(HashSet::new, HashSet::addAll, HashSet::addAll);
+
+    if (!newExpressionsToEvaluate.isEmpty()) {
+      computeInitialDependenciesFor(newExpressionsToEvaluate, accumulator);
     }
-
-    Path(Path path) {
-      expressions = new LinkedList<String>(path.expressions);
-    }
-
-    final void addFirst(String expression) {
-      expressions.addFirst(expression);
-    }
-
-    private final void addLast(String expression) {
-      expressions.addLast(expression);
-    }
-
-    final Path getCommonPrefix(Path other) {
-      Path prefix = new Path();
-      for (int i = 0; i < expressions.size(); i++) {
-        if (other.expressions.size() <= i) {
-          break;
-        }
-        String myString = expressions.get(i);
-        String otherString = other.expressions.get(i);
-        if (myString.equals(otherString)) {
-          prefix.addLast(myString);
-        } else {
-          break;
-        }
-      }
-      return prefix;
-    }
-
-    final boolean isEmpty() {
-      return expressions.isEmpty();
-    }
-
-    final String getLastExpression() {
-      return expressions.getLast();
-    }
-
-    final String getSecondLastExpression() {
-      return expressions.get(expressions.size() - 2);
-    }
-
-    @Override
-    public final int compareTo(Path other) {
-      for (int i = 0; i < expressions.size(); i++) {
-        if (other.expressions.size() <= i) {
-          return 1;
-        }
-        String myString = expressions.get(i);
-        String otherString = other.expressions.get(i);
-        int compareStrings = myString.compareTo(otherString);
-        if (compareStrings != 0) {
-          return compareStrings;
-        }
-      }
-      return 0;
-    }
-
-    @Override
-    public final String toString() {
-      return expressions.toString();
-    }
-
   }
 
 }

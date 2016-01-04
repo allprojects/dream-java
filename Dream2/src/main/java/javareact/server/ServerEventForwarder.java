@@ -97,7 +97,7 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
       sendToTokenService(EventPacket.subject, packet, outbox);
     } else {
       if ((sender.isClient() || sender.equals(tokenService)) && (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC)) {
-        final Set<WaitRecommendations> waitRecommendations = dependencyDetector.getWaitRecommendations(packet.getEvent(), packet.getComputedFrom());
+        final Set<WaitRecommendations> waitRecommendations = dependencyDetector.getWaitRecommendations(packet.getEvent(), packet.getInitialVar());
         sendEvent(packet, waitRecommendations, outbox);
       } else {
         sendEvent(packet, outbox);

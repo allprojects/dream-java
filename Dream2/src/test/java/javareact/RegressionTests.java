@@ -9,8 +9,7 @@ import javareact.token_service.FinalExpressionsDetectorTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ DependencyDetectorTest.class, //
     FinalExpressionsDetectorTest.class, //
-    LocalTest.class, //
-    RemoteTest.class })
+    LocalTest.class })
 
 public class RegressionTests {
 

@@ -27,7 +27,9 @@ public class DependencyDetectorTest {
     final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
     final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
 
+    final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
     final Advertisement advD = new Advertisement("Host", "D");
 
     // Subscription to A (A generates B)
@@ -43,28 +45,27 @@ public class DependencyDetectorTest {
     final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advC, AdvType.ADV, true));
+
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    final Set<String> computedFromA = new HashSet<String>();
     final Event evA = new Event("Host", "A");
-    assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA, "A@Host").size(), 0);
 
     // Event B
-    final Set<String> computedFromB = new HashSet<String>();
     final Event evB = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB, computedFromB).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evB, "A@Host").size(), 0);
 
     // Event C
-    final Set<String> computedFromC = new HashSet<String>();
     final Event evC = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC, computedFromC).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evC, "A@Host").size(), 0);
 
     // Event D
-    final Set<String> computedFromD = new HashSet<String>();
     final Event evD = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evD, "A@Host").size(), 0);
   }
 
   @Test
@@ -76,6 +77,7 @@ public class DependencyDetectorTest {
     final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
     final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
 
+    final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
     final Advertisement advC = new Advertisement("Host", "C");
 
@@ -92,39 +94,36 @@ public class DependencyDetectorTest {
     final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
     depDetector.processAdvertisementPacket(advPktC);
 
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    final Set<String> computedFromA = new HashSet<String>();
     final Event evA = new Event("Host", "A");
-    assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
-    computedFromA.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
     final Event evA2 = new Event("Host", "A");
-    assertEquals(depDetector.getWaitRecommendations(evA2, computedFromA).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evA2, computedFromA)) {
+    assertEquals(depDetector.getWaitRecommendations(evA2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evA2, "A@Host")) {
       assertTrue(wr.getExpression().equals("C@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event B
-    final Set<String> computedFromB = new HashSet<String>();
     final Event evB1 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
     final Event evB2 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+    assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("C@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("A@Host"));
     }
 
     // Event C
-    final Set<String> computedFromC = new HashSet<String>();
     final Event evC = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC, computedFromC).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evC, "").size(), 0);
   }
 
   @Test
@@ -138,6 +137,7 @@ public class DependencyDetectorTest {
     final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
     final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
 
+    final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
     final Advertisement advC = new Advertisement("Host", "C");
     final Advertisement advD = new Advertisement("Host", "D");
@@ -161,44 +161,40 @@ public class DependencyDetectorTest {
     final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    final Set<String> computedFromA = new HashSet<String>();
     final Event evA = new Event("Host", "A");
-    assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
 
     // Event B
-    final Set<String> computedFromB = new HashSet<String>();
     final Event evB1 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
     final Event evB2 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+    assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
     // Event C
-    final Set<String> computedFromC = new HashSet<String>();
     final Event evC1 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
     final Event evC2 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
+    assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event D
-    final Set<String> computedFromD = new HashSet<String>();
     final Event evD = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evD, "").size(), 0);
   }
 
   @Test
@@ -214,10 +210,13 @@ public class DependencyDetectorTest {
     final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
     final Subscription subD = new Subscription("Host", "D", UUID.randomUUID());
 
+    final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
     final Advertisement advC = new Advertisement("Host", "C");
     final Advertisement advD = new Advertisement("Host", "D");
     final Advertisement advE = new Advertisement("Host", "E");
+
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
 
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
@@ -248,48 +247,40 @@ public class DependencyDetectorTest {
     depDetector.consolidate();
 
     // Event A
-    final Set<String> computedFromA = new HashSet<String>();
     final Event evA = new Event("Host", "A");
-    assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
 
     // Event B
-    final Set<String> computedFromB = new HashSet<String>();
     final Event evB1 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
     final Event evB2 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+    assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("D@Host"));
     }
 
     // Event C
-    final Set<String> computedFromC = new HashSet<String>();
     final Event evC1 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
     final Event evC2 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 0);
 
     // Event D
-    final Set<String> computedFromD = new HashSet<String>();
     final Event evD1 = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD1, computedFromD).size(), 0);
-    computedFromD.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evD1, "").size(), 0);
     final Event evD2 = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD2, computedFromC).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, computedFromC)) {
+    assertEquals(depDetector.getWaitRecommendations(evD2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event E
-    final Set<String> computedFromE = new HashSet<String>();
     final Event evE = new Event("E", "Host");
-    assertEquals(depDetector.getWaitRecommendations(evE, computedFromE).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evE, "").size(), 0);
   }
 
   @Test
@@ -303,6 +294,7 @@ public class DependencyDetectorTest {
     final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
     final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
 
+    final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
     final Advertisement advC = new Advertisement("Host", "C");
     final Advertisement advD = new Advertisement("Host", "D");
@@ -326,47 +318,42 @@ public class DependencyDetectorTest {
     final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    final Set<String> computedFromA = new HashSet<String>();
     final Event evA = new Event("Host", "A");
-    assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
 
     // Event B
-    final Set<String> computedFromB = new HashSet<String>();
     final Event evB1 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("B@Host");
+    assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
     final Event evB2 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+    assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
     // Event C
-    final Set<String> computedFromC = new HashSet<String>();
     final Event evC1 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("B@Host");
+    assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
     final Event evC2 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromB)) {
+    assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event D
-    final Set<String> computedFromD = new HashSet<String>();
     final Event evD1 = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD1, computedFromD).size(), 0);
-    computedFromD.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evD1, "").size(), 0);
     final Event evD2 = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD2, computedFromC).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evD2, "A@Host").size(), 0);
   }
 
   @Test
@@ -382,10 +369,13 @@ public class DependencyDetectorTest {
     final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
     final Subscription subD = new Subscription("Host", "D", UUID.randomUUID());
 
+    final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
     final Advertisement advC = new Advertisement("Host", "C");
     final Advertisement advD = new Advertisement("Host", "D");
     final Advertisement advE = new Advertisement("Host", "E");
+
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
 
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
@@ -417,18 +407,15 @@ public class DependencyDetectorTest {
     depDetector.consolidate();
 
     // Event A
-    final Set<String> computedFromA = new HashSet<String>();
     final Event evA = new Event("Host", "A");
-    assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
 
     // Event B
-    final Set<String> computedFromB = new HashSet<String>();
     final Event evB1 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
     final Event evB2 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+    assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
       assertTrue(wr.getRecommendations().contains("C@Host"));
@@ -436,13 +423,11 @@ public class DependencyDetectorTest {
     }
 
     // Event C
-    final Set<String> computedFromC = new HashSet<String>();
     final Event evC1 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
     final Event evC2 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
+    assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
       assertTrue(wr.getRecommendations().contains("B@Host"));
@@ -450,13 +435,11 @@ public class DependencyDetectorTest {
     }
 
     // Event D
-    final Set<String> computedFromD = new HashSet<String>();
     final Event evD1 = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD1, computedFromD).size(), 0);
-    computedFromD.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evD1, "").size(), 0);
     final Event evD2 = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD2, computedFromD).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, computedFromD)) {
+    assertEquals(depDetector.getWaitRecommendations(evD2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
       assertTrue(wr.getRecommendations().contains("B@Host"));
@@ -464,9 +447,8 @@ public class DependencyDetectorTest {
     }
 
     // Event E
-    final Set<String> computedFromE = new HashSet<String>();
     final Event evE = new Event("Host", "E");
-    assertEquals(depDetector.getWaitRecommendations(evE, computedFromE).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evE, "A@Host").size(), 0);
   }
 
   @Test
@@ -485,6 +467,8 @@ public class DependencyDetectorTest {
     final Subscription subC1 = new Subscription("Host", "C1", UUID.randomUUID());
     final Subscription subC2 = new Subscription("Host", "C2", UUID.randomUUID());
 
+    final Advertisement advA1 = new Advertisement("Host", "A1");
+    final Advertisement advA2 = new Advertisement("Host", "A2");
     final Advertisement advB1 = new Advertisement("Host", "B1");
     final Advertisement advB2 = new Advertisement("Host", "B2");
     final Advertisement advC1 = new Advertisement("Host", "C1");
@@ -524,67 +508,59 @@ public class DependencyDetectorTest {
     final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(advPktD);
 
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA1, AdvType.ADV, true));
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA2, AdvType.ADV, true));
+
     // Consolidate
     depDetector.consolidate();
 
     // Event A1
-    final Set<String> computedFromA1 = new HashSet<String>();
     final Event evA1 = new Event("Host", "A1");
-    assertEquals(depDetector.getWaitRecommendations(evA1, computedFromA1).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA1, "A1@Host").size(), 0);
 
     // Event A2
-    final Set<String> computedFromA2 = new HashSet<String>();
     final Event evA2 = new Event("Host", "A2");
-    assertEquals(depDetector.getWaitRecommendations(evA2, computedFromA2).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA2, "A2@Host").size(), 0);
 
     // Event B1
-    final Set<String> computedFromB1 = new HashSet<String>();
-    computedFromB1.add("A1@Host");
     final Event evB1 = new Event("Host", "B1");
-    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB1).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB1, computedFromB1)) {
+    assertEquals(depDetector.getWaitRecommendations(evB1, "A1@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB1, "A1@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("C1@Host"));
     }
 
     // Event C1
-    final Set<String> computedFromC1 = new HashSet<String>();
-    computedFromC1.add("A1@Host");
     final Event evC1 = new Event("Host", "C1");
-    assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC1).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC1, computedFromC1)) {
+    assertEquals(depDetector.getWaitRecommendations(evC1, "A1@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC1, "A1@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("B1@Host"));
     }
 
     // Event B2
-    final Set<String> computedFromB2 = new HashSet<String>();
-    computedFromB2.add("A2@Host");
     final Event evB2 = new Event("Host", "B2");
-    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB2).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB2)) {
+    assertEquals(depDetector.getWaitRecommendations(evB2, "A2@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A2@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("C2@Host"));
     }
 
     // Event C2
-    final Set<String> computedFromC2 = new HashSet<String>();
-    computedFromC2.add("A2@Host");
     final Event evC2 = new Event("Host", "C2");
-    assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC2).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC2)) {
+    assertEquals(depDetector.getWaitRecommendations(evC2, "A2@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A2@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("B2@Host"));
     }
 
     // Event D
-    final Set<String> computedFromD = new HashSet<String>();
     final Event evD = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evD, "A2@Host").size(), 0);
   }
 
   @Test
@@ -599,9 +575,14 @@ public class DependencyDetectorTest {
     final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
     final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
 
+    final Advertisement advA1 = new Advertisement("Host", "A1");
+    final Advertisement advA2 = new Advertisement("Host", "A2");
     final Advertisement advB = new Advertisement("Host", "B");
     final Advertisement advC = new Advertisement("Host", "C");
     final Advertisement advD = new Advertisement("Host", "D");
+
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA1, AdvType.ADV, true));
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA2, AdvType.ADV, true));
 
     // Subscription to A1 (A1 generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
@@ -627,53 +608,44 @@ public class DependencyDetectorTest {
     depDetector.consolidate();
 
     // Event A1
-    final Set<String> computedFromA1 = new HashSet<String>();
     final Event evA1 = new Event("Host", "A1");
-    assertEquals(depDetector.getWaitRecommendations(evA1, computedFromA1).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA1, "A1@Host").size(), 0);
 
     // Event A2
-    final Set<String> computedFromA2 = new HashSet<String>();
     final Event evA2 = new Event("Host", "A2");
-    assertEquals(depDetector.getWaitRecommendations(evA2, computedFromA2).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA2, "A2@Host").size(), 0);
 
     // Event B from A1
-    final Set<String> computedFromB = new HashSet<String>();
     final Event evB1 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("A1@Host");
+    assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
     final Event evB2 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+    assertEquals(depDetector.getWaitRecommendations(evB2, "A1@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A1@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
     // Event C from A1
-    final Set<String> computedFromC1 = new HashSet<String>();
     final Event evC1_1 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC1_1, computedFromC1).size(), 0);
-    computedFromC1.add("A1@Host");
+    assertEquals(depDetector.getWaitRecommendations(evC1_1, "").size(), 0);
     final Event evC1_2 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC1_2, computedFromC1).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC1_2, computedFromC1)) {
+    assertEquals(depDetector.getWaitRecommendations(evC1_2, "A1@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC1_2, "A1@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
     // Event C from A2
-    final Set<String> computedFromC2 = new HashSet<String>();
     final Event evC2_1 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC2_1, computedFromC2).size(), 0);
-    computedFromC1.add("A2@Host");
+    assertEquals(depDetector.getWaitRecommendations(evC2_1, "").size(), 0);
     final Event evC2_2 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC2_2, computedFromC2).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evC2_2, "A2@Host").size(), 0);
 
     // Event D
-    final Set<String> computedFromD = new HashSet<String>();
     final Event evD = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evD, "A2@Host").size(), 0);
   }
 
   @Test
@@ -695,6 +667,7 @@ public class DependencyDetectorTest {
     final Subscription subG = new Subscription("Host", "G", UUID.randomUUID());
     final Subscription subH = new Subscription("Host", "H", UUID.randomUUID());
 
+    final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
     final Advertisement advC = new Advertisement("Host", "C");
     final Advertisement advD = new Advertisement("Host", "D");
@@ -748,22 +721,21 @@ public class DependencyDetectorTest {
     final AdvertisementPacket subPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
     depDetector.processAdvertisementPacket(subPktD);
 
+    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+
     // Consolidate
     depDetector.consolidate();
 
     // Event A
-    final Set<String> computedFromA = new HashSet<String>();
     final Event evA = new Event("Host", "A");
-    assertEquals(depDetector.getWaitRecommendations(evA, computedFromA).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evA, "A@Host").size(), 0);
 
     // Event B
-    final Set<String> computedFromB = new HashSet<String>();
     final Event evB1 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB1, computedFromB).size(), 0);
-    computedFromB.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
     final Event evB2 = new Event("Host", "B");
-    assertEquals(depDetector.getWaitRecommendations(evB2, computedFromB).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, computedFromB)) {
+    assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
       assertTrue(wr.getRecommendations().contains("C@Host"));
@@ -771,13 +743,11 @@ public class DependencyDetectorTest {
     }
 
     // Event C
-    final Set<String> computedFromC = new HashSet<String>();
     final Event evC1 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC1, computedFromC).size(), 0);
-    computedFromC.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
     final Event evC2 = new Event("Host", "C");
-    assertEquals(depDetector.getWaitRecommendations(evC2, computedFromC).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, computedFromC)) {
+    assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
       assertTrue(wr.getRecommendations().contains("B@Host"));
@@ -785,44 +755,37 @@ public class DependencyDetectorTest {
     }
 
     // Event E
-    final Set<String> computedFromE = new HashSet<String>();
     final Event evE = new Event("Host", "E");
-    assertEquals(depDetector.getWaitRecommendations(evE, computedFromE).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evE, "A@Host").size(), 0);
 
     // Event F
-    final Set<String> computedFromF = new HashSet<String>();
     final Event evF1 = new Event("Host", "F");
-    assertEquals(depDetector.getWaitRecommendations(evF1, computedFromF).size(), 0);
-    computedFromF.add("E@Host");
+    assertEquals(depDetector.getWaitRecommendations(evF1, "").size(), 0);
     final Event evF2 = new Event("Host", "F");
-    assertEquals(depDetector.getWaitRecommendations(evF2, computedFromF).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evF2, computedFromF)) {
+    assertEquals(depDetector.getWaitRecommendations(evF2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evF2, "A@Host")) {
       assertTrue(wr.getExpression().equals("H@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("G@Host"));
     }
 
     // Event G
-    final Set<String> computedFromG = new HashSet<String>();
     final Event evG1 = new Event("Host", "G");
-    assertEquals(depDetector.getWaitRecommendations(evG1, computedFromG).size(), 0);
-    computedFromG.add("E@Host");
+    assertEquals(depDetector.getWaitRecommendations(evG1, "").size(), 0);
     final Event evG2 = new Event("Host", "G");
-    assertEquals(depDetector.getWaitRecommendations(evG2, computedFromG).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evG2, computedFromG)) {
+    assertEquals(depDetector.getWaitRecommendations(evG2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evG2, "A@Host")) {
       assertTrue(wr.getExpression().equals("H@Host"));
       assertEquals(wr.getRecommendations().size(), 1);
       assertTrue(wr.getRecommendations().contains("F@Host"));
     }
 
     // Event H
-    final Set<String> computedFromH = new HashSet<String>();
     final Event evH1 = new Event("Host", "H");
-    assertEquals(depDetector.getWaitRecommendations(evH1, computedFromH).size(), 0);
-    computedFromH.add("A@Host");
+    assertEquals(depDetector.getWaitRecommendations(evH1, "").size(), 0);
     final Event evH2 = new Event("Host", "H");
-    assertEquals(depDetector.getWaitRecommendations(evH2, computedFromH).size(), 1);
-    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evH2, computedFromH)) {
+    assertEquals(depDetector.getWaitRecommendations(evH2, "A@Host").size(), 1);
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evH2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
       assertEquals(wr.getRecommendations().size(), 2);
       assertTrue(wr.getRecommendations().contains("B@Host"));
@@ -830,8 +793,7 @@ public class DependencyDetectorTest {
     }
 
     // Event D
-    final Set<String> computedFromD = new HashSet<String>();
     final Event evD = new Event("Host", "D");
-    assertEquals(depDetector.getWaitRecommendations(evD, computedFromD).size(), 0);
+    assertEquals(depDetector.getWaitRecommendations(evD, "A@Host").size(), 0);
   }
 }

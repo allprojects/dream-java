@@ -68,20 +68,20 @@ public class ClientEventForwarder implements PacketForwarder {
     return result;
   }
 
-  public final void sendEvent(UUID id, Event ev, Set<String> computedFrom, boolean approvedByTokenService) {
-    sendEvent(id, ev, computedFrom, new HashSet<String>(), approvedByTokenService);
+  public final void sendEvent(UUID id, Event ev, String initialVar, boolean approvedByTokenService) {
+    sendEvent(id, ev, initialVar, new HashSet<String>(), approvedByTokenService);
   }
 
-  public final void sendEvent(UUID id, Event ev, Set<String> computedFrom, Set<String> finalExpressions, boolean approvedByTokenService) {
+  public final void sendEvent(UUID id, Event ev, String initialVar, Set<String> finalExpressions, boolean approvedByTokenService) {
     logger.finer("Sending an event " + ev);
     // Local forward occurs only if glitch freedom is not guaranteed.
     // Indeed, to ensure glitch freedom, all events, including local ones,
     // need to be pass through the server before being delivered
     if (Consts.consistencyType != ConsistencyType.GLITCH_FREE && Consts.consistencyType != ConsistencyType.ATOMIC) {
-      subTable.getMatchingSubscribers(ev).forEach(sub -> sub.notifyValueChanged(new EventPacket(ev, id, computedFrom, approvedByTokenService)));
+      subTable.getMatchingSubscribers(ev).forEach(sub -> sub.notifyValueChanged(new EventPacket(ev, id, initialVar, approvedByTokenService)));
     }
     if (subTable.needsToDeliverToServer(ev)) {
-      connectionManager.sendEvent(id, ev, computedFrom, finalExpressions, approvedByTokenService);
+      connectionManager.sendEvent(id, ev, initialVar, finalExpressions, approvedByTokenService);
     }
   }
 

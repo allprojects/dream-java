@@ -1,4 +1,5 @@
+- Understand why the notification to listener is not in sync with the computation of a new value, and fix the problem.
+
 - Can we create a proxy to a method (not to an object)?
-	- Work in progress
 - Can we consider methods with parameters?
 - Can we define constraints on the return values of methods?

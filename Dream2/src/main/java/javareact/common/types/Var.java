@@ -2,7 +2,6 @@ package javareact.common.types;
 
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import javareact.client.ClientEventForwarder;
 import javareact.common.Consts;
@@ -26,20 +25,20 @@ public class Var<T> implements ProxyGenerator {
 
   public final synchronized void set(T val) {
     this.val = val;
-    impactOn("get", () -> this.get());
+    impactOnGet();
   }
 
   public final synchronized void modify(Consumer<T> modification) {
     modification.accept(val);
-    impactOn("get", () -> get());
+    impactOnGet();
   }
 
   public final synchronized T get() {
     return val;
   }
 
-  protected final void impactOn(String methodName, Supplier<?> method) {
-    final Event ev = new Event(Consts.hostName, objectId, new Attribute(methodName, method.get()));
+  protected final void impactOnGet() {
+    final Event ev = new Event(Consts.hostName, objectId, new Attribute<T>("get", get()));
     forwarder.sendEvent(UUID.randomUUID(), ev, ev.getSignature(), false);
   }
 

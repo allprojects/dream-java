@@ -9,8 +9,6 @@ public class LocalExample4 {
 
   public static void main(String args[]) {
     final VarList<Integer> varList = new VarList<>("varList", new ArrayList<Integer>());
-    // TODO: how to specify that we are interested in the method "size", and not
-    // on the default method "get"?
     final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 1000 + varList.size(), varList);
 
     signalInt.addValueChangeListener(System.out::println);

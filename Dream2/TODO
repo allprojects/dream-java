@@ -1,3 +1,4 @@
 - Can we create a proxy to a method (not to an object)?
-	- If not, we can get rid of AspectJ and obtain a pure Java project
+	- Work in progress
+- Can we consider methods with parameters?
 - Can we define constraints on the return values of methods?

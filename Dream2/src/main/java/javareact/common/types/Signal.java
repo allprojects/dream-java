@@ -1,5 +1,6 @@
 package javareact.common.types;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,15 +14,14 @@ import java.util.stream.Collectors;
 import javareact.client.ClientEventForwarder;
 import javareact.client.QueueManager;
 import javareact.common.Consts;
+import javareact.common.SerializablePredicate;
 import javareact.common.ValueChangeListener;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Advertisement;
-import javareact.common.packets.content.Attribute;
-import javareact.common.packets.content.Constraint;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyChangeListener {
+public class Signal<T extends Serializable> implements TimeChangingValue<T>, ProxyChangeListener {
   private final Set<ValueChangeListener<T>> listeners = new HashSet<ValueChangeListener<T>>();
   private final ClientEventForwarder clientEventForwarder;
   private final QueueManager queueManager = new QueueManager();
@@ -31,19 +31,37 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-  private RemoteVar<T> proxy = null;
+  private RemoteVar<T> proxy;
+  private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
   protected T val;
 
-  public Signal(String name, Supplier<T> evaluation, ProxyGenerator... vars) {
-    this.objectId = name;
+  public Signal(String objectId, Supplier<T> evaluation, ProxyGenerator... vars) {
+    this.objectId = objectId;
+    this.evaluation = evaluation;
+
     clientEventForwarder = ClientEventForwarder.get();
+
     for (final ProxyGenerator var : vars) {
       final Proxy varProxy = var.getProxy();
       dependentProxies.add(varProxy);
       varProxy.addProxyChangeListener(this);
     }
-    this.evaluation = evaluation;
+
     sendAdvertisement();
+  }
+
+  /**
+   * Private constructor used only for filters. Does not send advertisements and
+   * does not retain any value.
+   */
+  private Signal(Signal<T> copy, SerializablePredicate constraint) {
+    this.objectId = copy.objectId;
+    this.evaluation = null;
+    this.val = null;
+    clientEventForwarder = ClientEventForwarder.get();
+
+    constraints.addAll(copy.constraints);
+    constraints.add(constraint);
   }
 
   @Override
@@ -68,13 +86,8 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
       final UUID id = templatePkt.getId();
       final String initialVar = getInitialVar(pairs);
       final Set<String> finalExpressions = templatePkt.getFinalExpressions();
-      Event ev = null;
-      try {
-        // TODO consider methods other than get()!!!
-        ev = new Event(Consts.hostName, objectId, Attribute.of("get", val));
-      } catch (final Exception e) {
-        e.printStackTrace();
-      }
+
+      final Event<T> ev = new Event<T>(Consts.hostName, objectId, val);
       logger.finest("Sending event to dependent reactive objects.");
       clientEventForwarder.sendEvent(id, ev, initialVar, finalExpressions, true);
 
@@ -102,7 +115,7 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
 
   private final void sendAdvertisement() {
     final Set<Subscription> subs = dependentProxies.stream().//
-        map(p -> new Subscription(p.getHost(), p.getObject(), p.getProxyID(), new Constraint(p.getMethod()))).//
+        map(p -> new Subscription(p.getHost(), p.getObject(), p.getProxyID(), p.getConstraints())).//
         collect(Collectors.toSet());
     clientEventForwarder.advertise(new Advertisement(Consts.hostName, objectId), subs, true);
   }
@@ -128,9 +141,14 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
   @Override
   public synchronized RemoteVar<T> getProxy() {
     if (proxy == null) {
-      proxy = new RemoteVar<T>(objectId);
+      proxy = new RemoteVar<T>(objectId, constraints);
     }
     return proxy;
+  }
+
+  @Override
+  public ProxyGenerator<T> filter(SerializablePredicate<T> constraint) {
+    return new Signal<T>(this, constraint);
   }
 
 }

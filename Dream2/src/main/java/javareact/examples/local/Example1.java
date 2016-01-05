@@ -3,7 +3,7 @@ package javareact.examples.local;
 import javareact.common.types.Signal;
 import javareact.common.types.Var;
 
-public class LocalExample {
+public class Example1 {
 
   public static void main(String args[]) {
     final Var<Integer> varInt = new Var<>("varInt", 1);

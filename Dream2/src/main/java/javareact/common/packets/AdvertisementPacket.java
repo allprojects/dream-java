@@ -20,7 +20,7 @@ public class AdvertisementPacket implements Serializable {
 
   private final Advertisement advertisement;
   private final AdvType advType;
-  private final Set<Subscription> subscriptions = new HashSet<Subscription>();
+  private final Set<Subscription> subscriptions = new HashSet<>();
   private final boolean isPublic;
 
   public AdvertisementPacket(Advertisement advertisement, AdvType advType, Set<Subscription> subscriptions, boolean isPublic) {

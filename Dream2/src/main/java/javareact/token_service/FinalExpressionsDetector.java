@@ -54,7 +54,7 @@ final class FinalExpressionsDetector {
     if (subs.isEmpty()) {
       initialExpressions.add(advSignature);
     } else {
-      for (final Subscription sub : advPkt.getSubscriptions()) {
+      for (final Subscription<?> sub : advPkt.getSubscriptions()) {
         final String subSignature = sub.getSignature();
         addDependency(subSignature, advSignature, sub.getProxyID());
       }

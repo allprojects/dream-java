@@ -23,9 +23,9 @@ public class DependencyDetectorTest {
     // D = f(B, C)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A", UUID.randomUUID());
+    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B", UUID.randomUUID());
+    final Subscription<Integer> subC = new Subscription<Integer>("Host", "C", UUID.randomUUID());
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
@@ -33,13 +33,13 @@ public class DependencyDetectorTest {
     final Advertisement advD = new Advertisement("Host", "D");
 
     // Subscription to A (A generates B)
-    final Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<>();
     subsB.add(subA);
     final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to B and C (B, C generate D)
-    final Set<Subscription> subsD = new HashSet<Subscription>();
+    final Set<Subscription> subsD = new HashSet<>();
     subsD.add(subB);
     subsD.add(subC);
     final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
@@ -51,20 +51,20 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A
-    final Event evA = new Event("Host", "A");
+    // Event<Integer>A
+    final Event<Integer> evA = new Event<>("Host", "A", 1);
     assertEquals(depDetector.getWaitRecommendations(evA, "A@Host").size(), 0);
 
-    // Event B
-    final Event evB = new Event("Host", "B");
+    // Event<Integer>B
+    final Event<Integer> evB = new Event<>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB, "A@Host").size(), 0);
 
-    // Event C
-    final Event evC = new Event("Host", "C");
+    // Event<Integer>C
+    final Event<Integer> evC = new Event<>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC, "A@Host").size(), 0);
 
-    // Event D
-    final Event evD = new Event("Host", "D");
+    // Event<Integer>D
+    final Event<Integer> evD = new Event<>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD, "A@Host").size(), 0);
   }
 
@@ -74,21 +74,21 @@ public class DependencyDetectorTest {
     // C = f(A, B)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
+    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A", UUID.randomUUID());
+    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B", UUID.randomUUID());
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
     final Advertisement advC = new Advertisement("Host", "C");
 
     // Subscription to A (A generates B)
-    final Set<Subscription> subsB = new HashSet<Subscription>();
+    final Set<Subscription> subsB = new HashSet<>();
     subsB.add(subA);
     final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
     depDetector.processAdvertisementPacket(advPktA);
 
     // Subscription to A, B (A, B generates C)
-    final Set<Subscription> subsC = new HashSet<Subscription>();
+    final Set<Subscription> subsC = new HashSet<>();
     subsC.add(subA);
     subsC.add(subB);
     final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
@@ -99,10 +99,10 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A
-    final Event evA = new Event("Host", "A");
+    // Event<Integer>A
+    final Event<Integer> evA = new Event<Integer>("Host", "A", 1);
     assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
-    final Event evA2 = new Event("Host", "A");
+    final Event<Integer> evA2 = new Event<Integer>("Host", "A", 1);
     assertEquals(depDetector.getWaitRecommendations(evA2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evA2, "A@Host")) {
       assertTrue(wr.getExpression().equals("C@Host"));
@@ -110,10 +110,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
-    // Event B
-    final Event evB1 = new Event("Host", "B");
+    // Event<Integer>B
+    final Event<Integer> evB1 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
-    final Event evB2 = new Event("Host", "B");
+    final Event<Integer> evB2 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("C@Host"));
@@ -121,8 +121,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("A@Host"));
     }
 
-    // Event C
-    final Event evC = new Event("Host", "C");
+    // Event<Integer>C
+    final Event<Integer> evC = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC, "").size(), 0);
   }
 
@@ -133,9 +133,9 @@ public class DependencyDetectorTest {
     // D = f(B, C)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A", UUID.randomUUID());
+    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B", UUID.randomUUID());
+    final Subscription<Integer> subC = new Subscription<Integer>("Host", "C", UUID.randomUUID());
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
@@ -166,14 +166,14 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A
-    final Event evA = new Event("Host", "A");
+    // Event<Integer>A
+    final Event<Integer> evA = new Event<Integer>("Host", "A", 1);
     assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
 
-    // Event B
-    final Event evB1 = new Event("Host", "B");
+    // Event<Integer>B
+    final Event<Integer> evB1 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
-    final Event evB2 = new Event("Host", "B");
+    final Event<Integer> evB2 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -181,10 +181,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
-    // Event C
-    final Event evC1 = new Event("Host", "C");
+    // Event<Integer>C
+    final Event<Integer> evC1 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
-    final Event evC2 = new Event("Host", "C");
+    final Event<Integer> evC2 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -192,8 +192,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
-    // Event D
-    final Event evD = new Event("Host", "D");
+    // Event<Integer>D
+    final Event<Integer> evD = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD, "").size(), 0);
   }
 
@@ -246,14 +246,14 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A
-    final Event evA = new Event("Host", "A");
+    // Event<Integer>A
+    final Event<Integer> evA = new Event<Integer>("Host", "A", 1);
     assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
 
-    // Event B
-    final Event evB1 = new Event("Host", "B");
+    // Event<Integer>B
+    final Event<Integer> evB1 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
-    final Event evB2 = new Event("Host", "B");
+    final Event<Integer> evB2 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
@@ -261,16 +261,16 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("D@Host"));
     }
 
-    // Event C
-    final Event evC1 = new Event("Host", "C");
+    // Event<Integer>C
+    final Event<Integer> evC1 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
-    final Event evC2 = new Event("Host", "C");
+    final Event<Integer> evC2 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 0);
 
-    // Event D
-    final Event evD1 = new Event("Host", "D");
+    // Event<Integer>D
+    final Event<Integer> evD1 = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD1, "").size(), 0);
-    final Event evD2 = new Event("Host", "D");
+    final Event<Integer> evD2 = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
@@ -278,8 +278,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
-    // Event E
-    final Event evE = new Event("E", "Host");
+    // Event<Integer>E
+    final Event<Integer> evE = new Event<Integer>("E", "Host", 1);
     assertEquals(depDetector.getWaitRecommendations(evE, "").size(), 0);
   }
 
@@ -323,14 +323,14 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A
-    final Event evA = new Event("Host", "A");
+    // Event<Integer>A
+    final Event<Integer> evA = new Event<Integer>("Host", "A", 1);
     assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
 
-    // Event B
-    final Event evB1 = new Event("Host", "B");
+    // Event<Integer>B
+    final Event<Integer> evB1 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
-    final Event evB2 = new Event("Host", "B");
+    final Event<Integer> evB2 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -338,10 +338,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
-    // Event C
-    final Event evC1 = new Event("Host", "C");
+    // Event<Integer>C
+    final Event<Integer> evC1 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
-    final Event evC2 = new Event("Host", "C");
+    final Event<Integer> evC2 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -349,10 +349,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
-    // Event D
-    final Event evD1 = new Event("Host", "D");
+    // Event<Integer>D
+    final Event<Integer> evD1 = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD1, "").size(), 0);
-    final Event evD2 = new Event("Host", "D");
+    final Event<Integer> evD2 = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD2, "A@Host").size(), 0);
   }
 
@@ -406,14 +406,14 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A
-    final Event evA = new Event("Host", "A");
+    // Event<Integer>A
+    final Event<Integer> evA = new Event<Integer>("Host", "A", 1);
     assertEquals(depDetector.getWaitRecommendations(evA, "").size(), 0);
 
-    // Event B
-    final Event evB1 = new Event("Host", "B");
+    // Event<Integer>B
+    final Event<Integer> evB1 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
-    final Event evB2 = new Event("Host", "B");
+    final Event<Integer> evB2 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
@@ -422,10 +422,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("D@Host"));
     }
 
-    // Event C
-    final Event evC1 = new Event("Host", "C");
+    // Event<Integer>C
+    final Event<Integer> evC1 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
-    final Event evC2 = new Event("Host", "C");
+    final Event<Integer> evC2 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
@@ -434,10 +434,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("D@Host"));
     }
 
-    // Event D
-    final Event evD1 = new Event("Host", "D");
+    // Event<Integer>D
+    final Event<Integer> evD1 = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD1, "").size(), 0);
-    final Event evD2 = new Event("Host", "D");
+    final Event<Integer> evD2 = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD2, "A@Host")) {
       assertTrue(wr.getExpression().equals("E@Host"));
@@ -446,8 +446,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
-    // Event E
-    final Event evE = new Event("Host", "E");
+    // Event<Integer>E
+    final Event<Integer> evE = new Event<Integer>("Host", "E", 1);
     assertEquals(depDetector.getWaitRecommendations(evE, "A@Host").size(), 0);
   }
 
@@ -514,16 +514,16 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A1
-    final Event evA1 = new Event("Host", "A1");
+    // Event<Integer>A1
+    final Event<Integer> evA1 = new Event<Integer>("Host", "A1", 1);
     assertEquals(depDetector.getWaitRecommendations(evA1, "A1@Host").size(), 0);
 
-    // Event A2
-    final Event evA2 = new Event("Host", "A2");
+    // Event<Integer>A2
+    final Event<Integer> evA2 = new Event<Integer>("Host", "A2", 1);
     assertEquals(depDetector.getWaitRecommendations(evA2, "A2@Host").size(), 0);
 
-    // Event B1
-    final Event evB1 = new Event("Host", "B1");
+    // Event<Integer>B1
+    final Event<Integer> evB1 = new Event<Integer>("Host", "B1", 1);
     assertEquals(depDetector.getWaitRecommendations(evB1, "A1@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB1, "A1@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -531,8 +531,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("C1@Host"));
     }
 
-    // Event C1
-    final Event evC1 = new Event("Host", "C1");
+    // Event<Integer>C1
+    final Event<Integer> evC1 = new Event<Integer>("Host", "C1", 1);
     assertEquals(depDetector.getWaitRecommendations(evC1, "A1@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC1, "A1@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -540,8 +540,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("B1@Host"));
     }
 
-    // Event B2
-    final Event evB2 = new Event("Host", "B2");
+    // Event<Integer>B2
+    final Event<Integer> evB2 = new Event<Integer>("Host", "B2", 1);
     assertEquals(depDetector.getWaitRecommendations(evB2, "A2@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A2@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -549,8 +549,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("C2@Host"));
     }
 
-    // Event C2
-    final Event evC2 = new Event("Host", "C2");
+    // Event<Integer>C2
+    final Event<Integer> evC2 = new Event<Integer>("Host", "C2", 1);
     assertEquals(depDetector.getWaitRecommendations(evC2, "A2@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A2@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -558,8 +558,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("B2@Host"));
     }
 
-    // Event D
-    final Event evD = new Event("Host", "D");
+    // Event<Integer>D
+    final Event<Integer> evD = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD, "A2@Host").size(), 0);
   }
 
@@ -607,18 +607,18 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A1
-    final Event evA1 = new Event("Host", "A1");
+    // Event<Integer>A1
+    final Event<Integer> evA1 = new Event<Integer>("Host", "A1", 1);
     assertEquals(depDetector.getWaitRecommendations(evA1, "A1@Host").size(), 0);
 
-    // Event A2
-    final Event evA2 = new Event("Host", "A2");
+    // Event<Integer>A2
+    final Event<Integer> evA2 = new Event<Integer>("Host", "A2", 1);
     assertEquals(depDetector.getWaitRecommendations(evA2, "A2@Host").size(), 0);
 
-    // Event B from A1
-    final Event evB1 = new Event("Host", "B");
+    // Event<Integer>B from A1
+    final Event<Integer> evB1 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
-    final Event evB2 = new Event("Host", "B");
+    final Event<Integer> evB2 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB2, "A1@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A1@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -626,10 +626,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
-    // Event C from A1
-    final Event evC1_1 = new Event("Host", "C");
+    // Event<Integer>C from A1
+    final Event<Integer> evC1_1 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC1_1, "").size(), 0);
-    final Event evC1_2 = new Event("Host", "C");
+    final Event<Integer> evC1_2 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC1_2, "A1@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC1_2, "A1@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -637,14 +637,14 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("B@Host"));
     }
 
-    // Event C from A2
-    final Event evC2_1 = new Event("Host", "C");
+    // Event<Integer>C from A2
+    final Event<Integer> evC2_1 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC2_1, "").size(), 0);
-    final Event evC2_2 = new Event("Host", "C");
+    final Event<Integer> evC2_2 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC2_2, "A2@Host").size(), 0);
 
-    // Event D
-    final Event evD = new Event("Host", "D");
+    // Event<Integer>D
+    final Event<Integer> evD = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD, "A2@Host").size(), 0);
   }
 
@@ -726,14 +726,14 @@ public class DependencyDetectorTest {
     // Consolidate
     depDetector.consolidate();
 
-    // Event A
-    final Event evA = new Event("Host", "A");
+    // Event<Integer>A
+    final Event<Integer> evA = new Event<Integer>("Host", "A", 1);
     assertEquals(depDetector.getWaitRecommendations(evA, "A@Host").size(), 0);
 
-    // Event B
-    final Event evB1 = new Event("Host", "B");
+    // Event<Integer>B
+    final Event<Integer> evB1 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB1, "").size(), 0);
-    final Event evB2 = new Event("Host", "B");
+    final Event<Integer> evB2 = new Event<Integer>("Host", "B", 1);
     assertEquals(depDetector.getWaitRecommendations(evB2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -742,10 +742,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("H@Host"));
     }
 
-    // Event C
-    final Event evC1 = new Event("Host", "C");
+    // Event<Integer>C
+    final Event<Integer> evC1 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC1, "").size(), 0);
-    final Event evC2 = new Event("Host", "C");
+    final Event<Integer> evC2 = new Event<Integer>("Host", "C", 1);
     assertEquals(depDetector.getWaitRecommendations(evC2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -754,14 +754,14 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("H@Host"));
     }
 
-    // Event E
-    final Event evE = new Event("Host", "E");
+    // Event<Integer>E
+    final Event<Integer> evE = new Event<Integer>("Host", "E", 1);
     assertEquals(depDetector.getWaitRecommendations(evE, "A@Host").size(), 0);
 
-    // Event F
-    final Event evF1 = new Event("Host", "F");
+    // Event<Integer>F
+    final Event<Integer> evF1 = new Event<Integer>("Host", "F", 1);
     assertEquals(depDetector.getWaitRecommendations(evF1, "").size(), 0);
-    final Event evF2 = new Event("Host", "F");
+    final Event<Integer> evF2 = new Event<Integer>("Host", "F", 1);
     assertEquals(depDetector.getWaitRecommendations(evF2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evF2, "A@Host")) {
       assertTrue(wr.getExpression().equals("H@Host"));
@@ -769,10 +769,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("G@Host"));
     }
 
-    // Event G
-    final Event evG1 = new Event("Host", "G");
+    // Event<Integer>G
+    final Event<Integer> evG1 = new Event<Integer>("Host", "G", 1);
     assertEquals(depDetector.getWaitRecommendations(evG1, "").size(), 0);
-    final Event evG2 = new Event("Host", "G");
+    final Event<Integer> evG2 = new Event<Integer>("Host", "G", 1);
     assertEquals(depDetector.getWaitRecommendations(evG2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evG2, "A@Host")) {
       assertTrue(wr.getExpression().equals("H@Host"));
@@ -780,10 +780,10 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("F@Host"));
     }
 
-    // Event H
-    final Event evH1 = new Event("Host", "H");
+    // Event<Integer>H
+    final Event<Integer> evH1 = new Event<Integer>("Host", "H", 1);
     assertEquals(depDetector.getWaitRecommendations(evH1, "").size(), 0);
-    final Event evH2 = new Event("Host", "H");
+    final Event<Integer> evH2 = new Event<Integer>("Host", "H", 1);
     assertEquals(depDetector.getWaitRecommendations(evH2, "A@Host").size(), 1);
     for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evH2, "A@Host")) {
       assertTrue(wr.getExpression().equals("D@Host"));
@@ -792,8 +792,8 @@ public class DependencyDetectorTest {
       assertTrue(wr.getRecommendations().contains("C@Host"));
     }
 
-    // Event D
-    final Event evD = new Event("Host", "D");
+    // Event<Integer>D
+    final Event<Integer> evD = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD, "A@Host").size(), 0);
   }
 }

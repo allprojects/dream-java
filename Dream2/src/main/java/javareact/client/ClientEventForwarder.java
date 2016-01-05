@@ -100,12 +100,12 @@ public class ClientEventForwarder implements PacketForwarder {
     connectionManager.sendAdvertisement(adv, subs, isPublic);
   }
 
-  public final void unadvertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
+  public final void unadvertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
     logger.fine("Sending unadvertisement " + adv + " with subscriptions " + subs);
     connectionManager.sendUnadvertisement(adv, isPublic);
   }
 
-  public final void addSubscription(Subscriber subscriber, Subscription subscription) {
+  public final void addSubscription(Subscriber subscriber, Subscription<?> subscription) {
     logger.fine("Adding subscription " + subscription);
     subTable.addSubscription(subscriber, subscription);
     if (needToSendToServer(subscription)) {
@@ -113,7 +113,7 @@ public class ClientEventForwarder implements PacketForwarder {
     }
   }
 
-  public final void removeSubscription(Subscriber subscriber, Subscription subscription) {
+  public final void removeSubscription(Subscriber subscriber, Subscription<?> subscription) {
     logger.fine("Adding subscription " + subscription);
     subTable.addSubscription(subscriber, subscription);
     if (needToSendToServer(subscription)) {
@@ -121,14 +121,14 @@ public class ClientEventForwarder implements PacketForwarder {
     }
   }
 
-  private final boolean needToSendToServer(Subscription sub) {
+  private final boolean needToSendToServer(Subscription<?> sub) {
     return //
     !isLocal(sub) || //
         Consts.consistencyType == ConsistencyType.GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC;
   }
 
-  private final boolean isLocal(Subscription sub) {
+  private final boolean isLocal(Subscription<?> sub) {
     return sub.getHostId().equals(Consts.hostName);
   }
 

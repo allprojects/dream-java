@@ -49,7 +49,7 @@ class ConnectionManager {
     }
   }
 
-  final void sendEvent(UUID id, Event event, String initialVar, Set<String> finalExpressions, boolean approvedByTokenService) {
+  final void sendEvent(UUID id, Event<? extends Serializable> event, String initialVar, Set<String> finalExpressions, boolean approvedByTokenService) {
     final EventPacket pkt = new EventPacket(event, id, initialVar, approvedByTokenService);
     finalExpressions.forEach(pkt::addFinalExpression);
     send(EventPacket.subject, pkt);

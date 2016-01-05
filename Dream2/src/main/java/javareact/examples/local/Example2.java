@@ -3,10 +3,10 @@ package javareact.examples.local;
 import javareact.common.types.Signal;
 import javareact.common.types.Var;
 
-public class LocalExample2 {
+public class Example2 {
 
   public static void main(String args[]) {
-    final LocalExample2 example = new LocalExample2();
+    final Example2 example = new Example2();
     example.launch();
   }
 

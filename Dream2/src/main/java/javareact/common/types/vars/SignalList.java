@@ -1,8 +1,7 @@
 package javareact.common.types.vars;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Supplier;
 
 import javareact.common.types.ProxyGenerator;
@@ -11,9 +10,9 @@ import javareact.common.types.Signal;
 /**
  * Example of ad-hoc Signal.
  */
-public class SignalList<T extends Serializable> extends Signal<List<T>> {
+public class SignalList<T> extends Signal<ArrayList<T>> {
 
-  public SignalList(String name, Supplier<List<T>> evaluation, ProxyGenerator... vars) {
+  public SignalList(String name, Supplier<ArrayList<T>> evaluation, ProxyGenerator... vars) {
     super(name, evaluation, vars);
   }
 
@@ -37,8 +36,8 @@ public class SignalList<T extends Serializable> extends Signal<List<T>> {
     return val.get(index);
   }
 
-  public List<T> subList(int fromIndex, int toIndex) {
-    return val.subList(fromIndex, toIndex);
+  public ArrayList<T> subList(int fromIndex, int toIndex) {
+    return new ArrayList<T>(val.subList(fromIndex, toIndex));
   }
 
 }

@@ -1,8 +1,7 @@
 package javareact.common.types.vars;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -11,9 +10,9 @@ import javareact.common.types.Var;
 /**
  * Example of ad-hoc Var.
  */
-public class VarList<T extends Serializable> extends Var<List<T>> {
+public class VarList<T> extends Var<ArrayList<T>> {
 
-  public VarList(String objectId, List<T> val) {
+  public VarList(String objectId, ArrayList<T> val) {
     super(objectId, val);
   }
 
@@ -35,75 +34,75 @@ public class VarList<T extends Serializable> extends Var<List<T>> {
 
   public boolean add(T e) {
     final boolean result = val.add(e);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
   public boolean remove(Object o) {
     final boolean result = val.remove(o);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
   public boolean addAll(Collection<? extends T> c) {
     final boolean result = val.addAll(c);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
   public boolean addAll(int index, Collection<? extends T> c) {
     final boolean result = val.addAll(index, c);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
   public boolean removeAll(Collection<?> c) {
     final boolean result = val.removeAll(c);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
   public boolean retainAll(Collection<?> c) {
     final boolean result = val.retainAll(c);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
   public void replaceAll(UnaryOperator<T> operator) {
     val.replaceAll(operator);
-    impactOnGet();
+    propagateChange();
   }
 
   public boolean removeIf(Predicate<? super T> filter) {
     final boolean result = val.removeIf(filter);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
   public void clear() {
     val.clear();
-    impactOnGet();
+    propagateChange();
   }
 
   public T set(int index, T element) {
     final T result = val.set(index, element);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
   public void add(int index, T element) {
-    impactOnGet();
+    propagateChange();
     val.add(index, element);
   }
 
   public T remove(int index) {
     final T result = val.remove(index);
-    impactOnGet();
+    propagateChange();
     return result;
   }
 
-  public List<T> subList(int fromIndex, int toIndex) {
-    return val.subList(fromIndex, toIndex);
+  public ArrayList<T> subList(int fromIndex, int toIndex) {
+    return new ArrayList<T>(val.subList(fromIndex, toIndex));
   }
 
 }

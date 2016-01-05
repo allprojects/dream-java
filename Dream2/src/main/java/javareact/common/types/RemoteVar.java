@@ -1,35 +1,47 @@
 package javareact.common.types;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import javareact.common.SerializablePredicate;
 import javareact.common.ValueChangeListener;
 import javareact.common.packets.EventPacket;
-import javareact.common.packets.content.Attribute;
 import javareact.common.packets.content.Event;
 
 public class RemoteVar<T> extends Proxy implements TimeChangingValue<T> {
   private final Set<ValueChangeListener<T>> listeners = new HashSet<ValueChangeListener<T>>();
   private T val;
 
+  @SuppressWarnings("unchecked")
   public RemoteVar(String host, String object) {
-    super(host, object);
+    super(host, object, new ArrayList<SerializablePredicate>());
   }
 
+  @SuppressWarnings("unchecked")
   public RemoteVar(String object) {
-    super(object);
+    super(object, new ArrayList<SerializablePredicate>());
+  }
+
+  @SuppressWarnings("unchecked")
+  RemoteVar(String host, String object, List<SerializablePredicate> constraints) {
+    super(host, object, constraints);
+  }
+
+  @SuppressWarnings("unchecked")
+  RemoteVar(String object, List<SerializablePredicate> constraints) {
+    super(object, constraints);
   }
 
   public final synchronized T get() {
     return val;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  protected final synchronized void processEvent(Event ev) {
-    if (ev.hasAttribute(method)) {
-      final Attribute attr = ev.getAttributeFor(method);
-      val = (T) attr.getValue();
-    }
+  protected final synchronized void processEvent(Event<?> ev) {
+    val = (T) ev.getVal();
   }
 
   @Override
@@ -55,6 +67,11 @@ public class RemoteVar<T> extends Proxy implements TimeChangingValue<T> {
 
   @Override
   public Proxy getProxy() {
+    return this;
+  }
+
+  @Override
+  public ProxyGenerator<T> filter(SerializablePredicate<T> constraint) {
     return this;
   }
 

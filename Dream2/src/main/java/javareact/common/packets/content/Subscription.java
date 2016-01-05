@@ -2,62 +2,45 @@ package javareact.common.packets.content;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
-public class Subscription implements Serializable {
-  private static final long serialVersionUID = -3452847781395458670L;
+import javareact.common.SerializablePredicate;
 
-  public static final String wildcard = "*";
+public class Subscription<T extends Serializable> implements Serializable {
+  private static final long serialVersionUID = -3452847781395458670L;
 
   private final String objectId;
   private final String hostId;
-  private final Collection<Constraint> constraints = new ArrayList<Constraint>();
-  private final boolean blocking;
+  private final List<SerializablePredicate<T>> constraints = new ArrayList<SerializablePredicate<T>>();
   private final UUID proxyID;
 
-  public Subscription(String hostId, String objectId, boolean blocking, UUID proxyID, Constraint... constraints) {
+  public Subscription(String hostId, String objectId, UUID proxyID) {
     this.hostId = hostId;
     this.objectId = objectId;
-    this.blocking = blocking;
     this.proxyID = proxyID;
-    for (final Constraint constraint : constraints) {
-      this.constraints.add(constraint);
-    }
+    this.constraints.addAll(constraints);
   }
 
-  public Subscription(String hostId, String objectId, UUID proxyID, Constraint... constraints) {
-    this(hostId, objectId, false, proxyID, constraints);
+  public Subscription(String hostId, String objectId, UUID proxyID, List<SerializablePredicate<T>> constraints) {
+    this(hostId, objectId, proxyID);
+    this.constraints.addAll(constraints);
   }
 
-  public final boolean isSatisfiedBy(Event ev) {
-    if (!isBroadcast() && !hostId.equals(ev.getHostId())) {
-      return false;
-    }
-    if (!objectId.equals(ev.getObjectId())) {
-      return false;
-    }
-    for (final Constraint c : constraints) {
-      if (!c.isSatisfiedBy(ev)) {
-        return false;
-      }
-    }
-    return true;
+  public final boolean isSatisfiedBy(Event<?> ev) {
+    @SuppressWarnings("unchecked")
+    final T val = (T) ev.getVal();
+    return hostId.equals(ev.getHostId()) && //
+        objectId.equals(ev.getObjectId()) && //
+        constraints.stream().allMatch(c -> c.test(val));
   }
 
-  public final boolean matchesOnlySignatureOf(Event ev) {
-    if (!isBroadcast() && !hostId.equals(ev.getHostId())) {
-      return false;
-    }
-    if (!objectId.equals(ev.getObjectId())) {
-      return false;
-    }
-    for (final Constraint c : constraints) {
-      if (!c.isSatisfiedBy(ev)) {
-        return true;
-      }
-    }
-    return false;
+  public final boolean matchesOnlySignatureOf(Event<?> ev) {
+    @SuppressWarnings("unchecked")
+    final T val = (T) ev.getVal();
+    return hostId.equals(ev.getHostId()) && //
+        objectId.equals(ev.getObjectId()) && //
+        constraints.stream().anyMatch(c -> !c.test(val));
   }
 
   public final String getObjectId() {
@@ -72,74 +55,8 @@ public class Subscription implements Serializable {
     return objectId + "@" + hostId;
   }
 
-  public final boolean isBroadcast() {
-    return hostId.equals(wildcard);
-  }
-
-  public final boolean isBlocking() {
-    return blocking;
-  }
-
-  public UUID getProxyID() {
+  public final UUID getProxyID() {
     return proxyID;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (blocking ? 1231 : 1237);
-    result = prime * result + (constraints == null ? 0 : constraints.hashCode());
-    result = prime * result + (hostId == null ? 0 : hostId.hashCode());
-    result = prime * result + (objectId == null ? 0 : objectId.hashCode());
-    result = prime * result + (proxyID == null ? 0 : proxyID.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (!(obj instanceof Subscription)) {
-      return false;
-    }
-    final Subscription other = (Subscription) obj;
-    if (blocking != other.blocking) {
-      return false;
-    }
-    if (constraints == null) {
-      if (other.constraints != null) {
-        return false;
-      }
-    } else if (!constraints.equals(other.constraints)) {
-      return false;
-    }
-    if (hostId == null) {
-      if (other.hostId != null) {
-        return false;
-      }
-    } else if (!hostId.equals(other.hostId)) {
-      return false;
-    }
-    if (objectId == null) {
-      if (other.objectId != null) {
-        return false;
-      }
-    } else if (!objectId.equals(other.objectId)) {
-      return false;
-    }
-    if (proxyID == null) {
-      if (other.proxyID != null) {
-        return false;
-      }
-    } else if (!proxyID.equals(other.proxyID)) {
-      return false;
-    }
-    return true;
   }
 
   @Override

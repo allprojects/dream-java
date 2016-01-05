@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javareact.common.types.Signal;
 import javareact.common.types.vars.VarList;
 
-public class LocalExample4 {
+public class ExampleVarList {
 
   public static void main(String args[]) {
     final VarList<Integer> varList = new VarList<>("varList", new ArrayList<Integer>());

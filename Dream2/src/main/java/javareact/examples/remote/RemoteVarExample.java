@@ -1,7 +1,6 @@
 package javareact.examples.remote;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import javareact.common.Consts;
@@ -14,7 +13,7 @@ public class RemoteVarExample {
     final Var<Integer> remoteInt = new Var<Integer>("remoteInt", 1);
     final Var<String> remoteString1 = new Var<String>("remoteString1", "a");
     final Var<String> remoteString2 = new Var<String>("remoteString2", "b");
-    final Var<List<Integer>> remoteList = new Var<List<Integer>>("remoteList", new ArrayList<Integer>());
+    final Var<ArrayList<Integer>> remoteList = new Var<ArrayList<Integer>>("remoteList", new ArrayList<Integer>());
     final Random random = new Random();
 
     while (true) {

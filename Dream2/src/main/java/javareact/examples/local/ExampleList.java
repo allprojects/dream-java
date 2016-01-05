@@ -1,15 +1,14 @@
 package javareact.examples.local;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javareact.common.types.Signal;
 import javareact.common.types.Var;
 
-public class LocalExample3 {
+public class ExampleList {
 
   public static void main(String args[]) {
-    final Var<List<Integer>> varList = new Var<>("varList", new ArrayList<Integer>());
+    final Var<ArrayList<Integer>> varList = new Var<>("varList", new ArrayList<Integer>());
     final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 1000 + varList.get().size(), varList);
 
     signalInt.addValueChangeListener(System.out::println);

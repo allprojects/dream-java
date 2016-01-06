@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -21,8 +20,8 @@ import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-public class Signal<T extends Serializable> implements TimeChangingValue<T>, ProxyChangeListener {
-  private final Set<ValueChangeListener<T>> listeners = new HashSet<ValueChangeListener<T>>();
+public class Signal<T extends Serializable> implements ProxyGenerator<T>, TimeChangingValue<T>, ProxyChangeListener {
+  private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<ValueChangeListener<T>>();
   private final ClientEventForwarder clientEventForwarder;
   private final QueueManager queueManager = new QueueManager();
   private final String objectId;
@@ -31,7 +30,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Pro
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-  private RemoteVar<T> proxy;
+  protected RemoteVar<T> proxy;
   private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
   protected T val;
 
@@ -80,20 +79,17 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Pro
         return;
       }
 
-      // Notify dependent objects
-      final EventProxyPair templatePair = pairs.get(0);
-      final EventPacket templatePkt = templatePair.getEventPacket();
-      final UUID id = templatePkt.getId();
-      final String initialVar = getInitialVar(pairs);
-      final Set<String> finalExpressions = templatePkt.getFinalExpressions();
-
-      final Event<T> ev = new Event<T>(Consts.hostName, objectId, val);
-      logger.finest("Sending event to dependent reactive objects.");
-      clientEventForwarder.sendEvent(id, ev, initialVar, finalExpressions, true);
-
-      // Notify listeners
+      // Notify local listeners
       logger.finest("Notifying registered listeners of the change.");
-      listeners.forEach(l -> l.notifyValueChanged(val));
+      valueChangeListeners.forEach(l -> l.notifyValueChanged(val));
+
+      // Notify dependent objects
+      logger.finest("Sending event to dependent reactive objects.");
+      final Event<T> ev = new Event<T>(Consts.hostName, objectId, val);
+      // Extract information from any of the packets received by the
+      // QueueManager
+      final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
+      clientEventForwarder.sendEvent(anyPkt.getId(), ev, anyPkt.getInitialVar(), anyPkt.getFinalExpressions(), true);
 
       // Acknowledge the proxies
       logger.finest("Acknowledging the proxies.");
@@ -105,12 +101,12 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Pro
 
   @Override
   public void addValueChangeListener(ValueChangeListener<T> listener) {
-    listeners.add(listener);
+    valueChangeListeners.add(listener);
   }
 
   @Override
   public void removeValueChangeListener(ValueChangeListener<T> listener) {
-    listeners.remove(listener);
+    valueChangeListeners.remove(listener);
   }
 
   private final void sendAdvertisement() {

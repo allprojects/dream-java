@@ -17,27 +17,27 @@ public class SignalList<T> extends Signal<ArrayList<T>> {
   }
 
   public int size() {
-    return val.size();
+    return proxy.get().size();
   }
 
   public boolean isEmpty() {
-    return val.isEmpty();
+    return proxy.get().isEmpty();
   }
 
   public boolean contains(Object o) {
-    return val.contains(o);
+    return proxy.get().contains(o);
   }
 
   public boolean containsAll(Collection<?> c) {
-    return val.containsAll(c);
+    return proxy.get().containsAll(c);
   }
 
   public T get(int index) {
-    return val.get(index);
+    return proxy.get().get(index);
   }
 
   public ArrayList<T> subList(int fromIndex, int toIndex) {
-    return new ArrayList<T>(val.subList(fromIndex, toIndex));
+    return new ArrayList<T>(proxy.get().subList(fromIndex, toIndex));
   }
 
 }

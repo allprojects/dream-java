@@ -1,17 +1,13 @@
 package javareact.common.types;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javareact.common.SerializablePredicate;
-import javareact.common.ValueChangeListener;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Event;
 
-public class RemoteVar<T> extends Proxy implements TimeChangingValue<T> {
-  private final Set<ValueChangeListener<T>> listeners = new HashSet<ValueChangeListener<T>>();
+public class RemoteVar<T> extends Proxy implements ProxyGenerator<T> {
   private T val;
 
   @SuppressWarnings("unchecked")
@@ -45,24 +41,8 @@ public class RemoteVar<T> extends Proxy implements TimeChangingValue<T> {
   }
 
   @Override
-  public T evaluate() {
-    return this.get();
-  }
-
-  @Override
-  public void addValueChangeListener(ValueChangeListener<T> listener) {
-    listeners.add(listener);
-  }
-
-  @Override
-  public void removeValueChangeListener(ValueChangeListener<T> listener) {
-    listeners.remove(listener);
-  }
-
-  @Override
-  public final void notifyValueChanged(EventPacket evPkt) {
-    super.notifyValueChanged(evPkt);
-    listeners.forEach(l -> l.notifyValueChanged(val));
+  public final void notifyEventReceived(EventPacket evPkt) {
+    super.notifyEventReceived(evPkt);
   }
 
   @Override

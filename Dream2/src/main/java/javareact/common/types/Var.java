@@ -18,7 +18,7 @@ public class Var<T extends Serializable> implements ProxyGenerator<T> {
   private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
 
   protected T val;
-  private RemoteVar<T> proxy;
+  protected RemoteVar<T> proxy;
 
   public Var(String objectId, T val) {
     this.forwarder = ClientEventForwarder.get();
@@ -50,7 +50,8 @@ public class Var<T extends Serializable> implements ProxyGenerator<T> {
   }
 
   public final synchronized T get() {
-    return val;
+    assert val != null;
+    return proxy.get();
   }
 
   protected final void propagateChange() {

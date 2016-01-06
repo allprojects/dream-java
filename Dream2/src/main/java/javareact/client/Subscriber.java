@@ -14,5 +14,5 @@ public interface Subscriber {
    * @param event
    *          the occurred event.
    */
-  public void notifyValueChanged(EventPacket event);
+  public void notifyEventReceived(EventPacket event);
 }

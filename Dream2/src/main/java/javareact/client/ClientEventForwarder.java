@@ -78,7 +78,7 @@ public class ClientEventForwarder implements PacketForwarder {
     // Indeed, to ensure glitch freedom, all events, including local ones,
     // need to be pass through the server before being delivered
     if (Consts.consistencyType != ConsistencyType.GLITCH_FREE && Consts.consistencyType != ConsistencyType.ATOMIC) {
-      subTable.getMatchingSubscribers(ev).forEach(sub -> sub.notifyValueChanged(new EventPacket(ev, id, initialVar, approvedByTokenService)));
+      subTable.getMatchingSubscribers(ev).forEach(sub -> sub.notifyEventReceived(new EventPacket(ev, id, initialVar, approvedByTokenService)));
     }
     if (subTable.needsToDeliverToServer(ev)) {
       connectionManager.sendEvent(id, ev, initialVar, finalExpressions, approvedByTokenService);
@@ -133,10 +133,10 @@ public class ClientEventForwarder implements PacketForwarder {
   }
 
   private final void processEventFromServer(EventPacket evPkt) {
-    subTable.getMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyValueChanged(evPkt));
+    subTable.getMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyEventReceived(evPkt));
     if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
-      subTable.getSignatureOnlyMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyValueChanged(evPkt));
+      subTable.getSignatureOnlyMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyEventReceived(evPkt));
     }
   }
 

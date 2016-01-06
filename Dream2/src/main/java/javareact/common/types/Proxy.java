@@ -19,7 +19,7 @@ import javareact.common.packets.content.Subscription;
 
 public abstract class Proxy implements Subscriber {
   protected final ClientEventForwarder forwarder;
-  private final Set<ProxyChangeListener> listeners = new HashSet<ProxyChangeListener>();
+  private final Set<ProxyChangeListener> proxyChangeListeners = new HashSet<ProxyChangeListener>();
 
   private final Queue<EventPacket> eventsQueue = new ArrayDeque<EventPacket>();
   private final Set<ProxyChangeListener> pendingAcks = new HashSet<ProxyChangeListener>();
@@ -52,11 +52,11 @@ public abstract class Proxy implements Subscriber {
   }
 
   final void addProxyChangeListener(ProxyChangeListener listener) {
-    listeners.add(listener);
+    proxyChangeListeners.add(listener);
   }
 
   final void removeProxyChangeListener(ProxyChangeListener listener) {
-    listeners.remove(listener);
+    proxyChangeListeners.remove(listener);
   }
 
   final List<SerializablePredicate> getConstraints() {
@@ -64,7 +64,7 @@ public abstract class Proxy implements Subscriber {
   }
 
   @Override
-  public synchronized void notifyValueChanged(EventPacket evPkt) {
+  public synchronized void notifyEventReceived(EventPacket evPkt) {
     eventsQueue.add(evPkt);
     logger.finest("Received event packet " + evPkt + ". Added to the queue.");
     if (eventsQueue.size() == 1) {
@@ -100,10 +100,10 @@ public abstract class Proxy implements Subscriber {
   protected abstract void processEvent(Event<?> ev);
 
   private final void sendEventPacketToListeners(EventPacket evPkt) {
-    if (!listeners.isEmpty()) {
-      pendingAcks.addAll(listeners);
+    if (!proxyChangeListeners.isEmpty()) {
+      pendingAcks.addAll(proxyChangeListeners);
       final EventProxyPair pair = new EventProxyPair(evPkt, this);
-      listeners.forEach(l -> l.update(pair));
+      proxyChangeListeners.forEach(l -> l.update(pair));
     } else {
       processNextEvent();
     }

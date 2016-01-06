@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javareact.common.SerializablePredicate;
-import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Event;
 
 public class RemoteVar<T> extends Proxy implements ProxyGenerator<T> {
@@ -38,11 +37,6 @@ public class RemoteVar<T> extends Proxy implements ProxyGenerator<T> {
   @Override
   protected final synchronized void processEvent(Event<?> ev) {
     val = (T) ev.getVal();
-  }
-
-  @Override
-  public final void notifyEventReceived(EventPacket evPkt) {
-    super.notifyEventReceived(evPkt);
   }
 
   @Override

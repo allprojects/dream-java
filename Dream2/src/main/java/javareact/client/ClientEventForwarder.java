@@ -78,7 +78,7 @@ public class ClientEventForwarder implements PacketForwarder {
     // Indeed, to ensure glitch freedom, all events, including local ones,
     // need to be pass through the server before being delivered
     if (Consts.consistencyType != ConsistencyType.GLITCH_FREE && Consts.consistencyType != ConsistencyType.ATOMIC) {
-      subTable.getMatchingSubscribers(ev).forEach(sub -> sub.notifyValueChanged(new EventPacket(ev, id, initialVar, approvedByTokenService)));
+      subTable.getMatchingSubscribers(ev).forEach(sub -> sub.notifyEventReceived(new EventPacket(ev, id, initialVar, approvedByTokenService)));
     }
     if (subTable.needsToDeliverToServer(ev)) {
       connectionManager.sendEvent(id, ev, initialVar, finalExpressions, approvedByTokenService);
@@ -100,12 +100,12 @@ public class ClientEventForwarder implements PacketForwarder {
     connectionManager.sendAdvertisement(adv, subs, isPublic);
   }
 
-  public final void unadvertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
+  public final void unadvertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
     logger.fine("Sending unadvertisement " + adv + " with subscriptions " + subs);
     connectionManager.sendUnadvertisement(adv, isPublic);
   }
 
-  public final void addSubscription(Subscriber subscriber, Subscription subscription) {
+  public final void addSubscription(Subscriber subscriber, Subscription<?> subscription) {
     logger.fine("Adding subscription " + subscription);
     subTable.addSubscription(subscriber, subscription);
     if (needToSendToServer(subscription)) {
@@ -113,7 +113,7 @@ public class ClientEventForwarder implements PacketForwarder {
     }
   }
 
-  public final void removeSubscription(Subscriber subscriber, Subscription subscription) {
+  public final void removeSubscription(Subscriber subscriber, Subscription<?> subscription) {
     logger.fine("Adding subscription " + subscription);
     subTable.addSubscription(subscriber, subscription);
     if (needToSendToServer(subscription)) {
@@ -121,22 +121,22 @@ public class ClientEventForwarder implements PacketForwarder {
     }
   }
 
-  private final boolean needToSendToServer(Subscription sub) {
+  private final boolean needToSendToServer(Subscription<?> sub) {
     return //
     !isLocal(sub) || //
         Consts.consistencyType == ConsistencyType.GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC;
   }
 
-  private final boolean isLocal(Subscription sub) {
+  private final boolean isLocal(Subscription<?> sub) {
     return sub.getHostId().equals(Consts.hostName);
   }
 
   private final void processEventFromServer(EventPacket evPkt) {
-    subTable.getMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyValueChanged(evPkt));
+    subTable.getMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyEventReceived(evPkt));
     if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
-      subTable.getSignatureOnlyMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyValueChanged(evPkt));
+      subTable.getSignatureOnlyMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyEventReceived(evPkt));
     }
   }
 

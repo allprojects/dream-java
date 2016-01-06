@@ -24,7 +24,7 @@ final class DependencyDetector {
   // Wait recommendations
   private final Map<String, Map<String, Set<WaitRecommendations>>> recommendations = new HashMap<String, Map<String, Set<WaitRecommendations>>>();
 
-  final Set<WaitRecommendations> getWaitRecommendations(Event event, String initialVar) {
+  final Set<WaitRecommendations> getWaitRecommendations(Event<?> event, String initialVar) {
     final Map<String, Set<WaitRecommendations>> innerMap = recommendations.get(event.getSignature());
     if (innerMap == null) {
       return new HashSet<>();

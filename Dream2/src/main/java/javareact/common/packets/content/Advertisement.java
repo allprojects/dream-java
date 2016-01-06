@@ -13,14 +13,8 @@ public class Advertisement implements Serializable {
     this.objectId = objectId;
   }
 
-  public boolean isSatisfiedBy(Subscription sub) {
-    if (!sub.isBroadcast() && !hostId.equals(sub.getHostId())) {
-      return false;
-    }
-    if (!objectId.equals(sub.getObjectId())) {
-      return false;
-    }
-    return true;
+  public boolean isSatisfiedBy(Subscription<?> sub) {
+    return hostId.equals(sub.getHostId()) && objectId.equals(sub.getObjectId());
   }
 
   public final String getObjectId() {
@@ -33,44 +27,6 @@ public class Advertisement implements Serializable {
 
   public final String getSignature() {
     return objectId + "@" + hostId;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (hostId == null ? 0 : hostId.hashCode());
-    result = prime * result + (objectId == null ? 0 : objectId.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (!(obj instanceof Advertisement)) {
-      return false;
-    }
-    final Advertisement other = (Advertisement) obj;
-    if (hostId == null) {
-      if (other.hostId != null) {
-        return false;
-      }
-    } else if (!hostId.equals(other.hostId)) {
-      return false;
-    }
-    if (objectId == null) {
-      if (other.objectId != null) {
-        return false;
-      }
-    } else if (!objectId.equals(other.objectId)) {
-      return false;
-    }
-    return true;
   }
 
   @Override

@@ -1,11 +1,11 @@
 package javareact.common.types;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -13,16 +13,15 @@ import java.util.stream.Collectors;
 import javareact.client.ClientEventForwarder;
 import javareact.client.QueueManager;
 import javareact.common.Consts;
+import javareact.common.SerializablePredicate;
 import javareact.common.ValueChangeListener;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Advertisement;
-import javareact.common.packets.content.Attribute;
-import javareact.common.packets.content.Constraint;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyChangeListener {
-  private final Set<ValueChangeListener<T>> listeners = new HashSet<ValueChangeListener<T>>();
+public class Signal<T extends Serializable> implements ProxyGenerator<T>, TimeChangingValue<T>, ProxyChangeListener {
+  private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<ValueChangeListener<T>>();
   private final ClientEventForwarder clientEventForwarder;
   private final QueueManager queueManager = new QueueManager();
   private final String objectId;
@@ -31,19 +30,37 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-  private RemoteVar<T> proxy = null;
+  protected RemoteVar<T> proxy;
+  private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
   protected T val;
 
-  public Signal(String name, Supplier<T> evaluation, ProxyGenerator... vars) {
-    this.objectId = name;
+  public Signal(String objectId, Supplier<T> evaluation, ProxyGenerator... vars) {
+    this.objectId = objectId;
+    this.evaluation = evaluation;
+
     clientEventForwarder = ClientEventForwarder.get();
+
     for (final ProxyGenerator var : vars) {
       final Proxy varProxy = var.getProxy();
       dependentProxies.add(varProxy);
       varProxy.addProxyChangeListener(this);
     }
-    this.evaluation = evaluation;
+
     sendAdvertisement();
+  }
+
+  /**
+   * Private constructor used only for filters. Does not send advertisements and
+   * does not retain any value.
+   */
+  private Signal(Signal<T> copy, SerializablePredicate constraint) {
+    this.objectId = copy.objectId;
+    this.evaluation = null;
+    this.val = null;
+    clientEventForwarder = ClientEventForwarder.get();
+
+    constraints.addAll(copy.constraints);
+    constraints.add(constraint);
   }
 
   @Override
@@ -62,25 +79,17 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
         return;
       }
 
-      // Notify dependent objects
-      final EventProxyPair templatePair = pairs.get(0);
-      final EventPacket templatePkt = templatePair.getEventPacket();
-      final UUID id = templatePkt.getId();
-      final String initialVar = getInitialVar(pairs);
-      final Set<String> finalExpressions = templatePkt.getFinalExpressions();
-      Event ev = null;
-      try {
-        // TODO consider methods other than get()!!!
-        ev = new Event(Consts.hostName, objectId, Attribute.of("get", val));
-      } catch (final Exception e) {
-        e.printStackTrace();
-      }
-      logger.finest("Sending event to dependent reactive objects.");
-      clientEventForwarder.sendEvent(id, ev, initialVar, finalExpressions, true);
-
-      // Notify listeners
+      // Notify local listeners
       logger.finest("Notifying registered listeners of the change.");
-      listeners.forEach(l -> l.notifyValueChanged(val));
+      valueChangeListeners.forEach(l -> l.notifyValueChanged(val));
+
+      // Notify dependent objects
+      logger.finest("Sending event to dependent reactive objects.");
+      final Event<T> ev = new Event<T>(Consts.hostName, objectId, val);
+      // Extract information from any of the packets received by the
+      // QueueManager
+      final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
+      clientEventForwarder.sendEvent(anyPkt.getId(), ev, anyPkt.getInitialVar(), anyPkt.getFinalExpressions(), true);
 
       // Acknowledge the proxies
       logger.finest("Acknowledging the proxies.");
@@ -92,17 +101,17 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
 
   @Override
   public void addValueChangeListener(ValueChangeListener<T> listener) {
-    listeners.add(listener);
+    valueChangeListeners.add(listener);
   }
 
   @Override
   public void removeValueChangeListener(ValueChangeListener<T> listener) {
-    listeners.remove(listener);
+    valueChangeListeners.remove(listener);
   }
 
   private final void sendAdvertisement() {
     final Set<Subscription> subs = dependentProxies.stream().//
-        map(p -> new Subscription(p.getHost(), p.getObject(), p.getProxyID(), new Constraint(p.getMethod()))).//
+        map(p -> new Subscription(p.getHost(), p.getObject(), p.getProxyID(), p.getConstraints())).//
         collect(Collectors.toSet());
     clientEventForwarder.advertise(new Advertisement(Consts.hostName, objectId), subs, true);
   }
@@ -128,9 +137,14 @@ public class Signal<T> implements TimeChangingValue<T>, ProxyGenerator, ProxyCha
   @Override
   public synchronized RemoteVar<T> getProxy() {
     if (proxy == null) {
-      proxy = new RemoteVar<T>(objectId);
+      proxy = new RemoteVar<T>(objectId, constraints);
     }
     return proxy;
+  }
+
+  @Override
+  public ProxyGenerator<T> filter(SerializablePredicate<T> constraint) {
+    return new Signal<T>(this, constraint);
   }
 
 }

@@ -11,7 +11,7 @@ import javareact.common.ValueChangeListener;
  * It also exposes methods to register and unregister ValueChangeListener, which
  * are automatically notified when the value changes.
  */
-interface TimeChangingValue<T> extends ProxyGenerator {
+interface TimeChangingValue<T> {
 
   /**
    * The evaluate method is automatically invoked whenever one of the values

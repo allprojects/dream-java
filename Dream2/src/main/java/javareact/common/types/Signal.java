@@ -2,13 +2,12 @@ package javareact.common.types;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javareact.client.ClientEventForwarder;
 import javareact.client.QueueManager;
@@ -20,13 +19,12 @@ import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-public class Signal<T extends Serializable> implements ProxyGenerator<T>, TimeChangingValue<T>, ProxyChangeListener {
+public class Signal<T extends Serializable> implements ProxyRegistrar<T>, TimeChangingValue<T>, ProxyChangeListener {
   private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<ValueChangeListener<T>>();
   private final ClientEventForwarder clientEventForwarder;
   private final QueueManager queueManager = new QueueManager();
   private final String objectId;
   private final Supplier<T> evaluation;
-  private final List<Proxy> dependentProxies = new ArrayList<Proxy>();
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -34,19 +32,18 @@ public class Signal<T extends Serializable> implements ProxyGenerator<T>, TimeCh
   private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
   protected T val;
 
-  public Signal(String objectId, Supplier<T> evaluation, ProxyGenerator... vars) {
+  public Signal(String objectId, Supplier<T> evaluation, ProxyRegistrar... vars) {
     this.objectId = objectId;
     this.evaluation = evaluation;
 
-    clientEventForwarder = ClientEventForwarder.get();
-
-    for (final ProxyGenerator var : vars) {
-      final Proxy varProxy = var.getProxy();
-      dependentProxies.add(varProxy);
-      varProxy.addProxyChangeListener(this);
+    final Set<Subscription> subs = new HashSet<Subscription>();
+    for (final ProxyRegistrar var : vars) {
+      var.addProxyChangeListener(this);
+      subs.add(new Subscription(var.getHost(), var.getObject(), var.getProxyID(), var.getConstraints()));
     }
 
-    sendAdvertisement();
+    clientEventForwarder = ClientEventForwarder.get();
+    clientEventForwarder.advertise(new Advertisement(Consts.hostName, objectId), subs, true);
   }
 
   /**
@@ -109,22 +106,6 @@ public class Signal<T extends Serializable> implements ProxyGenerator<T>, TimeCh
     valueChangeListeners.remove(listener);
   }
 
-  private final void sendAdvertisement() {
-    final Set<Subscription> subs = dependentProxies.stream().//
-        map(p -> new Subscription(p.getHost(), p.getObject(), p.getProxyID(), p.getConstraints())).//
-        collect(Collectors.toSet());
-    clientEventForwarder.advertise(new Advertisement(Consts.hostName, objectId), subs, true);
-  }
-
-  private final String getInitialVar(Collection<EventProxyPair> pairs) {
-    // All pairs are generated from the same initial var, so we can retrieve the
-    // initial var from any event
-    return pairs.stream().//
-        findAny().//
-        map(p -> p.getEventPacket().getInitialVar()).//
-        get();
-  }
-
   @Override
   public final synchronized T evaluate() {
     return evaluation.get();
@@ -134,7 +115,6 @@ public class Signal<T extends Serializable> implements ProxyGenerator<T>, TimeCh
     return val;
   }
 
-  @Override
   public synchronized RemoteVar<T> getProxy() {
     if (proxy == null) {
       proxy = new RemoteVar<T>(objectId, constraints);
@@ -143,8 +123,38 @@ public class Signal<T extends Serializable> implements ProxyGenerator<T>, TimeCh
   }
 
   @Override
-  public ProxyGenerator<T> filter(SerializablePredicate<T> constraint) {
+  public ProxyRegistrar<T> filter(SerializablePredicate<T> constraint) {
     return new Signal<T>(this, constraint);
+  }
+
+  @Override
+  public void addProxyChangeListener(ProxyChangeListener proxyChangeListener) {
+    getProxy().proxyChangeListeners.add(proxyChangeListener);
+  }
+
+  @Override
+  public void removeProxyChangeListener(ProxyChangeListener proxyChangeListener) {
+    getProxy().proxyChangeListeners.remove(proxyChangeListener);
+  }
+
+  @Override
+  public String getHost() {
+    return getProxy().host;
+  }
+
+  @Override
+  public String getObject() {
+    return getProxy().object;
+  }
+
+  @Override
+  public UUID getProxyID() {
+    return getProxy().proxyID;
+  }
+
+  @Override
+  public List<SerializablePredicate> getConstraints() {
+    return getProxy().getConstraints();
   }
 
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-import javareact.common.types.ProxyGenerator;
+import javareact.common.types.ProxyRegistrar;
 import javareact.common.types.Signal;
 
 /**
@@ -12,7 +12,7 @@ import javareact.common.types.Signal;
  */
 public class SignalList<T> extends Signal<ArrayList<T>> {
 
-  public SignalList(String name, Supplier<ArrayList<T>> evaluation, ProxyGenerator... vars) {
+  public SignalList(String name, Supplier<ArrayList<T>> evaluation, ProxyRegistrar... vars) {
     super(name, evaluation, vars);
   }
 

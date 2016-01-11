@@ -12,7 +12,7 @@ import javareact.common.SerializablePredicate;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 
-public class Var<T extends Serializable> implements ProxyGenerator<T> {
+public class Var<T extends Serializable> implements ProxyRegistrar<T> {
   protected final ClientEventForwarder forwarder;
   protected final String objectId;
   private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
@@ -59,8 +59,7 @@ public class Var<T extends Serializable> implements ProxyGenerator<T> {
     forwarder.sendEvent(UUID.randomUUID(), ev, ev.getSignature(), false);
   }
 
-  @Override
-  public synchronized RemoteVar<T> getProxy() {
+  private synchronized RemoteVar<T> getProxy() {
     if (proxy == null) {
       proxy = new RemoteVar<T>(objectId, constraints);
     }
@@ -68,8 +67,38 @@ public class Var<T extends Serializable> implements ProxyGenerator<T> {
   }
 
   @Override
-  public ProxyGenerator<T> filter(SerializablePredicate<T> constraint) {
+  public ProxyRegistrar<T> filter(SerializablePredicate<T> constraint) {
     return new Var<T>(this, constraint);
+  }
+
+  @Override
+  public void addProxyChangeListener(ProxyChangeListener proxyChangeListener) {
+    getProxy().proxyChangeListeners.add(proxyChangeListener);
+  }
+
+  @Override
+  public void removeProxyChangeListener(ProxyChangeListener proxyChangeListener) {
+    getProxy().proxyChangeListeners.remove(proxyChangeListener);
+  }
+
+  @Override
+  public String getHost() {
+    return getProxy().host;
+  }
+
+  @Override
+  public String getObject() {
+    return getProxy().object;
+  }
+
+  @Override
+  public UUID getProxyID() {
+    return getProxy().proxyID;
+  }
+
+  @Override
+  public List<SerializablePredicate> getConstraints() {
+    return constraints;
   }
 
 }

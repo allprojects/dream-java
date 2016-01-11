@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javareact.common.packets.content.Event;
-import javareact.server.WaitRecommendations;
+import javareact.common.utils.WaitRecommendations;
 
 /**
  * Packet used to deliver events, which notify about some state change.
@@ -24,7 +24,8 @@ public class EventPacket implements Serializable {
 
   // Wait recommendations are used in glitch free protocols to tell the client
   // to wait before processing an event
-  private final Map<String, Set<WaitRecommendations>> waitRecommendations = new HashMap<String, Set<WaitRecommendations>>();
+  private final Map<String, Set<WaitRecommendations>> waitRecommendations = new HashMap<>();
+  private final Set<WaitRecommendations> allRecommendations = new HashSet<>();
 
   // Final expressions are used in the atomic protocol to determine when the
   // token can be released
@@ -52,6 +53,7 @@ public class EventPacket implements Serializable {
   }
 
   public final void addWaitRecommendations(WaitRecommendations recommendations) {
+    allRecommendations.add(recommendations);
     final String expression = recommendations.getExpression();
     Set<WaitRecommendations> innerSet = waitRecommendations.get(expression);
     if (innerSet == null) {
@@ -59,6 +61,10 @@ public class EventPacket implements Serializable {
       waitRecommendations.put(expression, innerSet);
     }
     innerSet.add(recommendations);
+  }
+
+  public final Set<WaitRecommendations> getWaitRecommendations() {
+    return allRecommendations;
   }
 
   public final boolean hasRecommendationsFor(String expression) {

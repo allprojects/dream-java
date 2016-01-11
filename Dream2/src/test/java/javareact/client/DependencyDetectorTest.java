@@ -1,4 +1,4 @@
-package javareact.server;
+package javareact.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,11 +8,11 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import javareact.common.packets.AdvertisementPacket;
-import javareact.common.packets.content.AdvType;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
+import javareact.common.utils.DependencyDetector;
+import javareact.common.utils.WaitRecommendations;
 
 public class DependencyDetectorTest {
 
@@ -20,7 +20,8 @@ public class DependencyDetectorTest {
   public void noDependencyTest() {
     // B = f(A)
     // D = f(B, C)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription<Integer> subA = new Subscription<Integer>("Host", "A");
     final Subscription<Integer> subB = new Subscription<Integer>("Host", "B");
@@ -34,18 +35,16 @@ public class DependencyDetectorTest {
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<>();
     subsB.add(subA);
-    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
-    depDetector.processAdvertisementPacket(advPktA);
+    depDetector.processAdv(advB, subsB);
 
     // Subscription to B and C (B, C generate D)
     final Set<Subscription> subsD = new HashSet<>();
     subsD.add(subB);
     subsD.add(subC);
-    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
-    depDetector.processAdvertisementPacket(advPktD);
+    depDetector.processAdv(advD, subsD);
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advC, AdvType.ADV, true));
+    depDetector.processAdv(advA);
+    depDetector.processAdv(advC);
 
     // Consolidate
     depDetector.consolidate();
@@ -71,7 +70,8 @@ public class DependencyDetectorTest {
   public void basicTriangularCycleTest() {
     // B = f(A)
     // C = f(A, B)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription<Integer> subA = new Subscription<Integer>("Host", "A");
     final Subscription<Integer> subB = new Subscription<Integer>("Host", "B");
@@ -83,17 +83,15 @@ public class DependencyDetectorTest {
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<>();
     subsB.add(subA);
-    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
-    depDetector.processAdvertisementPacket(advPktA);
+    depDetector.processAdv(advB, subsB);
 
     // Subscription to A, B (A, B generates C)
     final Set<Subscription> subsC = new HashSet<>();
     subsC.add(subA);
     subsC.add(subB);
-    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
-    depDetector.processAdvertisementPacket(advPktC);
+    depDetector.processAdv(advC, subsC);
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+    depDetector.processAdv(advA);
 
     // Consolidate
     depDetector.consolidate();
@@ -130,7 +128,8 @@ public class DependencyDetectorTest {
     // B = f(A)
     // C = f(A)
     // D = f(B, C)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription<Integer> subA = new Subscription<Integer>("Host", "A");
     final Subscription<Integer> subB = new Subscription<Integer>("Host", "B");
@@ -144,23 +143,20 @@ public class DependencyDetectorTest {
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
-    depDetector.processAdvertisementPacket(advPktA);
+    depDetector.processAdv(advB, subsB);
 
     // Subscription to A (A generates C)
     final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
-    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
-    depDetector.processAdvertisementPacket(advPktC);
+    depDetector.processAdv(advC, subsC);
 
     // Subscription to B, C (B, C generate D)
     final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
-    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
-    depDetector.processAdvertisementPacket(advPktD);
+    depDetector.processAdv(advD, subsD);
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+    depDetector.processAdv(advA);
 
     // Consolidate
     depDetector.consolidate();
@@ -202,7 +198,8 @@ public class DependencyDetectorTest {
     // C = f(A)
     // D = f(C)
     // E = f(B, D)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription subA = new Subscription("Host", "A");
     final Subscription subB = new Subscription("Host", "B");
@@ -215,32 +212,28 @@ public class DependencyDetectorTest {
     final Advertisement advD = new Advertisement("Host", "D");
     final Advertisement advE = new Advertisement("Host", "E");
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+    depDetector.processAdv(advA);
 
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
-    depDetector.processAdvertisementPacket(advPktA);
+    depDetector.processAdv(advB, subsB);
 
     // Subscription to A (A generates C)
     final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
-    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
-    depDetector.processAdvertisementPacket(advPktC);
+    depDetector.processAdv(advC, subsC);
 
     // Subscription to C (C generate D)
     final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subC);
-    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
-    depDetector.processAdvertisementPacket(advPktD);
+    depDetector.processAdv(advD, subsD);
 
     // Subscription to B, D (B, D generate E)
     final Set<Subscription> subsE = new HashSet<Subscription>();
     subsE.add(subB);
     subsE.add(subD);
-    final AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
-    depDetector.processAdvertisementPacket(advPktE);
+    depDetector.processAdv(advE, subsE);
 
     // Consolidate
     depDetector.consolidate();
@@ -287,7 +280,8 @@ public class DependencyDetectorTest {
     // B = f(A)
     // C = f(B)
     // D = f(B, C)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription subA = new Subscription("Host", "A");
     final Subscription subB = new Subscription("Host", "B");
@@ -301,23 +295,20 @@ public class DependencyDetectorTest {
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
-    depDetector.processAdvertisementPacket(advPktA);
+    depDetector.processAdv(advB, subsB);
 
     // Subscription to B (B generates C)
     final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subB);
-    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
-    depDetector.processAdvertisementPacket(advPktC);
+    depDetector.processAdv(advC, subsC);
 
     // Subscription to B, C (B, C generate D)
     final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
-    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
-    depDetector.processAdvertisementPacket(advPktD);
+    depDetector.processAdv(advD, subsD);
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+    depDetector.processAdv(advA);
 
     // Consolidate
     depDetector.consolidate();
@@ -361,7 +352,8 @@ public class DependencyDetectorTest {
     // C = f(A)
     // D = f(A)
     // E = f(B, C, D)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription subA = new Subscription("Host", "A");
     final Subscription subB = new Subscription("Host", "B");
@@ -374,33 +366,29 @@ public class DependencyDetectorTest {
     final Advertisement advD = new Advertisement("Host", "D");
     final Advertisement advE = new Advertisement("Host", "E");
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+    depDetector.processAdv(advA);
 
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
-    depDetector.processAdvertisementPacket(advPktA);
+    depDetector.processAdv(advB, subsB);
 
     // Subscription to A (A generates C)
     final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
-    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
-    depDetector.processAdvertisementPacket(advPktC);
+    depDetector.processAdv(advC, subsC);
 
     // Subscription to A (A generates D)
     final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subA);
-    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
-    depDetector.processAdvertisementPacket(advPktD);
+    depDetector.processAdv(advD, subsD);
 
     // Subscription to B, C, D (B, C, D generate E)
     final Set<Subscription> subsE = new HashSet<Subscription>();
     subsE.add(subB);
     subsE.add(subC);
     subsE.add(subD);
-    final AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
-    depDetector.processAdvertisementPacket(advPktE);
+    depDetector.processAdv(advE, subsE);
 
     // Consolidate
     depDetector.consolidate();
@@ -457,7 +445,8 @@ public class DependencyDetectorTest {
     // B2 = f(A2)
     // C2 = f(A2)
     // D = f(B1, C1, B2, C2)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription subA1 = new Subscription("Host", "A1");
     final Subscription subA2 = new Subscription("Host", "A2");
@@ -477,26 +466,22 @@ public class DependencyDetectorTest {
     // Subscription to A1 (A1 generates B2)
     final Set<Subscription> subsB1 = new HashSet<Subscription>();
     subsB1.add(subA1);
-    final AdvertisementPacket advPktA1 = new AdvertisementPacket(advB1, AdvType.ADV, subsB1, true);
-    depDetector.processAdvertisementPacket(advPktA1);
+    depDetector.processAdv(advB1, subsB1);
 
     // Subscription to A2 (A2 generates B2)
     final Set<Subscription> subsB2 = new HashSet<Subscription>();
     subsB2.add(subA2);
-    final AdvertisementPacket advPktA2 = new AdvertisementPacket(advB2, AdvType.ADV, subsB2, true);
-    depDetector.processAdvertisementPacket(advPktA2);
+    depDetector.processAdv(advB2, subsB2);
 
     // Subscription to A1 (A1 generates C1)
     final Set<Subscription> subsC1 = new HashSet<Subscription>();
     subsC1.add(subA1);
-    final AdvertisementPacket advPktC1 = new AdvertisementPacket(advC1, AdvType.ADV, subsC1, true);
-    depDetector.processAdvertisementPacket(advPktC1);
+    depDetector.processAdv(advC1, subsC1);
 
     // Subscription to A2 (A2 generates C2)
     final Set<Subscription> subsC2 = new HashSet<Subscription>();
     subsC2.add(subA2);
-    final AdvertisementPacket advPktC2 = new AdvertisementPacket(advC2, AdvType.ADV, subsC2, true);
-    depDetector.processAdvertisementPacket(advPktC2);
+    depDetector.processAdv(advC2, subsC2);
 
     // Subscription to B1, B2, C1, C2 (B1, B2, C1, C2 generate D)
     final Set<Subscription> subsD = new HashSet<Subscription>();
@@ -504,11 +489,10 @@ public class DependencyDetectorTest {
     subsD.add(subB2);
     subsD.add(subC1);
     subsD.add(subC2);
-    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
-    depDetector.processAdvertisementPacket(advPktD);
+    depDetector.processAdv(advD, subsD);
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA1, AdvType.ADV, true));
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA2, AdvType.ADV, true));
+    depDetector.processAdv(advA1);
+    depDetector.processAdv(advA2);
 
     // Consolidate
     depDetector.consolidate();
@@ -567,7 +551,8 @@ public class DependencyDetectorTest {
     // B = f(A1)
     // C = f(A1, A2)
     // D = f(B, C)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription subA1 = new Subscription("Host", "A1");
     final Subscription subA2 = new Subscription("Host", "A2");
@@ -580,28 +565,25 @@ public class DependencyDetectorTest {
     final Advertisement advC = new Advertisement("Host", "C");
     final Advertisement advD = new Advertisement("Host", "D");
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA1, AdvType.ADV, true));
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA2, AdvType.ADV, true));
+    depDetector.processAdv(advA1);
+    depDetector.processAdv(advA2);
 
     // Subscription to A1 (A1 generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA1);
-    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
-    depDetector.processAdvertisementPacket(advPktA);
+    depDetector.processAdv(advB, subsB);
 
     // Subscription to A1, A2 (A1, A2 generate C)
     final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA1);
     subsC.add(subA2);
-    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
-    depDetector.processAdvertisementPacket(advPktC);
+    depDetector.processAdv(advC, subsC);
 
     // Subscription to D (B, C generate D)
     final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
-    final AdvertisementPacket advPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
-    depDetector.processAdvertisementPacket(advPktD);
+    depDetector.processAdv(advD, subsD);
 
     // Consolidate
     depDetector.consolidate();
@@ -656,7 +638,8 @@ public class DependencyDetectorTest {
     // F = f(E)
     // H = f(F, G)
     // D = f(B, C, H)
-    final DependencyDetector depDetector = new DependencyDetector();
+    final DependencyDetector depDetector = DependencyDetector.instance;
+    depDetector.clear();
 
     final Subscription subA = new Subscription("Host", "A");
     final Subscription subB = new Subscription("Host", "B");
@@ -678,49 +661,42 @@ public class DependencyDetectorTest {
     // Subscription to A (A generates B)
     final Set<Subscription> subsB = new HashSet<Subscription>();
     subsB.add(subA);
-    final AdvertisementPacket advPktA = new AdvertisementPacket(advB, AdvType.ADV, subsB, true);
-    depDetector.processAdvertisementPacket(advPktA);
+    depDetector.processAdv(advB, subsB);
 
     // Subscription to A (A generates C)
     final Set<Subscription> subsC = new HashSet<Subscription>();
     subsC.add(subA);
-    final AdvertisementPacket advPktC = new AdvertisementPacket(advC, AdvType.ADV, subsC, true);
-    depDetector.processAdvertisementPacket(advPktC);
+    depDetector.processAdv(advC, subsC);
 
     // Subscription to A (A generates E)
     final Set<Subscription> subsE = new HashSet<Subscription>();
     subsE.add(subA);
-    final AdvertisementPacket advPktE = new AdvertisementPacket(advE, AdvType.ADV, subsE, true);
-    depDetector.processAdvertisementPacket(advPktE);
+    depDetector.processAdv(advE, subsE);
 
     // Subscription to E (E generates G)
     final Set<Subscription> subsG = new HashSet<Subscription>();
     subsG.add(subE);
-    final AdvertisementPacket advPktG = new AdvertisementPacket(advG, AdvType.ADV, subsG, true);
-    depDetector.processAdvertisementPacket(advPktG);
+    depDetector.processAdv(advG, subsG);
 
     // Subscription to E (E generates F)
     final Set<Subscription> subsF = new HashSet<Subscription>();
     subsF.add(subE);
-    final AdvertisementPacket advPktF = new AdvertisementPacket(advF, AdvType.ADV, subsF, true);
-    depDetector.processAdvertisementPacket(advPktF);
+    depDetector.processAdv(advF, subsF);
 
     // Subscription to F, G (F, G generate H)
     final Set<Subscription> subsH = new HashSet<Subscription>();
     subsH.add(subF);
     subsH.add(subG);
-    final AdvertisementPacket advPktH = new AdvertisementPacket(advH, AdvType.ADV, subsH, true);
-    depDetector.processAdvertisementPacket(advPktH);
+    depDetector.processAdv(advH, subsH);
 
     // Subscription to B, C, H (B, C, H generate D)
     final Set<Subscription> subsD = new HashSet<Subscription>();
     subsD.add(subB);
     subsD.add(subC);
     subsD.add(subH);
-    final AdvertisementPacket subPktD = new AdvertisementPacket(advD, AdvType.ADV, subsD, true);
-    depDetector.processAdvertisementPacket(subPktD);
+    depDetector.processAdv(advD, subsD);
 
-    depDetector.processAdvertisementPacket(new AdvertisementPacket(advA, AdvType.ADV, true));
+    depDetector.processAdv(advA);
 
     // Consolidate
     depDetector.consolidate();

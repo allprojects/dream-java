@@ -11,9 +11,9 @@ import java.util.logging.Logger;
 import javareact.client.ClientEventForwarder;
 import javareact.client.Subscriber;
 import javareact.common.Consts;
-import javareact.common.SerializablePredicate;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Subscription;
+import javareact.common.utils.SerializablePredicate;
 
 public class RemoteVar<T> implements Subscriber, UpdateProducer<T> {
   private T val;

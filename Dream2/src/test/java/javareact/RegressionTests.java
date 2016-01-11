@@ -3,7 +3,7 @@ package javareact;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import javareact.server.DependencyDetectorTest;
+import javareact.client.DependencyDetectorTest;
 import javareact.token_service.FinalExpressionsDetectorTest;
 
 @RunWith(Suite.class)

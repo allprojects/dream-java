@@ -1,4 +1,4 @@
-package javareact.common;
+package javareact.common.utils;
 
 import java.io.Serializable;
 import java.util.function.Predicate;

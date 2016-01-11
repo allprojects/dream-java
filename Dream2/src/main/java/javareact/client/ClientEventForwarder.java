@@ -10,11 +10,14 @@ import java.util.logging.Logger;
 
 import javareact.common.ConsistencyType;
 import javareact.common.Consts;
+import javareact.common.packets.AdvertisementPacket;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.SubscriptionPacket;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
+import javareact.common.utils.DependencyDetector;
+import javareact.common.utils.WaitRecommendations;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.routing.Outbox;
 import polimi.reds.broker.routing.PacketForwarder;
@@ -24,6 +27,8 @@ public class ClientEventForwarder implements PacketForwarder {
 
   private final ConnectionManager connectionManager;
   private final ClientSubscriptionTable subTable;
+  private final DependencyDetector dependencyDetector = DependencyDetector.instance;
+
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   public static final ClientEventForwarder get() {
@@ -54,7 +59,11 @@ public class ClientEventForwarder implements PacketForwarder {
   @Override
   public Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender, Serializable packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
     final Collection<NodeDescriptor> result = new ArrayList<NodeDescriptor>();
-    if (subject.equals(EventPacket.subject)) {
+    if (subject.equals(AdvertisementPacket.subject)) {
+      assert packet instanceof AdvertisementPacket;
+      logger.finer("Received an advertisement packet " + packet);
+      processAdvertisementFromServer((AdvertisementPacket) packet);
+    } else if (subject.equals(EventPacket.subject)) {
       assert packet instanceof EventPacket;
       logger.finer("Received an event packet " + packet);
       processEventFromServer((EventPacket) packet);
@@ -68,34 +77,50 @@ public class ClientEventForwarder implements PacketForwarder {
     return result;
   }
 
-  public final void sendEvent(UUID id, Event ev, String initialVar, boolean approvedByTokenService) {
-    sendEvent(id, ev, initialVar, new HashSet<String>(), approvedByTokenService);
+  public final void sendEvent(UUID id, Event ev, String initialVar, Set<WaitRecommendations> waitRecommendations, boolean approvedByTokenService) {
+    sendEvent(id, ev, initialVar, waitRecommendations, new HashSet<>(), approvedByTokenService);
   }
 
-  public final void sendEvent(UUID id, Event ev, String initialVar, Set<String> finalExpressions, boolean approvedByTokenService) {
+  public final void sendEvent(UUID id, Event ev, String initialVar, Set<WaitRecommendations> waitRecommendations, Set<String> finalExpressions, boolean approvedByTokenService) {
     logger.finer("Sending an event " + ev);
     if (subTable.needsToDeliverToServer(ev)) {
-      connectionManager.sendEvent(id, ev, initialVar, finalExpressions, approvedByTokenService);
+      connectionManager.sendEvent(id, ev, initialVar, waitRecommendations, finalExpressions, approvedByTokenService);
     }
   }
 
   public final void advertise(Advertisement adv, boolean isPublic) {
     logger.fine("Sending advertisement " + adv);
+    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
+      dependencyDetector.processAdv(adv);
+      dependencyDetector.consolidate();
+    }
     connectionManager.sendAdvertisement(adv, isPublic);
   }
 
   public final void unadvertise(Advertisement adv, boolean isPublic) {
     logger.fine("Sending unadvertisement " + adv);
+    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
+      dependencyDetector.processUnAdv(adv);
+      dependencyDetector.consolidate();
+    }
     connectionManager.sendUnadvertisement(adv, isPublic);
   }
 
   public final void advertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
     logger.fine("Sending advertisement " + adv + " with subscriptions " + subs);
+    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
+      dependencyDetector.processAdv(adv, subs);
+      dependencyDetector.consolidate();
+    }
     connectionManager.sendAdvertisement(adv, subs, isPublic);
   }
 
-  public final void unadvertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
+  public final void unadvertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
     logger.fine("Sending unadvertisement " + adv + " with subscriptions " + subs);
+    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
+      dependencyDetector.processUnAdv(adv, subs);
+      dependencyDetector.consolidate();
+    }
     connectionManager.sendUnadvertisement(adv, isPublic);
   }
 
@@ -128,6 +153,28 @@ public class ClientEventForwarder implements PacketForwarder {
     if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
       subTable.getSignatureOnlyMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyEventReceived(evPkt));
+    }
+  }
+
+  private final void processAdvertisementFromServer(AdvertisementPacket advPkt) {
+    final Set<Subscription> subs = advPkt.getSubscriptions();
+    switch (advPkt.getAdvType()) {
+    case ADV:
+      if (subs.isEmpty()) {
+        dependencyDetector.processAdv(advPkt.getAdvertisement());
+      } else {
+        dependencyDetector.processAdv(advPkt.getAdvertisement(), subs);
+      }
+      dependencyDetector.consolidate();
+      break;
+    case UNADV:
+      if (subs.isEmpty()) {
+        dependencyDetector.processUnAdv(advPkt.getAdvertisement());
+      } else {
+        dependencyDetector.processUnAdv(advPkt.getAdvertisement(), subs);
+      }
+      dependencyDetector.consolidate();
+      break;
     }
   }
 

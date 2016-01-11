@@ -2,7 +2,7 @@ package javareact.common.types;
 
 import java.util.List;
 
-import javareact.common.SerializablePredicate;
+import javareact.common.utils.SerializablePredicate;
 
 /**
  * An UpdateProducer generates an update task and gets notified about the

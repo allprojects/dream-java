@@ -3,12 +3,9 @@ package javareact.server;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javareact.common.ConsistencyType;
 import javareact.common.Consts;
@@ -29,7 +26,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
   protected final SubscriptionTable clientsSubTable = new SubscriptionTable();
   protected final SubscriptionTable brokersSubTable = new SubscriptionTable();
   protected final AdvertisementTable advTable = new AdvertisementTable();
-  protected final DependencyDetector dependencyDetector = new DependencyDetector();
 
   protected NodeDescriptor registry = null;
   protected NodeDescriptor tokenService = null;
@@ -96,21 +92,11 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
     if (Consts.consistencyType == ConsistencyType.ATOMIC && !packet.isApprovedByTokenService()) {
       sendToTokenService(EventPacket.subject, packet, outbox);
     } else {
-      if ((sender.isClient() || sender.equals(tokenService)) && (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC)) {
-        final Set<WaitRecommendations> waitRecommendations = dependencyDetector.getWaitRecommendations(packet.getEvent(), packet.getInitialVar());
-        sendEvent(packet, waitRecommendations, outbox);
-      } else {
-        sendEvent(packet, outbox);
-      }
+      sendEvent(packet, outbox);
     }
   }
 
   private final void sendEvent(EventPacket pkt, Outbox outbox) {
-    sendEvent(pkt, new HashSet<WaitRecommendations>(), outbox);
-  }
-
-  private final void sendEvent(EventPacket pkt, Set<WaitRecommendations> waitRecommendations, Outbox outbox) {
-    waitRecommendations.forEach(pkt::addWaitRecommendations);
     final Map<NodeDescriptor, Integer> matchingClients = clientsSubTable.getMatchingNodes(pkt.getEvent());
     final Map<NodeDescriptor, Integer> matchingBrokers = brokersSubTable.getMatchingNodes(pkt.getEvent());
     sendTo(EventPacket.subject, pkt, outbox, matchingClients.keySet());
@@ -134,10 +120,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
   }
 
   private final void processAdvertisement(NodeDescriptor sender, AdvertisementPacket packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
-    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
-      dependencyDetector.processAdvertisementPacket(packet);
-      dependencyDetector.consolidate();
-    }
     if (Consts.consistencyType == ConsistencyType.ATOMIC && sender.isClient()) {
       assert tokenService != null;
       sendToTokenService(AdvertisementPacket.subject, packet, outbox);
@@ -152,7 +134,7 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
         break;
       }
     }
-    outbox.add(AdvertisementPacket.subject, packet, getAllBrokersExcept(sender, neighbors));
+    outbox.add(AdvertisementPacket.subject, packet, getAllNodesExcept(sender, neighbors));
   }
 
   private final void processRegistryAdvertise(NodeDescriptor sender, RegistryAdvertisePacket packet) {
@@ -196,15 +178,10 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
     box.add(subject, packet, recipients);
   }
 
-  private final Collection<NodeDescriptor> getAllBrokersExcept(NodeDescriptor nodeToSkip, Collection<NodeDescriptor> neighbors) {
-    final Predicate<NodeDescriptor> isBroker = node -> node.isBroker();
-    final Predicate<NodeDescriptor> isNotRegistry = node -> registry != null && node.equals(registry);
-    final Predicate<NodeDescriptor> isNotTokenService = node -> tokenService != null && node.equals(tokenService);
-    return neighbors.stream().//
-        filter(isBroker).//
-        filter(isNotRegistry).//
-        filter(isNotTokenService).//
-        collect(Collectors.toList());
+  private final Collection<NodeDescriptor> getAllNodesExcept(NodeDescriptor nodeToSkip, Collection<NodeDescriptor> neighbors) {
+    final Collection<NodeDescriptor> result = new ArrayList<>(neighbors);
+    result.remove(nodeToSkip);
+    return result;
   }
 
   private final void reactToRemovedNeighbor(NodeDescriptor node) {

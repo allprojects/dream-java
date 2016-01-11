@@ -13,12 +13,12 @@ import java.util.logging.Logger;
 import javareact.client.ClientEventForwarder;
 import javareact.client.QueueManager;
 import javareact.common.Consts;
-import javareact.common.SerializablePredicate;
 import javareact.common.ValueChangeListener;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
+import javareact.common.utils.SerializablePredicate;
 
 public class Signal<T extends Serializable> implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer {
   private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<>();
@@ -113,7 +113,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
       // Extract information from any of the packets
       final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
       // Notify remote subscribers
-      clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getInitialVar(), anyPkt.getFinalExpressions(), true);
+      clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getInitialVar(), anyPkt.getWaitRecommendations(), anyPkt.getFinalExpressions(), true);
       // Notify local subscribers
       if (!consumers.isEmpty()) {
         pairs.forEach(pair -> waitingProducers.add(pair.getUpdateProducer()));

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import javareact.common.packets.EventPacket;
 import javareact.common.types.EventProducerPair;
-import javareact.server.WaitRecommendations;
+import javareact.common.utils.WaitRecommendations;
 
 /**
  * This class is responsible for temporarily accumulating events before delivery

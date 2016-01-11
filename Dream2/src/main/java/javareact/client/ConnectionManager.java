@@ -16,6 +16,7 @@ import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.SubType;
 import javareact.common.packets.content.Subscription;
+import javareact.common.utils.WaitRecommendations;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.overlay.GenericOverlay;
 import polimi.reds.broker.overlay.NotRunningException;
@@ -49,9 +50,10 @@ class ConnectionManager {
     }
   }
 
-  final void sendEvent(UUID id, Event<? extends Serializable> event, String initialVar, Set<String> finalExpressions, boolean approvedByTokenService) {
+  final void sendEvent(UUID id, Event<? extends Serializable> event, String initialVar, Set<WaitRecommendations> waitRecomendations, Set<String> finalExpressions, boolean approvedByTokenService) {
     final EventPacket pkt = new EventPacket(event, id, initialVar, approvedByTokenService);
     finalExpressions.forEach(pkt::addFinalExpression);
+    waitRecomendations.forEach(pkt::addWaitRecommendations);
     send(EventPacket.subject, pkt);
   }
 

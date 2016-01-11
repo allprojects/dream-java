@@ -1,4 +1,4 @@
-package javareact.server;
+package javareact.common.utils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javareact.common.packets.AdvertisementPacket;
+import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-final class DependencyDetector {
+public enum DependencyDetector {
+  instance;
+
   private final Map<String, Collection<String>> dependencyGraph = new HashMap<>();
   private final Set<String> initialExpressions = new HashSet<>();
 
@@ -24,7 +26,7 @@ final class DependencyDetector {
   // Wait recommendations
   private final Map<String, Map<String, Set<WaitRecommendations>>> recommendations = new HashMap<>();
 
-  final Set<WaitRecommendations> getWaitRecommendations(Event<?> event, String initialVar) {
+  public synchronized final Set<WaitRecommendations> getWaitRecommendations(Event<?> event, String initialVar) {
     final Map<String, Set<WaitRecommendations>> innerMap = recommendations.get(event.getSignature());
     if (innerMap == null) {
       return new HashSet<>();
@@ -32,39 +34,36 @@ final class DependencyDetector {
     return innerMap.containsKey(initialVar) ? innerMap.get(initialVar) : new HashSet<>();
   }
 
-  final void processAdvertisementPacket(AdvertisementPacket advPkt) {
-    switch (advPkt.getAdvType()) {
-    case ADV:
-      processAdv(advPkt);
-      break;
-    case UNADV:
-      processUnadv(advPkt);
-      break;
-    default:
-      assert false : advPkt.getAdvType();
-    }
+  public synchronized final void clear() {
+    dependencyGraph.clear();
+    initialExpressions.clear();
   }
 
-  final void consolidate() {
+  public synchronized final void consolidate() {
     recommendations.clear();
     computeRecommendations();
   }
 
-  private final void processAdv(AdvertisementPacket advPkt) {
-    final String advSignature = advPkt.getAdvertisement().getSignature();
-    final Set<Subscription> subs = advPkt.getSubscriptions();
-    if (!subs.isEmpty()) {
-      final Set<String> subSignatures = subs.stream().//
-          map(sub -> sub.getSignature()).//
-          collect(Collectors.toSet());
-      dependencyGraph.put(advSignature, subSignatures);
-    } else {
-      initialExpressions.add(advSignature);
-    }
+  public synchronized final void processAdv(Advertisement adv) {
+    final String advSignature = adv.getSignature();
+    initialExpressions.add(advSignature);
   }
 
-  private final void processUnadv(AdvertisementPacket advPkt) {
-    // TODO: manage unadvertisements
+  public synchronized final void processAdv(Advertisement adv, Set<Subscription> subs) {
+    final String advSignature = adv.getSignature();
+    assert!subs.isEmpty();
+    final Set<String> subSignatures = subs.stream().//
+        map(sub -> sub.getSignature()).//
+        collect(Collectors.toSet());
+    dependencyGraph.put(advSignature, subSignatures);
+  }
+
+  public synchronized final void processUnAdv(Advertisement adv) {
+    // TODO manage unadvertisements
+  }
+
+  public synchronized final void processUnAdv(Advertisement adv, Set<Subscription> subs) {
+    // TODO manage unadvertisements
   }
 
   private final void computeRecommendations() {

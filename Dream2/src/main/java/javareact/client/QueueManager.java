@@ -9,9 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javareact.common.packets.EventPacket;
-import javareact.common.packets.content.Event;
-import javareact.common.types.EventProxyPair;
-import javareact.common.types.Proxy;
+import javareact.common.types.EventProducerPair;
 import javareact.server.WaitRecommendations;
 
 /**
@@ -23,35 +21,32 @@ public class QueueManager {
   private final Map<UUID, WaitingElement> waitingElements = new HashMap<UUID, WaitingElement>();
   // Candidate results to deliver (they can be effectively delivered only there
   // are no waiting elements).
-  private final Set<EventProxyPair> pendingResults = new HashSet<EventProxyPair>();
+  private final Set<EventProducerPair> pendingResults = new HashSet<>();
 
-  public final List<EventProxyPair> processEventPacket(EventProxyPair eventProxyPair, String expression) {
-    final EventPacket evPkt = eventProxyPair.getEventPacket();
-    final Proxy proxy = eventProxyPair.getProxy();
+  public final List<EventProducerPair> processEventPacket(EventProducerPair event, String expression) {
+    final EventPacket evPkt = event.getEventPacket();
 
     final UUID id = evPkt.getId();
-    final Set<WaitRecommendations> waitingRecommendations = evPkt.hasRecommendationsFor(expression) ? evPkt.getRecommendationsFor(expression) : new HashSet<WaitRecommendations>();
+    final Set<WaitRecommendations> waitingRecommendations = evPkt.hasRecommendationsFor(expression) ? evPkt.getRecommendationsFor(expression) : new HashSet<>();
 
     if (waitingElements.containsKey(id)) {
       final WaitingElement elem = waitingElements.get(id);
-      elem.processEvent(evPkt, proxy);
+      elem.processEvent(event);
       if (elem.hasFinishedWaiting()) {
-        final Map<EventPacket, Proxy> eventProxyMap = elem.getReceivedEvents();
-        eventProxyMap.entrySet().//
-            forEach(e -> pendingResults.add(new EventProxyPair(e.getKey(), e.getValue())));
+        elem.getReceivedEvents().forEach(pendingResults::add);
         waitingElements.remove(id);
       }
     } else {
       final Set<String> expressionsToWaitFrom = getExpressionsToWaitFrom(waitingRecommendations);
       if (!expressionsToWaitFrom.isEmpty()) {
-        final WaitingElement elem = new WaitingElement(expressionsToWaitFrom, evPkt, proxy);
+        final WaitingElement elem = new WaitingElement(expressionsToWaitFrom, event);
         waitingElements.put(id, elem);
       } else {
-        pendingResults.add(new EventProxyPair(evPkt, proxy));
+        pendingResults.add(event);
       }
     }
 
-    final List<EventProxyPair> result = new ArrayList<EventProxyPair>();
+    final List<EventProducerPair> result = new ArrayList<>();
     if (waitingElements.isEmpty()) {
       result.addAll(pendingResults);
       pendingResults.clear();
@@ -68,28 +63,27 @@ public class QueueManager {
   private class WaitingElement {
     // Set of expressions we are waiting for before delivering the events with
     // the given id
-    private final Set<String> waitingFor = new HashSet<String>();
+    private final Set<String> waitingFor = new HashSet<>();
     // Set of events received with the given id
-    private final Map<EventPacket, Proxy> receivedEvents = new HashMap<EventPacket, Proxy>();
+    private final Set<EventProducerPair> receivedEvents = new HashSet<>();
 
-    WaitingElement(Set<String> waitingFor, EventPacket evPkt, Proxy proxy) {
+    WaitingElement(Set<String> waitingFor, EventProducerPair event) {
       this.waitingFor.addAll(waitingFor);
-      receivedEvents.put(evPkt, proxy);
+      receivedEvents.add(event);
     }
 
-    final void processEvent(EventPacket evPkt, Proxy proxy) {
-      final Event ev = evPkt.getEvent();
-      final String signature = ev.getSignature();
+    final void processEvent(EventProducerPair event) {
+      final String signature = event.getEventPacket().getEvent().getSignature();
       assert waitingFor.contains(signature);
       waitingFor.remove(signature);
-      receivedEvents.put(evPkt, proxy);
+      receivedEvents.add(event);
     }
 
     final boolean hasFinishedWaiting() {
       return waitingFor.isEmpty();
     }
 
-    final Map<EventPacket, Proxy> getReceivedEvents() {
+    final Set<EventProducerPair> getReceivedEvents() {
       return receivedEvents;
     }
   }

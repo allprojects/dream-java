@@ -1,11 +1,12 @@
 package javareact.common.types;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -19,31 +20,41 @@ import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
-public class Signal<T extends Serializable> implements ProxyRegistrar<T>, TimeChangingValue<T>, ProxyChangeListener {
-  private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<ValueChangeListener<T>>();
+public class Signal<T extends Serializable> implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer {
+  private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<>();
+
+  // Management of local subscribers
+  private final Set<UpdateConsumer> consumers = new HashSet<>();
+  private final Queue<EventProducerPair> eventQueue = new ArrayDeque<>();
+  private int pendingAcks = 0;
+  private final Set<UpdateProducer> waitingProducers = new HashSet<>();
+
   private final ClientEventForwarder clientEventForwarder;
   private final QueueManager queueManager = new QueueManager();
-  private final String objectId;
+
+  private final String host;
+  private final String object;
+  private final List<SerializablePredicate> constraints = new ArrayList<>();
+
   private final Supplier<T> evaluation;
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-  protected RemoteVar<T> proxy;
-  private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
   protected T val;
 
-  public Signal(String objectId, Supplier<T> evaluation, ProxyRegistrar... vars) {
-    this.objectId = objectId;
+  public Signal(String object, Supplier<T> evaluation, UpdateProducer... prods) {
+    this.host = Consts.hostName;
+    this.object = object;
     this.evaluation = evaluation;
 
-    final Set<Subscription> subs = new HashSet<Subscription>();
-    for (final ProxyRegistrar var : vars) {
-      var.addProxyChangeListener(this);
-      subs.add(new Subscription(var.getHost(), var.getObject(), var.getProxyID(), var.getConstraints()));
+    final Set<Subscription> subs = new HashSet<>();
+    for (final UpdateProducer prod : prods) {
+      prod.registerUpdateConsumer(this);
+      subs.add(new Subscription(prod.getHost(), prod.getObject(), prod.getConstraints()));
     }
 
     clientEventForwarder = ClientEventForwarder.get();
-    clientEventForwarder.advertise(new Advertisement(Consts.hostName, objectId), subs, true);
+    clientEventForwarder.advertise(new Advertisement(Consts.hostName, object), subs, true);
   }
 
   /**
@@ -51,7 +62,8 @@ public class Signal<T extends Serializable> implements ProxyRegistrar<T>, TimeCh
    * does not retain any value.
    */
   private Signal(Signal<T> copy, SerializablePredicate constraint) {
-    this.objectId = copy.objectId;
+    this.host = copy.host;
+    this.object = copy.object;
     this.evaluation = null;
     this.val = null;
     clientEventForwarder = ClientEventForwarder.get();
@@ -60,39 +72,60 @@ public class Signal<T extends Serializable> implements ProxyRegistrar<T>, TimeCh
     constraints.add(constraint);
   }
 
-  @Override
-  public void update(EventProxyPair eventProxyPair) {
-    logger.finest("Update method invoked with " + eventProxyPair);
-    final List<EventProxyPair> pairs = queueManager.processEventPacket(eventProxyPair, objectId + "@" + Consts.hostName);
+  private final synchronized void processNextUpdate() {
+    if (pendingAcks == 0) {
+      // Notify that the previous update has finished
+      if (!waitingProducers.isEmpty()) {
+        waitingProducers.forEach(prod -> prod.notifyUpdateFinished());
+        waitingProducers.clear();
+      }
+      // Process the next packet, if any
+      if (!eventQueue.isEmpty()) {
+        processUpdate(eventQueue.poll());
+      }
+    }
+  }
+
+  private final void processUpdate(EventProducerPair update) {
+    logger.finest("processTask method invoked with " + update);
+    final List<EventProducerPair> pairs = queueManager.processEventPacket(update, object + "@" + Consts.hostName);
     logger.finest("The queueManager returned the following pairs " + pairs);
     if (!pairs.isEmpty()) {
       logger.finest("Actual update");
+
       // Compute the new value
       try {
         val = evaluate();
         logger.finest("New value computed for the reactive object: " + val);
       } catch (final Exception e) {
-        logger.info("Exception during the evaluation of the expression.");
+        logger.info("Exception during the evaluation of the expression. Acknowledging the producers and returning.");
+        pairs.forEach(pair -> pair.getUpdateProducer().notifyUpdateFinished());
         return;
       }
 
-      // Notify local listeners
+      // Notify value change listeners
       logger.finest("Notifying registered listeners of the change.");
       valueChangeListeners.forEach(l -> l.notifyValueChanged(val));
 
-      // Notify dependent objects
-      logger.finest("Sending event to dependent reactive objects.");
-      final Event<T> ev = new Event<T>(Consts.hostName, objectId, val);
-      // Extract information from any of the packets received by the
-      // QueueManager
+      // Notify local and remote dependent objects
+      logger.finest("Sending event to dependent objects.");
+      final Event<T> event = new Event<T>(Consts.hostName, object, val);
+      // Extract information from any of the packets
       final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
-      clientEventForwarder.sendEvent(anyPkt.getId(), ev, anyPkt.getInitialVar(), anyPkt.getFinalExpressions(), true);
-
-      // Acknowledge the proxies
-      logger.finest("Acknowledging the proxies.");
-      pairs.forEach(pair -> pair.getProxy().notifyEventProcessed(this, pair.getEventPacket()));
+      // Notify remote subscribers
+      clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getInitialVar(), anyPkt.getFinalExpressions(), true);
+      // Notify local subscribers
+      if (!consumers.isEmpty()) {
+        pairs.forEach(pair -> waitingProducers.add(pair.getUpdateProducer()));
+        pendingAcks = consumers.size();
+        consumers.forEach(c -> c.updateFromProducer(new EventPacket(event, anyPkt.getId(), anyPkt.getInitialVar(), true), this));
+      } else {
+        // Acknowledge the producers if there are no pending acks
+        logger.finest("Acknowledging the producers.");
+        pairs.forEach(pair -> pair.getUpdateProducer().notifyUpdateFinished());
+      }
     } else {
-      logger.finest(objectId + ": update call but waiting: " + eventProxyPair.toString());
+      logger.finest(object + ": update call but waiting: " + update);
     }
   }
 
@@ -115,46 +148,52 @@ public class Signal<T extends Serializable> implements ProxyRegistrar<T>, TimeCh
     return val;
   }
 
-  public synchronized RemoteVar<T> getProxy() {
-    if (proxy == null) {
-      proxy = new RemoteVar<T>(objectId, constraints);
-    }
-    return proxy;
-  }
-
   @Override
-  public ProxyRegistrar<T> filter(SerializablePredicate<T> constraint) {
+  public UpdateProducer<T> filter(SerializablePredicate<T> constraint) {
     return new Signal<T>(this, constraint);
   }
 
   @Override
-  public void addProxyChangeListener(ProxyChangeListener proxyChangeListener) {
-    getProxy().proxyChangeListeners.add(proxyChangeListener);
+  public final synchronized void updateFromProducer(EventPacket packet, UpdateProducer producer) {
+    final EventProducerPair pair = new EventProducerPair(packet, producer);
+    eventQueue.add(pair);
+    logger.finest("Method update called for event " + pair + ". Added to the queue.");
+    if (eventQueue.size() == 1) {
+      logger.finest("The element is the only one in the queue. Let's process it.");
+      processNextUpdate();
+    }
+
   }
 
   @Override
-  public void removeProxyChangeListener(ProxyChangeListener proxyChangeListener) {
-    getProxy().proxyChangeListeners.remove(proxyChangeListener);
+  public final synchronized void notifyUpdateFinished() {
+    pendingAcks--;
+    processNextUpdate();
+  }
+
+  @Override
+  public void registerUpdateConsumer(UpdateConsumer consumer) {
+    consumers.add(consumer);
+  }
+
+  @Override
+  public void unregisterUpdateConsumer(UpdateConsumer consumer) {
+    consumers.remove(consumer);
   }
 
   @Override
   public String getHost() {
-    return getProxy().host;
+    return host;
   }
 
   @Override
   public String getObject() {
-    return getProxy().object;
-  }
-
-  @Override
-  public UUID getProxyID() {
-    return getProxy().proxyID;
+    return object;
   }
 
   @Override
   public List<SerializablePredicate> getConstraints() {
-    return getProxy().getConstraints();
+    return constraints;
   }
 
 }

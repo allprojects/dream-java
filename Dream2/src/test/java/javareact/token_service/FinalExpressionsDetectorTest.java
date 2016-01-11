@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.junit.Test;
 
@@ -255,7 +254,7 @@ public class FinalExpressionsDetectorTest {
     final Advertisement adv = new Advertisement(hostId, name);
     final Set<Subscription> subscriptions = new HashSet<Subscription>();
     for (final String subName : subsNames) {
-      final Subscription sub = new Subscription(hostId, subName, UUID.randomUUID());
+      final Subscription sub = new Subscription(hostId, subName);
       subscriptions.add(sub);
     }
     if (subscriptions.isEmpty()) {

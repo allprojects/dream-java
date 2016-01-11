@@ -12,17 +12,17 @@ import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 
 final class DependencyDetector {
-  private final Map<String, Collection<String>> dependencyGraph = new HashMap<String, Collection<String>>();
-  private final Set<String> initialExpressions = new HashSet<String>();
+  private final Map<String, Collection<String>> dependencyGraph = new HashMap<>();
+  private final Set<String> initialExpressions = new HashSet<>();
 
   // Expression -> set of initial expressions it (directly or indirectly)
   // depends on
-  private final Map<String, Set<String>> initialDependency = new HashMap<String, Set<String>>();
+  private final Map<String, Set<String>> initialDependency = new HashMap<>();
 
   // Stores the dependencies to compute expressions
   // Expression Expr -> Expression that led to the re-computation of Expr ->
   // Wait recommendations
-  private final Map<String, Map<String, Set<WaitRecommendations>>> recommendations = new HashMap<String, Map<String, Set<WaitRecommendations>>>();
+  private final Map<String, Map<String, Set<WaitRecommendations>>> recommendations = new HashMap<>();
 
   final Set<WaitRecommendations> getWaitRecommendations(Event<?> event, String initialVar) {
     final Map<String, Set<WaitRecommendations>> innerMap = recommendations.get(event.getSignature());
@@ -119,8 +119,8 @@ final class DependencyDetector {
   }
 
   private final Set<String> computeInitialDependenciesFor(String expression) {
-    final Set<String> newExpressions = new HashSet<String>();
-    final Set<String> accumulator = new HashSet<String>();
+    final Set<String> newExpressions = new HashSet<>();
+    final Set<String> accumulator = new HashSet<>();
     newExpressions.add(expression);
     computeInitialDependenciesFor(newExpressions, accumulator);
     return accumulator;

@@ -1,30 +1,42 @@
 package javareact.common.types;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javareact.client.ClientEventForwarder;
 import javareact.common.Consts;
 import javareact.common.SerializablePredicate;
+import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 
-public class Var<T extends Serializable> implements ProxyRegistrar<T> {
+public class Var<T extends Serializable> implements UpdateProducer<T> {
   protected final ClientEventForwarder forwarder;
-  protected final String objectId;
+
+  protected final String host;
+  protected final String object;
   private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
 
-  protected T val;
-  protected RemoteVar<T> proxy;
+  private final Set<UpdateConsumer> consumers = new HashSet<>();
+  private final Queue<Object> waitingModifications = new ArrayDeque<>();
+  private int pendingAcks = 0;
 
-  public Var(String objectId, T val) {
+  protected T val;
+
+  public Var(String object, T val) {
     this.forwarder = ClientEventForwarder.get();
-    this.objectId = objectId;
+    this.host = Consts.hostName;
+    this.object = object;
     this.val = val;
-    forwarder.advertise(new Advertisement(Consts.hostName, objectId), true);
+    forwarder.advertise(new Advertisement(Consts.hostName, object), true);
   }
 
   /**
@@ -33,67 +45,82 @@ public class Var<T extends Serializable> implements ProxyRegistrar<T> {
    */
   private Var(Var<T> copy, SerializablePredicate<T> constraint) {
     this.forwarder = ClientEventForwarder.get();
-    this.objectId = copy.objectId;
+    this.host = copy.host;
+    this.object = copy.object;
     this.val = null;
     constraints.addAll(copy.constraints);
     constraints.add(constraint);
   }
 
   public final synchronized void set(T val) {
-    this.val = val;
-    propagateChange();
+    final Supplier<T> supplier = () -> val;
+    waitingModifications.add(supplier);
+    if (waitingModifications.size() == 1) {
+      processNextUpdate();
+    }
   }
 
   public final synchronized void modify(Consumer<T> modification) {
-    modification.accept(val);
-    propagateChange();
+    waitingModifications.add(modification);
+    if (waitingModifications.size() == 1) {
+      processNextUpdate();
+    }
   }
 
   public final synchronized T get() {
     assert val != null;
-    return proxy.get();
+    return val;
   }
 
-  protected final void propagateChange() {
-    final Event<? extends Serializable> ev = new Event(Consts.hostName, objectId, val);
-    forwarder.sendEvent(UUID.randomUUID(), ev, ev.getSignature(), false);
-  }
+  private final void processNextUpdate() {
+    if (pendingAcks == 0 && !waitingModifications.isEmpty()) {
+      final Object mod = waitingModifications.poll();
+      // Apply modification
+      if (mod instanceof Consumer) {
+        final Consumer<T> consumer = (Consumer<T>) mod;
+        consumer.accept(val);
+      } else if (mod instanceof Supplier) {
+        final Supplier<T> supplier = (Supplier<T>) mod;
+        val = supplier.get();
+      }
 
-  private synchronized RemoteVar<T> getProxy() {
-    if (proxy == null) {
-      proxy = new RemoteVar<T>(objectId, constraints);
+      // Propagate modification to local and remote subscribers
+      final Event<? extends Serializable> ev = new Event(Consts.hostName, object, val);
+      pendingAcks = consumers.size();
+      consumers.forEach(c -> c.updateFromProducer(new EventPacket(ev, UUID.randomUUID(), ev.getSignature(), false), this));
+      forwarder.sendEvent(UUID.randomUUID(), ev, ev.getSignature(), false);
     }
-    return proxy;
   }
 
   @Override
-  public ProxyRegistrar<T> filter(SerializablePredicate<T> constraint) {
+  public UpdateProducer<T> filter(SerializablePredicate<T> constraint) {
     return new Var<T>(this, constraint);
   }
 
   @Override
-  public void addProxyChangeListener(ProxyChangeListener proxyChangeListener) {
-    getProxy().proxyChangeListeners.add(proxyChangeListener);
+  public final void notifyUpdateFinished() {
+    pendingAcks--;
+    processNextUpdate();
   }
 
   @Override
-  public void removeProxyChangeListener(ProxyChangeListener proxyChangeListener) {
-    getProxy().proxyChangeListeners.remove(proxyChangeListener);
+  public void registerUpdateConsumer(UpdateConsumer consumer) {
+    consumers.add(consumer);
+  }
+
+  @Override
+  public void unregisterUpdateConsumer(UpdateConsumer consumer) {
+    consumers.remove(consumer);
   }
 
   @Override
   public String getHost() {
-    return getProxy().host;
+    return host;
   }
 
   @Override
   public String getObject() {
-    return getProxy().object;
-  }
-
-  @Override
-  public UUID getProxyID() {
-    return getProxy().proxyID;
+    return object;
   }
 
   @Override

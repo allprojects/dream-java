@@ -12,18 +12,18 @@ public class Subscription<T extends Serializable> implements Serializable {
 
   private final String objectId;
   private final String hostId;
+  private final UUID subId;
   private final List<SerializablePredicate<T>> constraints = new ArrayList<SerializablePredicate<T>>();
-  private final UUID proxyID;
 
-  public Subscription(String hostId, String objectId, UUID proxyID) {
+  public Subscription(String hostId, String objectId) {
     this.hostId = hostId;
     this.objectId = objectId;
-    this.proxyID = proxyID;
+    this.subId = UUID.randomUUID();
     this.constraints.addAll(constraints);
   }
 
-  public Subscription(String hostId, String objectId, UUID proxyID, List<SerializablePredicate<T>> constraints) {
-    this(hostId, objectId, proxyID);
+  public Subscription(String hostId, String objectId, List<SerializablePredicate<T>> constraints) {
+    this(hostId, objectId);
     this.constraints.addAll(constraints);
   }
 
@@ -51,12 +51,12 @@ public class Subscription<T extends Serializable> implements Serializable {
     return hostId;
   }
 
-  public final String getSignature() {
-    return objectId + "@" + hostId;
+  public final UUID getSubId() {
+    return subId;
   }
 
-  public final UUID getProxyID() {
-    return proxyID;
+  public final String getSignature() {
+    return objectId + "@" + hostId;
   }
 
   @Override

@@ -1,32 +1,53 @@
 package javareact.common.types;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Queue;
+import java.util.Set;
+import java.util.logging.Logger;
 
+import javareact.client.ClientEventForwarder;
+import javareact.client.Subscriber;
 import javareact.common.Consts;
 import javareact.common.SerializablePredicate;
-import javareact.common.packets.content.Event;
+import javareact.common.packets.EventPacket;
+import javareact.common.packets.content.Subscription;
 
-public class RemoteVar<T> extends Proxy implements ProxyRegistrar<T> {
+public class RemoteVar<T> implements Subscriber, UpdateProducer<T> {
   private T val;
 
-  @SuppressWarnings("unchecked")
-  RemoteVar(String host, String object, List<SerializablePredicate> constraints) {
-    super(host, object, constraints);
+  private final ClientEventForwarder forwarder;
+  private final Set<UpdateConsumer> consumers = new HashSet<>();
+
+  private final Queue<EventPacket> eventsQueue = new ArrayDeque<>();
+  private int pendingAcks = 0;
+
+  private final List<SerializablePredicate> constraints = new ArrayList<>();
+
+  private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+  private final String host;
+  private final String object;
+
+  public RemoteVar(String host, String object, List<SerializablePredicate> constraints) {
+    this.host = host;
+    this.object = object;
+
+    final Subscription<?> sub = new Subscription(host, object, constraints);
+    forwarder = ClientEventForwarder.get();
+    forwarder.addSubscription(this, sub);
   }
 
-  @SuppressWarnings("unchecked")
-  RemoteVar(String object, List<SerializablePredicate> constraints) {
+  public RemoteVar(String object, List<SerializablePredicate> constraints) {
     this(Consts.hostName, object, constraints);
   }
 
-  @SuppressWarnings("unchecked")
   public RemoteVar(String host, String object) {
     this(host, object, new ArrayList<SerializablePredicate>());
   }
 
-  @SuppressWarnings("unchecked")
   public RemoteVar(String object) {
     this(Consts.hostName, object);
   }
@@ -35,46 +56,67 @@ public class RemoteVar<T> extends Proxy implements ProxyRegistrar<T> {
     return val;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  protected final synchronized void processEvent(Event<?> ev) {
-    val = (T) ev.getVal();
+  public synchronized void notifyEventReceived(EventPacket evPkt) {
+    eventsQueue.add(evPkt);
+    logger.finest("Received event packet " + evPkt + ". Added to the queue.");
+    if (eventsQueue.size() == 1) {
+      logger.finest("The element is the only one in the queue. Let's process it.");
+      processNextEvent();
+    }
   }
 
   @Override
-  public ProxyRegistrar<T> filter(SerializablePredicate<T> constraint) {
-    return this;
+  public final synchronized void notifyUpdateFinished() {
+    pendingAcks--;
+    processNextEvent();
+  }
+
+  private void processNextEvent() {
+    if (pendingAcks == 0 && !eventsQueue.isEmpty()) {
+      final EventPacket nextPkt = eventsQueue.poll();
+      val = (T) nextPkt.getEvent().getVal();
+      sendEventPacketToListeners(nextPkt);
+    }
+  }
+
+  private final void sendEventPacketToListeners(EventPacket evPkt) {
+    if (!consumers.isEmpty()) {
+      pendingAcks = consumers.size();
+      consumers.forEach(c -> c.updateFromProducer(evPkt, this));
+    } else {
+      processNextEvent();
+    }
   }
 
   @Override
-  public void addProxyChangeListener(ProxyChangeListener proxyChangeListener) {
-    proxyChangeListeners.add(proxyChangeListener);
-  }
-
-  @Override
-  public void removeProxyChangeListener(ProxyChangeListener proxyChangeListener) {
-    proxyChangeListeners.remove(proxyChangeListener);
-
-  }
-
-  @Override
-  public String getHost() {
+  public final String getHost() {
     return host;
   }
 
   @Override
-  public String getObject() {
+  public final String getObject() {
     return object;
   }
 
   @Override
-  public UUID getProxyID() {
-    return proxyID;
+  public final List<SerializablePredicate> getConstraints() {
+    return constraints;
   }
 
   @Override
-  public List<SerializablePredicate> getConstraints() {
-    return constraints;
+  public final void registerUpdateConsumer(UpdateConsumer consumer) {
+    consumers.add(consumer);
+  }
+
+  @Override
+  public final void unregisterUpdateConsumer(UpdateConsumer consumer) {
+    consumers.remove(consumer);
+  }
+
+  @Override
+  public UpdateProducer<T> filter(SerializablePredicate constraint) {
+    return this; // TODO
   }
 
 }

@@ -32,13 +32,6 @@ public class Example1 {
     varDouble.set(1.6);
     varBool.set(true);
     varString1.set("Hello ");
-
-    try {
-      Thread.sleep(500);
-    } catch (final InterruptedException e) {
-      e.printStackTrace();
-    }
-
     varString2.set("World!");
 
   }

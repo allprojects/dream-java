@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import org.junit.Test;
 
@@ -23,9 +22,9 @@ public class DependencyDetectorTest {
     // D = f(B, C)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A", UUID.randomUUID());
-    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B", UUID.randomUUID());
-    final Subscription<Integer> subC = new Subscription<Integer>("Host", "C", UUID.randomUUID());
+    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A");
+    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B");
+    final Subscription<Integer> subC = new Subscription<Integer>("Host", "C");
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
@@ -74,8 +73,8 @@ public class DependencyDetectorTest {
     // C = f(A, B)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A", UUID.randomUUID());
-    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B", UUID.randomUUID());
+    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A");
+    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B");
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
@@ -133,9 +132,9 @@ public class DependencyDetectorTest {
     // D = f(B, C)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A", UUID.randomUUID());
-    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B", UUID.randomUUID());
-    final Subscription<Integer> subC = new Subscription<Integer>("Host", "C", UUID.randomUUID());
+    final Subscription<Integer> subA = new Subscription<Integer>("Host", "A");
+    final Subscription<Integer> subB = new Subscription<Integer>("Host", "B");
+    final Subscription<Integer> subC = new Subscription<Integer>("Host", "C");
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
@@ -205,10 +204,10 @@ public class DependencyDetectorTest {
     // E = f(B, D)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
-    final Subscription subD = new Subscription("Host", "D", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A");
+    final Subscription subB = new Subscription("Host", "B");
+    final Subscription subC = new Subscription("Host", "C");
+    final Subscription subD = new Subscription("Host", "D");
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
@@ -290,9 +289,9 @@ public class DependencyDetectorTest {
     // D = f(B, C)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A");
+    final Subscription subB = new Subscription("Host", "B");
+    final Subscription subC = new Subscription("Host", "C");
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
@@ -364,10 +363,10 @@ public class DependencyDetectorTest {
     // E = f(B, C, D)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
-    final Subscription subD = new Subscription("Host", "D", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A");
+    final Subscription subB = new Subscription("Host", "B");
+    final Subscription subC = new Subscription("Host", "C");
+    final Subscription subD = new Subscription("Host", "D");
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");
@@ -460,12 +459,12 @@ public class DependencyDetectorTest {
     // D = f(B1, C1, B2, C2)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA1 = new Subscription("Host", "A1", UUID.randomUUID());
-    final Subscription subA2 = new Subscription("Host", "A2", UUID.randomUUID());
-    final Subscription subB1 = new Subscription("Host", "B1", UUID.randomUUID());
-    final Subscription subB2 = new Subscription("Host", "B2", UUID.randomUUID());
-    final Subscription subC1 = new Subscription("Host", "C1", UUID.randomUUID());
-    final Subscription subC2 = new Subscription("Host", "C2", UUID.randomUUID());
+    final Subscription subA1 = new Subscription("Host", "A1");
+    final Subscription subA2 = new Subscription("Host", "A2");
+    final Subscription subB1 = new Subscription("Host", "B1");
+    final Subscription subB2 = new Subscription("Host", "B2");
+    final Subscription subC1 = new Subscription("Host", "C1");
+    final Subscription subC2 = new Subscription("Host", "C2");
 
     final Advertisement advA1 = new Advertisement("Host", "A1");
     final Advertisement advA2 = new Advertisement("Host", "A2");
@@ -570,10 +569,10 @@ public class DependencyDetectorTest {
     // D = f(B, C)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA1 = new Subscription("Host", "A1", UUID.randomUUID());
-    final Subscription subA2 = new Subscription("Host", "A2", UUID.randomUUID());
-    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
+    final Subscription subA1 = new Subscription("Host", "A1");
+    final Subscription subA2 = new Subscription("Host", "A2");
+    final Subscription subB = new Subscription("Host", "B");
+    final Subscription subC = new Subscription("Host", "C");
 
     final Advertisement advA1 = new Advertisement("Host", "A1");
     final Advertisement advA2 = new Advertisement("Host", "A2");
@@ -659,13 +658,13 @@ public class DependencyDetectorTest {
     // D = f(B, C, H)
     final DependencyDetector depDetector = new DependencyDetector();
 
-    final Subscription subA = new Subscription("Host", "A", UUID.randomUUID());
-    final Subscription subB = new Subscription("Host", "B", UUID.randomUUID());
-    final Subscription subC = new Subscription("Host", "C", UUID.randomUUID());
-    final Subscription subE = new Subscription("Host", "E", UUID.randomUUID());
-    final Subscription subF = new Subscription("Host", "F", UUID.randomUUID());
-    final Subscription subG = new Subscription("Host", "G", UUID.randomUUID());
-    final Subscription subH = new Subscription("Host", "H", UUID.randomUUID());
+    final Subscription subA = new Subscription("Host", "A");
+    final Subscription subB = new Subscription("Host", "B");
+    final Subscription subC = new Subscription("Host", "C");
+    final Subscription subE = new Subscription("Host", "E");
+    final Subscription subF = new Subscription("Host", "F");
+    final Subscription subG = new Subscription("Host", "G");
+    final Subscription subH = new Subscription("Host", "H");
 
     final Advertisement advA = new Advertisement("Host", "A");
     final Advertisement advB = new Advertisement("Host", "B");

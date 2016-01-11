@@ -15,4 +15,5 @@ public interface Subscriber {
    *          the occurred event.
    */
   public void notifyEventReceived(EventPacket event);
+
 }

@@ -113,7 +113,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
       // Extract information from any of the packets
       final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
       // Notify remote subscribers
-      clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getInitialVar(), anyPkt.getWaitRecommendations(), anyPkt.getFinalExpressions(), true);
+      clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getInitialVar(), anyPkt.getFinalExpressions(), true);
       // Notify local subscribers
       if (!consumers.isEmpty()) {
         pairs.forEach(pair -> waitingProducers.add(pair.getUpdateProducer()));

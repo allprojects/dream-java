@@ -11,12 +11,12 @@ public class ExampleGlitch {
   }
 
   public void launch() {
-    final Var<Double> var1 = new Var<>("var1", 1.0);
+    final Var<Double> var = new Var<>("var", 1.0);
 
-    final Signal<Double> signal1 = new Signal<>("signal1", () -> var1.get() * 2, var1);
-    final Signal<Double> signal2 = new Signal<>("signal2", () -> var1.get() * 3, var1);
+    final Signal<Double> mid1 = new Signal<>("mid1", () -> var.get() * 2, var);
+    final Signal<Double> mid2 = new Signal<>("mid2", () -> var.get() * 3, var);
 
-    final Signal<Double> finalResult = new Signal<>("sub", () -> signal1.get() + signal2.get(), signal1, signal2);
+    final Signal<Double> finalResult = new Signal<>("final", () -> mid1.get() + mid2.get(), mid1, mid2);
     finalResult.addValueChangeListener(System.out::println);
 
     try {
@@ -40,9 +40,9 @@ public class ExampleGlitch {
       e.printStackTrace();
     }
 
-    var1.set(v1);
-    var1.set(v2);
-    var1.set(v3);
+    var.set(v1);
+    var.set(v2);
+    var.set(v3);
 
   }
 

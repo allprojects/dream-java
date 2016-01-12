@@ -17,7 +17,6 @@ import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
 import javareact.common.utils.DependencyDetector;
-import javareact.common.utils.WaitRecommendations;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.routing.Outbox;
 import polimi.reds.broker.routing.PacketForwarder;
@@ -52,8 +51,9 @@ public class ClientEventForwarder implements PacketForwarder {
   private ClientEventForwarder() {
     connectionManager = new ConnectionManager();
     subTable = new ClientSubscriptionTable();
-    connectionManager.registerForwarder(this, EventPacket.subject);
+    connectionManager.registerForwarder(this, AdvertisementPacket.subject);
     connectionManager.registerForwarder(this, SubscriptionPacket.subject);
+    connectionManager.registerForwarder(this, EventPacket.subject);
   }
 
   @Override
@@ -63,28 +63,28 @@ public class ClientEventForwarder implements PacketForwarder {
       assert packet instanceof AdvertisementPacket;
       logger.finer("Received an advertisement packet " + packet);
       processAdvertisementFromServer((AdvertisementPacket) packet);
-    } else if (subject.equals(EventPacket.subject)) {
-      assert packet instanceof EventPacket;
-      logger.finer("Received an event packet " + packet);
-      processEventFromServer((EventPacket) packet);
     } else if (subject.equals(SubscriptionPacket.subject)) {
       assert packet instanceof SubscriptionPacket;
       logger.fine("Received a subscription packet " + packet);
       processSubscriptionFromServer((SubscriptionPacket) packet);
+    } else if (subject.equals(EventPacket.subject)) {
+      assert packet instanceof EventPacket;
+      logger.finer("Received an event packet " + packet);
+      processEventFromServer((EventPacket) packet);
     } else {
       assert false : subject;
     }
     return result;
   }
 
-  public final void sendEvent(UUID id, Event ev, String initialVar, Set<WaitRecommendations> waitRecommendations, boolean approvedByTokenService) {
-    sendEvent(id, ev, initialVar, waitRecommendations, new HashSet<>(), approvedByTokenService);
+  public final void sendEvent(UUID id, Event ev, String initialVar, boolean approvedByTokenService) {
+    sendEvent(id, ev, initialVar, new HashSet<>(), approvedByTokenService);
   }
 
-  public final void sendEvent(UUID id, Event ev, String initialVar, Set<WaitRecommendations> waitRecommendations, Set<String> finalExpressions, boolean approvedByTokenService) {
+  public final void sendEvent(UUID id, Event ev, String initialVar, Set<String> finalExpressions, boolean approvedByTokenService) {
     logger.finer("Sending an event " + ev);
     if (subTable.needsToDeliverToServer(ev)) {
-      connectionManager.sendEvent(id, ev, initialVar, waitRecommendations, finalExpressions, approvedByTokenService);
+      connectionManager.sendEvent(id, ev, initialVar, finalExpressions, approvedByTokenService);
     }
   }
 
@@ -157,24 +157,27 @@ public class ClientEventForwarder implements PacketForwarder {
   }
 
   private final void processAdvertisementFromServer(AdvertisementPacket advPkt) {
-    final Set<Subscription> subs = advPkt.getSubscriptions();
-    switch (advPkt.getAdvType()) {
-    case ADV:
-      if (subs.isEmpty()) {
-        dependencyDetector.processAdv(advPkt.getAdvertisement());
-      } else {
-        dependencyDetector.processAdv(advPkt.getAdvertisement(), subs);
+    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.ATOMIC) {
+      final Set<Subscription> subs = advPkt.getSubscriptions();
+      switch (advPkt.getAdvType()) {
+      case ADV:
+        if (subs.isEmpty()) {
+          dependencyDetector.processAdv(advPkt.getAdvertisement());
+        } else {
+          dependencyDetector.processAdv(advPkt.getAdvertisement(), subs);
+        }
+        dependencyDetector.consolidate();
+        break;
+      case UNADV:
+        if (subs.isEmpty()) {
+          dependencyDetector.processUnAdv(advPkt.getAdvertisement());
+        } else {
+          dependencyDetector.processUnAdv(advPkt.getAdvertisement(), subs);
+        }
+        dependencyDetector.consolidate();
+        break;
       }
-      dependencyDetector.consolidate();
-      break;
-    case UNADV:
-      if (subs.isEmpty()) {
-        dependencyDetector.processUnAdv(advPkt.getAdvertisement());
-      } else {
-        dependencyDetector.processUnAdv(advPkt.getAdvertisement(), subs);
-      }
-      dependencyDetector.consolidate();
-      break;
     }
   }
 

@@ -12,14 +12,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javareact.client.ClientEventForwarder;
-import javareact.common.ConsistencyType;
 import javareact.common.Consts;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
-import javareact.common.utils.DependencyDetector;
 import javareact.common.utils.SerializablePredicate;
-import javareact.common.utils.WaitRecommendations;
 
 public class Var<T extends Serializable> implements UpdateProducer<T> {
   protected final ClientEventForwarder forwarder;
@@ -91,19 +88,11 @@ public class Var<T extends Serializable> implements UpdateProducer<T> {
       final Event<? extends Serializable> ev = new Event(Consts.hostName, object, val);
       final UUID eventId = UUID.randomUUID();
       final EventPacket packet = new EventPacket(ev, eventId, ev.getSignature(), false);
-      final Set<WaitRecommendations> recommendations = //
-      Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC //
-          ? //
-          DependencyDetector.instance.getWaitRecommendations(ev, ev.getSignature())
-          : //
-          new HashSet<>();
-      recommendations.forEach(packet::addWaitRecommendations);
 
       pendingAcks = consumers.size();
       consumers.forEach(c -> c.updateFromProducer(packet, this));
-      
 
-      forwarder.sendEvent(eventId, ev, ev.getSignature(), recommendations, false);
+      forwarder.sendEvent(eventId, ev, ev.getSignature(), false);
     }
 
   }

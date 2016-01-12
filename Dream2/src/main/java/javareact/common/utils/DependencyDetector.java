@@ -22,7 +22,7 @@ public enum DependencyDetector {
   private final Map<String, Set<String>> initialDependency = new HashMap<>();
 
   // Stores the dependencies to compute expressions
-  // Expression Expr -> Expression that led to the re-computation of Expr ->
+  // Expression Expr -> Initial expression that caused the recomputation ->
   // Wait recommendations
   private final Map<String, Map<String, Set<WaitRecommendations>>> recommendations = new HashMap<>();
 

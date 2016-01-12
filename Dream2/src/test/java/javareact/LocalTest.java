@@ -29,7 +29,7 @@ public class LocalTest {
     final Signal<String> signalString = new Signal<String>("signalString", () -> varString1.get() + varString2.get(), varString1, varString2);
     final Signal<Integer> signalInt2 = new Signal<Integer>("signalInt2", () -> signalInt.get() * 2, signalInt);
 
-    final Var<Integer> varStart = new Var<>("varIntStart", Integer.valueOf(1));
+    final Var<Integer> varStart = new Var<>("varStart", Integer.valueOf(1));
     final Signal<Integer> signalMid1 = new Signal<Integer>("signalMid1", () -> varStart.get() * 2, varStart);
     final Signal<Integer> signalMid2 = new Signal<Integer>("signalMid2", () -> signalMid1.get() * 2, signalMid1);
     final Signal<Integer> signalFinal = new Signal<Integer>("signalFinal", () -> signalMid1.get() + signalMid2.get(), signalMid1, signalMid2);

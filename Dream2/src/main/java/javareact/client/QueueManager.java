@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javareact.common.packets.EventPacket;
 import javareact.common.types.EventProducerPair;
@@ -26,9 +27,12 @@ public class QueueManager {
 
   public final List<EventProducerPair> processEventPacket(EventProducerPair event, String expression) {
     final EventPacket evPkt = event.getEventPacket();
-
     final UUID id = evPkt.getId();
-    final Set<WaitRecommendations> waitingRecommendations = DependencyDetector.instance.getWaitRecommendations(evPkt.getEvent(), evPkt.getInitialVar());
+    final Set<WaitRecommendations> waitingRecommendations = //
+    DependencyDetector.instance.//
+        getWaitRecommendations(evPkt.getEvent(), evPkt.getInitialVar()).//
+        stream().filter(wr -> wr.getExpression().equals(expression)).//
+        collect(Collectors.toSet());
 
     if (waitingElements.containsKey(id)) {
       final WaitingElement elem = waitingElements.get(id);

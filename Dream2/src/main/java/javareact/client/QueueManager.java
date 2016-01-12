@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import javareact.common.packets.EventPacket;
 import javareact.common.types.EventProducerPair;
-import javareact.common.utils.DependencyDetector;
+import javareact.common.utils.IntraSourceDependencyDetector;
 import javareact.common.utils.WaitRecommendations;
 
 /**
@@ -29,7 +29,7 @@ public class QueueManager {
     final EventPacket evPkt = event.getEventPacket();
     final UUID id = evPkt.getId();
     final Set<WaitRecommendations> waitingRecommendations = //
-    DependencyDetector.instance.//
+    IntraSourceDependencyDetector.instance.//
         getWaitRecommendations(evPkt.getEvent(), evPkt.getInitialVar()).//
         stream().filter(wr -> wr.getExpression().equals(expression)).//
         collect(Collectors.toSet());

@@ -16,7 +16,8 @@ import javareact.common.packets.SubscriptionPacket;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Event;
 import javareact.common.packets.content.Subscription;
-import javareact.common.utils.DependencyDetector;
+import javareact.common.utils.DependencyGraph;
+import javareact.common.utils.IntraSourceDependencyDetector;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.routing.Outbox;
 import polimi.reds.broker.routing.PacketForwarder;
@@ -26,7 +27,8 @@ public class ClientEventForwarder implements PacketForwarder {
 
   private final ConnectionManager connectionManager;
   private final ClientSubscriptionTable subTable;
-  private final DependencyDetector dependencyDetector = DependencyDetector.instance;
+  private final DependencyGraph dependencyGraph = DependencyGraph.instance;
+  private final IntraSourceDependencyDetector intraDepDetector = IntraSourceDependencyDetector.instance;
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -90,36 +92,44 @@ public class ClientEventForwarder implements PacketForwarder {
 
   public final void advertise(Advertisement adv, boolean isPublic) {
     logger.fine("Sending advertisement " + adv);
-    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
-      dependencyDetector.processAdv(adv);
-      dependencyDetector.consolidate();
+    if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.ATOMIC) {
+      dependencyGraph.processAdv(adv);
+      intraDepDetector.consolidate();
     }
     connectionManager.sendAdvertisement(adv, isPublic);
   }
 
   public final void unadvertise(Advertisement adv, boolean isPublic) {
     logger.fine("Sending unadvertisement " + adv);
-    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
-      dependencyDetector.processUnAdv(adv);
-      dependencyDetector.consolidate();
+    if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.ATOMIC) {
+      dependencyGraph.processUnAdv(adv);
+      intraDepDetector.consolidate();
     }
     connectionManager.sendUnadvertisement(adv, isPublic);
   }
 
   public final void advertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
     logger.fine("Sending advertisement " + adv + " with subscriptions " + subs);
-    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
-      dependencyDetector.processAdv(adv, subs);
-      dependencyDetector.consolidate();
+    if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.ATOMIC) {
+      dependencyGraph.processAdv(adv, subs);
+      intraDepDetector.consolidate();
     }
     connectionManager.sendAdvertisement(adv, subs, isPublic);
   }
 
   public final void unadvertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
     logger.fine("Sending unadvertisement " + adv + " with subscriptions " + subs);
-    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || Consts.consistencyType == ConsistencyType.ATOMIC) {
-      dependencyDetector.processUnAdv(adv, subs);
-      dependencyDetector.consolidate();
+    if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.ATOMIC) {
+      dependencyGraph.processUnAdv(adv, subs);
+      intraDepDetector.consolidate();
     }
     connectionManager.sendUnadvertisement(adv, isPublic);
   }
@@ -150,32 +160,34 @@ public class ClientEventForwarder implements PacketForwarder {
 
   private final void processEventFromServer(EventPacket evPkt) {
     subTable.getMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyEventReceived(evPkt));
-    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || //
+    if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
       subTable.getSignatureOnlyMatchingSubscribers(evPkt.getEvent()).forEach(sub -> sub.notifyEventReceived(evPkt));
     }
   }
 
   private final void processAdvertisementFromServer(AdvertisementPacket advPkt) {
-    if (Consts.consistencyType == ConsistencyType.GLITCH_FREE || //
+    if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
+        Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
       final Set<Subscription> subs = advPkt.getSubscriptions();
       switch (advPkt.getAdvType()) {
       case ADV:
         if (subs.isEmpty()) {
-          dependencyDetector.processAdv(advPkt.getAdvertisement());
+          dependencyGraph.processAdv(advPkt.getAdvertisement());
         } else {
-          dependencyDetector.processAdv(advPkt.getAdvertisement(), subs);
+          dependencyGraph.processAdv(advPkt.getAdvertisement(), subs);
         }
-        dependencyDetector.consolidate();
+        intraDepDetector.consolidate();
         break;
       case UNADV:
         if (subs.isEmpty()) {
-          dependencyDetector.processUnAdv(advPkt.getAdvertisement());
+          dependencyGraph.processUnAdv(advPkt.getAdvertisement());
         } else {
-          dependencyDetector.processUnAdv(advPkt.getAdvertisement(), subs);
+          dependencyGraph.processUnAdv(advPkt.getAdvertisement(), subs);
         }
-        dependencyDetector.consolidate();
+        intraDepDetector.consolidate();
         break;
       }
     }

@@ -20,6 +20,19 @@ public final class Consts {
 
   static {
     /**
+     * Read logging properties
+     */
+    final LogManager manager = LogManager.getLogManager();
+    try {
+      manager.readConfiguration(new FileInputStream(new File(LOGGING_PROPERTIES_FILE_NAME)));
+    } catch (SecurityException | IOException e) {
+      e.printStackTrace();
+    }
+    final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    final ConsoleHandler consoleHandler = new ConsoleHandler();
+    logger.addHandler(consoleHandler);
+
+    /**
      * Load properties
      */
     try {
@@ -39,26 +52,18 @@ public final class Consts {
     final String hostNameProperty = properties.getProperty("hostName", "local");
     hostName = hostNameProperty;
 
-    final String consistencyTypeProperty = properties.getProperty("consistencyType", "glitch_free").toLowerCase();
+    final String consistencyTypeProperty = properties.getProperty("consistencyType", "single_glitch_free").toLowerCase();
     if (consistencyTypeProperty.equals("causal")) {
       consistencyType = ConsistencyType.CAUSAL;
-    } else if (consistencyTypeProperty.equals("glitch_free")) {
-      consistencyType = ConsistencyType.GLITCH_FREE;
-    } else {
+    } else if (consistencyTypeProperty.equals("single_glitch_free")) {
+      consistencyType = ConsistencyType.SINGLE_SOURCE_GLITCH_FREE;
+    } else if (consistencyTypeProperty.equals("complete_glitch_free")) {
+      consistencyType = ConsistencyType.COMPLETE_GLITCH_FREE;
+    } else if (consistencyTypeProperty.equals("atomic")) {
       consistencyType = ConsistencyType.ATOMIC;
+    } else {
+      logger.warning("Unknown consistency type. Using single source glitch free as default.");
     }
 
-    /**
-     * Read logging properties
-     */
-    final LogManager manager = LogManager.getLogManager();
-    try {
-      manager.readConfiguration(new FileInputStream(new File(LOGGING_PROPERTIES_FILE_NAME)));
-    } catch (SecurityException | IOException e) {
-      e.printStackTrace();
-    }
-    final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    final ConsoleHandler consoleHandler = new ConsoleHandler();
-    logger.addHandler(consoleHandler);
   }
 }

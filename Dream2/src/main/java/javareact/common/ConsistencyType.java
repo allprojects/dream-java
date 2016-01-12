@@ -7,10 +7,16 @@ public enum ConsistencyType {
       return "Causal";
     }
   },
-  GLITCH_FREE {
+  SINGLE_SOURCE_GLITCH_FREE {
     @Override
     public final String toString() {
-      return "GlitchFree";
+      return "Single source glitch free";
+    }
+  },
+  COMPLETE_GLITCH_FREE {
+    @Override
+    public final String toString() {
+      return "Complete glitch free";
     }
   },
   ATOMIC {

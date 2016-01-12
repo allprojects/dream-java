@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import javareact.common.types.Signal;
 import javareact.common.types.Var;
+import javareact.common.utils.DependencyGraph;
 import javareact.server.ServerLauncher;
 import javareact.token_service.TokenServiceLauncher;
 
@@ -20,6 +21,8 @@ public class LocalTest {
   public void localTest1() {
     startServerIfNeeded();
     startTokenServiceIfNeeded();
+
+    DependencyGraph.instance.clear();
 
     final Var<Integer> varInt = new Var<>("varInt", Integer.valueOf(1));
     final Var<String> varString1 = new Var<>("varString1", "");

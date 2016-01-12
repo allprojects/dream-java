@@ -1,4 +1,4 @@
-package javareact.token_service;
+package javareact.common.utils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +17,7 @@ import javareact.common.packets.content.Subscription;
  * enable this, each server notifies the token service when processing a final
  * expression.
  */
-final class FinalExpressionsDetector {
+public final class FinalExpressionsDetector {
   // Initial expressions
   private final Set<String> initialExpressions = new HashSet<String>();
   // Expression E -> expressions that directly depend on E
@@ -25,7 +25,7 @@ final class FinalExpressionsDetector {
   // Expression E -> final expressions generated from E
   private final Map<String, Map<String, Integer>> finalExpressions = new HashMap<>();
 
-  final void processAdvertisementPacket(AdvertisementPacket advPkt) {
+  public final void processAdvertisementPacket(AdvertisementPacket advPkt) {
     switch (advPkt.getAdvType()) {
     case ADV:
       processAdv(advPkt);
@@ -38,12 +38,12 @@ final class FinalExpressionsDetector {
     }
   }
 
-  final void consolidate() {
+  public final void consolidate() {
     finalExpressions.clear();
     computeFinalExpressions();
   }
 
-  final Map<String, Integer> getFinalExpressionsFor(String expr) {
+  public final Map<String, Integer> getFinalExpressionsFor(String expr) {
     assert finalExpressions.containsKey(expr);
     return finalExpressions.get(expr);
   }

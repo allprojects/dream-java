@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javareact.common.packets.AdvertisementPacket;
 import javareact.common.packets.EventPacket;
 import javareact.common.packets.token_service.TokenAckPacket;
+import javareact.common.utils.FinalExpressionsDetector;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.routing.Outbox;
 import polimi.reds.broker.routing.PacketForwarder;

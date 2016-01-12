@@ -13,6 +13,7 @@ import javareact.common.packets.AdvertisementPacket;
 import javareact.common.packets.content.AdvType;
 import javareact.common.packets.content.Advertisement;
 import javareact.common.packets.content.Subscription;
+import javareact.common.utils.FinalExpressionsDetector;
 
 public class FinalExpressionsDetectorTest {
 

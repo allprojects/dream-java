@@ -91,8 +91,6 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
     final List<EventProducerPair> pairs = queueManager.processEventPacket(update, object + "@" + Consts.hostName);
     logger.finest("The queueManager returned the following pairs " + pairs);
 
-    System.out.println(object + " " + update.getEventPacket().getEvent() + " " + pairs);
-
     if (!pairs.isEmpty()) {
       logger.finest("Actual update");
 

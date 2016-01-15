@@ -1,5 +1,6 @@
 package dream.common.utils;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,6 +26,25 @@ class DependencyGraphUtils {
     depGraph.getGraph().keySet().//
         forEach(node -> result.put(node, computeRelevantSourcesFor(node, depGraph)));
     return result;
+  }
+
+  /**
+   * Return the set of final nodes in the propagation graph, that is to say, all
+   * the nodes that do not have any other nodes that depends on them.
+   *
+   * @return the set of final nodes in the propagation graph.
+   */
+  static final Set<String> computeFinalNodes() {
+    final Map<String, Collection<String>> graph = DependencyGraph.instance.getGraph();
+    final Set<String> sources = DependencyGraph.instance.getSources();
+
+    final Set<String> allNodes = new HashSet<>(graph.keySet());
+    allNodes.addAll(sources);
+
+    return allNodes.stream()//
+        .filter(node -> graph.values().stream() //
+            .allMatch(depNodes -> !depNodes.contains(node))) //
+        .collect(Collectors.toSet());
   }
 
   /**

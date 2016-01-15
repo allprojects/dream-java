@@ -6,7 +6,7 @@ import org.junit.runners.Suite;
 import dream.common.utils.AtomicDependencyDetectorTest;
 import dream.common.utils.CompleteGlitchFreeDependencyDetectorTest;
 import dream.common.utils.DependencyGraphUtilsTest;
-import dream.common.utils.FinalExpressionsDetectorTest;
+import dream.common.utils.FinalNodesDetectorTest;
 import dream.common.utils.IntraSourceDependencyDetectorTest;
 
 @RunWith(Suite.class)
@@ -15,7 +15,7 @@ import dream.common.utils.IntraSourceDependencyDetectorTest;
     DependencyGraphUtilsTest.class, //
     CompleteGlitchFreeDependencyDetectorTest.class, //
     AtomicDependencyDetectorTest.class, //
-    FinalExpressionsDetectorTest.class, //
+    FinalNodesDetectorTest.class, //
     LocalTest.class })
 
 public class RegressionTests {

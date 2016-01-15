@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import dream.common.packets.locking.Lock;
 import dream.common.packets.locking.LockGrantPacket;
 import dream.common.packets.locking.LockReleasePacket;
 import dream.common.packets.locking.LockRequestPacket;
@@ -38,23 +37,20 @@ public class LockManagerForwarder implements PacketForwarder {
   }
 
   private final void processRequestPacket(NodeDescriptor sender, LockRequestPacket reqPkt, Outbox outbox) {
-    final Lock lock = reqPkt.getLock();
-    final LockApplicantPair pair = new LockApplicantPair(sender, lock);
-    final boolean granted = lockManager.processLockRequest(pair);
+    final boolean granted = lockManager.processLockRequest(reqPkt);
     if (granted) {
       final Collection<NodeDescriptor> recipients = new ArrayList<>(1);
       recipients.add(sender);
-      outbox.add(LockGrantPacket.subject, new LockGrantPacket(lock), recipients);
+      outbox.add(LockGrantPacket.subject, new LockGrantPacket(reqPkt), recipients);
     }
   }
 
   private final void processReleasePacket(NodeDescriptor sender, LockReleasePacket relPkt, Outbox outbox) {
-    final LockApplicantPair pair = new LockApplicantPair(sender, relPkt.getLock());
-    final Set<LockApplicantPair> granted = lockManager.processLockRelease(pair);
-    granted.forEach(grantedPair -> {
+    final Set<LockRequestPacket> granted = lockManager.processLockRelease(relPkt);
+    granted.forEach(req -> {
       final Collection<NodeDescriptor> recipients = new ArrayList<>(1);
-      recipients.add(grantedPair.getApplicant());
-      outbox.add(LockGrantPacket.subject, new LockGrantPacket(grantedPair.getLock()), recipients);
+      recipients.add(req.getApplicant());
+      outbox.add(LockGrantPacket.subject, new LockGrantPacket(req), recipients);
     });
   }
 

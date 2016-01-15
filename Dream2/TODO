@@ -1,6 +1,13 @@
-- Currently, glitch-freedom is not preserved in the case of exception when evaluating an expression
 - Filters are not properly implemented
 
 - Can we create a proxy to a method (not to an object)?
 - Can we consider methods with parameters?
 - Can we define constraints on the return values of methods?
+
+- Currently, a lock is acquired at a source and released only
+  when a propagation terminated. This can be improved to
+  enable parallel propagation.
+  -> In the case of complete glitch freedom, locks can be acquired
+     from the last nodes from which all shared nodes depend.
+  -> In the case of complete glitch freedom, locks can be released
+     after the shared nodes have been updated.

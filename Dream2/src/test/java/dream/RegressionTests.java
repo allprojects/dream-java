@@ -6,8 +6,8 @@ import org.junit.runners.Suite;
 import dream.common.utils.AtomicDependencyDetectorTest;
 import dream.common.utils.CompleteGlitchFreeDependencyDetectorTest;
 import dream.common.utils.DependencyGraphUtilsTest;
+import dream.common.utils.FinalExpressionsDetectorTest;
 import dream.common.utils.IntraSourceDependencyDetectorTest;
-import dream.token_service.FinalExpressionsDetectorTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ //

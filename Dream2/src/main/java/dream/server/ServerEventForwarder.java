@@ -12,8 +12,6 @@ import dream.common.Consts;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
-import dream.common.packets.locking.TokenAckPacket;
-import dream.common.packets.locking.TokenServiceAdvertisePacket;
 import dream.common.packets.registry.RegistryAdvertisePacket;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.overlay.NeighborhoodChangeListener;
@@ -52,14 +50,9 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
       final RegistryAdvertisePacket regAdvPkt = (RegistryAdvertisePacket) packet;
       logger.fine("Received a registry advertise packet: " + regAdvPkt);
       processRegistryAdvertise(sender, regAdvPkt);
-    } else if (subject.equals(TokenServiceAdvertisePacket.subject)) {
-      assert packet instanceof TokenServiceAdvertisePacket;
-      final TokenServiceAdvertisePacket tokenServiceAdvPkt = (TokenServiceAdvertisePacket) packet;
-      logger.fine("Received a token service advertise packet: " + tokenServiceAdvPkt);
-      processTokenServiceAdvertise(sender, tokenServiceAdvPkt);
     } else {
       assert false;
-      logger.warning("Received an unknown event subject");
+      logger.warning("Received an unknown packet subject");
     }
     return new ArrayList<NodeDescriptor>();
   }
@@ -101,14 +94,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
     final Map<NodeDescriptor, Integer> matchingBrokers = brokersSubTable.getMatchingNodes(pkt.getEvent());
     sendTo(EventPacket.subject, pkt, outbox, matchingClients.keySet());
     sendTo(EventPacket.subject, pkt, outbox, matchingBrokers.keySet());
-    sendTokenAckIfNeeded(pkt, matchingClients, outbox);
-  }
-
-  private final void sendTokenAckIfNeeded(EventPacket pkt, Map<NodeDescriptor, Integer> clients, Outbox outbox) {
-    if (Consts.consistencyType == ConsistencyType.ATOMIC && pkt.isFinal()) {
-      final TokenAckPacket tokenAck = new TokenAckPacket(pkt.getEvent().getSignature(), getSubscribersCount(clients));
-      sendToTokenService(TokenAckPacket.subject, tokenAck, outbox);
-    }
   }
 
   private final int getSubscribersCount(Map<NodeDescriptor, Integer> clients) {
@@ -148,20 +133,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
     default:
       assert false : packet.getType();
     }
-  }
-
-  private final void processTokenServiceAdvertise(NodeDescriptor sender, TokenServiceAdvertisePacket packet) {
-    switch (packet.getType()) {
-    case ADV:
-      tokenService = sender;
-      break;
-    case UNADV:
-      tokenService = null;
-      break;
-    default:
-      assert false : packet.getType();
-    }
-
   }
 
   private final void sendToTokenService(String subject, Serializable packet, Outbox box) {

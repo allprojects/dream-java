@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import dream.common.packets.locking.LockReleasePacket;
-import dream.common.packets.locking.LockRequestPacket;
+import dream.common.packets.locking.Lock;
 import dream.common.packets.locking.LockType;
 
 class LockManager {
-  private final List<LockRequestPacket> pendingRequests = new ArrayList<>();
+  private final List<LockApplicantPair> pendingRequests = new ArrayList<>();
   private final Map<String, Integer> readLocks = new HashMap<>();
   private final Set<String> writeLocks = new HashSet<>();
 
@@ -24,12 +23,12 @@ class LockManager {
    *          the request.
    * @return true if the lock is granted, false otherwise.
    */
-  final boolean processLockRequest(LockRequestPacket request) {
-    if (canBeGranted(request)) {
+  final boolean processLockRequest(LockApplicantPair request) {
+    if (canBeGranted(request.getLock())) {
       pendingRequests.add(request);
       return false;
     } else {
-      lock(request);
+      lock(request.getLock());
       return true;
     }
   }
@@ -40,16 +39,16 @@ class LockManager {
    *
    * @param release
    *          the release.
-   * @return the set of requests that obtain the lock.
+   * @return the set of granted locks.
    */
-  final Set<LockRequestPacket> processLockRelease(LockReleasePacket release) {
-    unlock(release);
-    final Set<LockRequestPacket> result = new HashSet<>();
-    final Iterator<LockRequestPacket> it = pendingRequests.iterator();
+  final Set<LockApplicantPair> processLockRelease(LockApplicantPair release) {
+    unlock(release.getLock());
+    final Set<LockApplicantPair> result = new HashSet<>();
+    final Iterator<LockApplicantPair> it = pendingRequests.iterator();
     while (it.hasNext()) {
-      final LockRequestPacket request = it.next();
-      if (canBeGranted(request)) {
-        lock(request);
+      final LockApplicantPair request = it.next();
+      if (canBeGranted(request.getLock())) {
+        lock(request.getLock());
         result.add(request);
         it.remove();
       }
@@ -57,14 +56,14 @@ class LockManager {
     return result;
   }
 
-  private final boolean canBeGranted(LockRequestPacket request) {
+  private final boolean canBeGranted(Lock request) {
     final LockType type = request.getType();
     final Set<String> nodes = request.getNodes();
     return nodes.stream().anyMatch(n -> writeLocks.contains(n)) || //
         type == LockType.READ_WRITE && nodes.stream().anyMatch(n -> readLocks.containsKey(n));
   }
 
-  private final void lock(LockRequestPacket request) {
+  private final void lock(Lock request) {
     final LockType type = request.getType();
     final Set<String> nodes = request.getNodes();
     switch (type) {
@@ -87,7 +86,7 @@ class LockManager {
     }
   }
 
-  private final void unlock(LockReleasePacket release) {
+  private final void unlock(Lock release) {
     final LockType type = release.getType();
     final Set<String> nodes = release.getNodes();
     switch (type) {

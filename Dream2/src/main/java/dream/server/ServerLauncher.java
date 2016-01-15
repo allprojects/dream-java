@@ -6,7 +6,6 @@ import dream.common.Consts;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
-import dream.common.packets.locking.TokenServiceAdvertisePacket;
 import dream.common.packets.registry.RegistryAdvertisePacket;
 import polimi.reds.broker.overlay.GenericOverlay;
 import polimi.reds.broker.overlay.Overlay;
@@ -23,17 +22,16 @@ public class ServerLauncher {
   private final Overlay overlay;
 
   private ServerLauncher() {
-    Transport tr = new TCPTransport(Consts.serverPort);
-    TopologyManager tm = new SimpleTopologyManager();
+    final Transport tr = new TCPTransport(Consts.serverPort);
+    final TopologyManager tm = new SimpleTopologyManager();
     overlay = new GenericOverlay(tm, tr);
-    GenericRouter router = new GenericRouter(overlay);
-    ServerEventForwarder forwarder = new ServerEventForwarder();
+    final GenericRouter router = new GenericRouter(overlay);
+    final ServerEventForwarder forwarder = new ServerEventForwarder();
     overlay.addNeighborhoodChangeListener(forwarder);
     router.setPacketForwarder(EventPacket.subject, forwarder);
     router.setPacketForwarder(SubscriptionPacket.subject, forwarder);
     router.setPacketForwarder(AdvertisementPacket.subject, forwarder);
     router.setPacketForwarder(RegistryAdvertisePacket.subject, forwarder);
-    router.setPacketForwarder(TokenServiceAdvertisePacket.subject, forwarder);
   }
 
   public static final void start() {

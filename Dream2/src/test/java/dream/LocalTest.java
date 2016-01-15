@@ -2,20 +2,17 @@ package dream;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.Test;
 
 import dream.common.datatypes.Signal;
 import dream.common.datatypes.Var;
 import dream.common.utils.DependencyGraph;
-import dream.locking.TokenServiceLauncher;
+import dream.locking.LockManagerLauncher;
 import dream.server.ServerLauncher;
 
 public class LocalTest {
   private boolean serverStarted = false;
-  private boolean tokenServiceStarted = false;
+  private final boolean lockManagerStarted = false;
 
   @Test
   public void localTest1() {
@@ -77,12 +74,8 @@ public class LocalTest {
   }
 
   private final void startTokenServiceIfNeeded() {
-    if (!tokenServiceStarted) {
-      final String serverAddress = "reds-tcp:localhost:9000";
-      final Set<String> addresses = new HashSet<String>();
-      addresses.add(serverAddress);
-      TokenServiceLauncher.start(addresses);
-      tokenServiceStarted = true;
+    if (!lockManagerStarted) {
+      LockManagerLauncher.start();
     }
     try {
       Thread.sleep(500);

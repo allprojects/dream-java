@@ -12,8 +12,11 @@ public final class Consts {
   private static final Properties properties = new Properties();
   private static final String LOGGING_PROPERTIES_FILE_NAME = "logging.properties";
 
-  public static final int serverPort;
   public static final String serverAddr;
+  public static final String lockManagerAddr;
+
+  public static final int serverPort;
+  public static final int lockManagerPort;
 
   public static ConsistencyType consistencyType;
   public static String hostName;
@@ -43,11 +46,15 @@ public final class Consts {
       e.printStackTrace();
     }
 
+    final String serverAddrProperty = properties.getProperty("serverAddr", "localhost");
     final String serverPortProperty = properties.getProperty("serverPort", "9000");
     serverPort = Integer.parseInt(serverPortProperty);
-
-    final String serverAddrProperty = properties.getProperty("serverAddr", "localhost");
     serverAddr = "reds-tcp:" + serverAddrProperty + ":" + serverPort;
+
+    final String lockManagerAddrProperty = properties.getProperty("lockManagerAddr", "localhost");
+    final String lockManagerPortProperty = properties.getProperty("serverManagerPort", "9999");
+    lockManagerPort = Integer.parseInt(lockManagerPortProperty);
+    lockManagerAddr = "reds-tcp:" + lockManagerAddrProperty + ":" + lockManagerPort;
 
     final String hostNameProperty = properties.getProperty("hostName", "local");
     hostName = hostNameProperty;

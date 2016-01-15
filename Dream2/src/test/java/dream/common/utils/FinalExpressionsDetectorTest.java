@@ -1,4 +1,4 @@
-package dream.token_service;
+package dream.common.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -1,4 +1,5 @@
 - Filters are not properly implemented
+- Atomicity is not implemented (read locks are not acquired)
 
 - Can we create a proxy to a method (not to an object)?
 - Can we consider methods with parameters?

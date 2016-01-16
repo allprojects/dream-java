@@ -126,12 +126,15 @@ public class ClientEventForwarder implements PacketForwarder {
     }
   }
 
-  public final void sentLockRequest(String source, LockApplicant applicant, LockType type) {
+  /**
+   * Return false if the lock request is not needed
+   */
+  public final boolean sentLockRequest(String source, LockApplicant applicant, LockType type) {
     if (Consts.consistencyType != ConsistencyType.COMPLETE_GLITCH_FREE && //
         Consts.consistencyType != ConsistencyType.ATOMIC) {
       assert false : Consts.consistencyType;
       logger.warning("Invoked sendLockRequest() even if the consistency level does not require it.");
-      return;
+      return false;
     }
 
     logger.finer("Invoked sendLockRequest for source " + source);
@@ -141,11 +144,16 @@ public class ClientEventForwarder implements PacketForwarder {
         ? new HashSet<>(nodesToLock) //
         : finalNodesDetector.getFinalNodesFor(source);
 
+    if (nodesToLock.isEmpty()) {
+      return false;
+    }
+
     final LockRequestPacket reqPkt = new LockRequestPacket(connectionManager.getNodeDescriptor(), nodesToLock, releaseNodes, type);
     final UUID lockId = reqPkt.getLockID();
     lockApplicants.put(lockId, applicant);
 
     connectionManager.sendLockRequest(reqPkt);
+    return true;
   }
 
   public final void sendLockRelease(UUID lockID) {

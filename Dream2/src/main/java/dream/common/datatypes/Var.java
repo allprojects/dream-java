@@ -18,6 +18,7 @@ import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.locking.LockGrantPacket;
+import dream.common.packets.locking.LockType;
 
 public class Var<T extends Serializable> implements UpdateProducer<T>, LockApplicant {
   protected final ClientEventForwarder forwarder;
@@ -79,7 +80,10 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
       // possibly need to acquire a lock before processing the update
       if (Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
           Consts.consistencyType == ConsistencyType.ATOMIC) {
-
+        final boolean lockRequired = forwarder.sentLockRequest(object + "@" + host, this, LockType.READ_WRITE);
+        if (!lockRequired) {
+          processNextUpdate(UUID.randomUUID());
+        }
       }
       // Otherwise the update can be immediately processed
       else {

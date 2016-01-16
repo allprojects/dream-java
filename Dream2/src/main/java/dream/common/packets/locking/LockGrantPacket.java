@@ -13,7 +13,7 @@ public class LockGrantPacket implements Serializable {
     this.lockID = reqPkt.getLockID();
   }
 
-  final UUID getLockID() {
+  public final UUID getLockID() {
     return lockID;
   }
 

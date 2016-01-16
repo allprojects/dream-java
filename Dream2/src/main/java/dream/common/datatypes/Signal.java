@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import dream.client.ClientEventForwarder;
 import dream.client.QueueManager;
+import dream.common.ConsistencyType;
 import dream.common.Consts;
 import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
@@ -112,17 +113,24 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
       // Extract information from any of the packets
       final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
       // Notify remote subscribers
-      clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getInitialVar(), anyPkt.getFinalExpressions(), true);
+      clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getSource());
       // Notify local subscribers
       if (!consumers.isEmpty()) {
         pairs.forEach(pair -> waitingProducers.add(pair.getUpdateProducer()));
         pendingAcks = consumers.size();
-        consumers.forEach(c -> c.updateFromProducer(new EventPacket(event, anyPkt.getId(), anyPkt.getInitialVar(), true), this));
+        consumers.forEach(c -> c.updateFromProducer(new EventPacket(event, anyPkt.getId(), anyPkt.getSource()), this));
       } else {
         // Acknowledge the producers if there are no pending acks
         logger.finest("Acknowledging the producers.");
         pairs.forEach(pair -> pair.getUpdateProducer().notifyUpdateFinished());
       }
+      // Release locks, if needed
+      if ((Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
+          Consts.consistencyType == ConsistencyType.ATOMIC) && //
+          anyPkt.getLockReleaseNodes().contains(object + "@" + host)) {
+        clientEventForwarder.sendLockRelease(anyPkt.getId());
+      }
+
     } else {
       logger.finest(object + ": update call but waiting: " + update);
     }

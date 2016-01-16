@@ -3,20 +3,31 @@ package dream.client;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import dream.common.ConsistencyType;
 import dream.common.Consts;
+import dream.common.datatypes.LockApplicant;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.content.Subscription;
+import dream.common.packets.locking.LockGrantPacket;
+import dream.common.packets.locking.LockReleasePacket;
+import dream.common.packets.locking.LockRequestPacket;
+import dream.common.packets.locking.LockType;
+import dream.common.utils.AtomicDependencyDetector;
+import dream.common.utils.CompleteGlitchFreeDependencyDetector;
 import dream.common.utils.DependencyGraph;
+import dream.common.utils.FinalNodesDetector;
+import dream.common.utils.InterSourceDependencyDetector;
 import dream.common.utils.IntraSourceDependencyDetector;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.routing.Outbox;
@@ -27,8 +38,20 @@ public class ClientEventForwarder implements PacketForwarder {
 
   private final ConnectionManager connectionManager;
   private final ClientSubscriptionTable subTable;
+
+  // Dependency graph
   private final DependencyGraph dependencyGraph = DependencyGraph.instance;
+
+  // Dependency detectors
   private final IntraSourceDependencyDetector intraDepDetector = IntraSourceDependencyDetector.instance;
+  private final InterSourceDependencyDetector interDepDetector = //
+  Consts.consistencyType == ConsistencyType.ATOMIC //
+      ? new AtomicDependencyDetector() //
+      : new CompleteGlitchFreeDependencyDetector();
+  private final FinalNodesDetector finalNodesDetector = new FinalNodesDetector();
+
+  // Lock applicants waiting for a grant
+  private final Map<UUID, LockApplicant> lockApplicants = new HashMap<>();
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -56,6 +79,7 @@ public class ClientEventForwarder implements PacketForwarder {
     connectionManager.registerForwarder(this, AdvertisementPacket.subject);
     connectionManager.registerForwarder(this, SubscriptionPacket.subject);
     connectionManager.registerForwarder(this, EventPacket.subject);
+    connectionManager.registerForwarder(this, LockGrantPacket.subject);
   }
 
   @Override
@@ -73,21 +97,66 @@ public class ClientEventForwarder implements PacketForwarder {
       assert packet instanceof EventPacket;
       logger.finer("Received an event packet " + packet);
       processEventFromServer((EventPacket) packet);
+    } else if (subject.equals(LockGrantPacket.subject)) {
+      assert packet instanceof LockGrantPacket;
+      logger.finer("Received lock grant packet " + packet);
+      processLockGrant((LockGrantPacket) packet);
     } else {
       assert false : subject;
     }
     return result;
   }
 
-  public final void sendEvent(UUID id, Event ev, String initialVar, boolean approvedByTokenService) {
-    sendEvent(id, ev, initialVar, new HashSet<>(), approvedByTokenService);
+  public final void sendEvent(UUID id, Event ev, String initialVar) {
+    logger.finer("Sending an event " + ev);
+    Set<String> lockReleaseNodes;
+    switch (Consts.consistencyType) {
+    case COMPLETE_GLITCH_FREE:
+      lockReleaseNodes = interDepDetector.getNodesToLockFor(initialVar);
+      break;
+    case ATOMIC:
+      lockReleaseNodes = finalNodesDetector.getFinalNodesFor(initialVar);
+      break;
+    default:
+      lockReleaseNodes = new HashSet<>();
+    }
+
+    if (subTable.needsToDeliverToServer(ev)) {
+      connectionManager.sendEvent(id, ev, initialVar, lockReleaseNodes);
+    }
   }
 
-  public final void sendEvent(UUID id, Event ev, String initialVar, Set<String> finalExpressions, boolean approvedByTokenService) {
-    logger.finer("Sending an event " + ev);
-    if (subTable.needsToDeliverToServer(ev)) {
-      connectionManager.sendEvent(id, ev, initialVar, finalExpressions, approvedByTokenService);
+  public final void sentLockRequest(String source, LockApplicant applicant, LockType type) {
+    if (Consts.consistencyType != ConsistencyType.COMPLETE_GLITCH_FREE && //
+        Consts.consistencyType != ConsistencyType.ATOMIC) {
+      assert false : Consts.consistencyType;
+      logger.warning("Invoked sendLockRequest() even if the consistency level does not require it.");
+      return;
     }
+
+    logger.finer("Invoked sendLockRequest for source " + source);
+    final Set<String> nodesToLock = interDepDetector.getNodesToLockFor(source);
+    final Set<String> releaseNodes = //
+    Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE //
+        ? new HashSet<>(nodesToLock) //
+        : finalNodesDetector.getFinalNodesFor(source);
+
+    final LockRequestPacket reqPkt = new LockRequestPacket(connectionManager.getNodeDescriptor(), nodesToLock, releaseNodes, type);
+    final UUID lockId = reqPkt.getLockID();
+    lockApplicants.put(lockId, applicant);
+
+    connectionManager.sendLockRequest(reqPkt);
+  }
+
+  public final void sendLockRelease(UUID lockID) {
+    if (Consts.consistencyType != ConsistencyType.COMPLETE_GLITCH_FREE && //
+        Consts.consistencyType != ConsistencyType.ATOMIC) {
+      assert false : Consts.consistencyType;
+      logger.warning("Invoked sendLockRelease() even if the consistency level does not require it.");
+      return;
+    }
+
+    connectionManager.sendLockRelease(new LockReleasePacket(lockID));
   }
 
   public final void advertise(Advertisement adv, boolean isPublic) {
@@ -96,7 +165,7 @@ public class ClientEventForwarder implements PacketForwarder {
         Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
       dependencyGraph.processAdv(adv);
-      intraDepDetector.consolidate();
+      updateDetectors();
     }
     connectionManager.sendAdvertisement(adv, isPublic);
   }
@@ -107,7 +176,7 @@ public class ClientEventForwarder implements PacketForwarder {
         Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
       dependencyGraph.processUnAdv(adv);
-      intraDepDetector.consolidate();
+      updateDetectors();
     }
     connectionManager.sendUnadvertisement(adv, isPublic);
   }
@@ -118,7 +187,7 @@ public class ClientEventForwarder implements PacketForwarder {
         Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
       dependencyGraph.processAdv(adv, subs);
-      intraDepDetector.consolidate();
+      updateDetectors();
     }
     connectionManager.sendAdvertisement(adv, subs, isPublic);
   }
@@ -129,7 +198,7 @@ public class ClientEventForwarder implements PacketForwarder {
         Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
         Consts.consistencyType == ConsistencyType.ATOMIC) {
       dependencyGraph.processUnAdv(adv, subs);
-      intraDepDetector.consolidate();
+      updateDetectors();
     }
     connectionManager.sendUnadvertisement(adv, isPublic);
   }
@@ -179,7 +248,6 @@ public class ClientEventForwarder implements PacketForwarder {
         } else {
           dependencyGraph.processAdv(advPkt.getAdvertisement(), subs);
         }
-        intraDepDetector.consolidate();
         break;
       case UNADV:
         if (subs.isEmpty()) {
@@ -187,9 +255,9 @@ public class ClientEventForwarder implements PacketForwarder {
         } else {
           dependencyGraph.processUnAdv(advPkt.getAdvertisement(), subs);
         }
-        intraDepDetector.consolidate();
         break;
       }
+      updateDetectors();
     }
   }
 
@@ -204,6 +272,19 @@ public class ClientEventForwarder implements PacketForwarder {
     default:
       assert false : subPkt.getSubType();
     }
+  }
+
+  private final void processLockGrant(LockGrantPacket lockGrant) {
+    final UUID lockID = lockGrant.getLockID();
+    assert lockApplicants.containsKey(lockID);
+    final LockApplicant applicant = lockApplicants.remove(lockID);
+    applicant.notifyLockGranted(lockGrant);
+  }
+
+  private final void updateDetectors() {
+    finalNodesDetector.consolidate();
+    intraDepDetector.consolidate();
+    interDepDetector.consolidate();
   }
 
 }

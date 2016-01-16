@@ -30,7 +30,7 @@ public class QueueManager {
     final UUID id = evPkt.getId();
     final Set<WaitRecommendations> waitingRecommendations = //
     IntraSourceDependencyDetector.instance.//
-        getWaitRecommendations(evPkt.getEvent(), evPkt.getInitialVar()).//
+        getWaitRecommendations(evPkt.getEvent(), evPkt.getSource()).//
         stream().filter(wr -> wr.getExpression().equals(expression)).//
         collect(Collectors.toSet());
 

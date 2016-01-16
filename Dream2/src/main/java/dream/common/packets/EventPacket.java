@@ -15,21 +15,22 @@ public class EventPacket implements Serializable {
   public static final String subject = "__DREAM_PUBLICATION_PACKET_SUBJECT";
 
   private final Event event;
+
+  // Uniquely identifies a propagation. In the case of complete glitch free and
+  // atomic consistency, it is identical to the id of the read lock associated
+  // to the propagation.
   private final UUID id;
-  private final String initialVar;
-  private boolean approvedByTokenService = false;
 
-  // Final expressions are used in the atomic protocol to determine when the
-  // token can be released
-  // Upon receiving a final expression, the server acknowledges the token
-  // manager
-  private final Set<String> finalExpressions = new HashSet<String>();
+  // Original source of the change
+  private final String source;
 
-  public EventPacket(Event event, UUID id, String initialVar, boolean approvedByTokenService) {
+  // Nodes that should release the lock for the propagation, if any
+  private final Set<String> lockReleaseNodes = new HashSet<>();
+
+  public EventPacket(Event event, UUID id, String source) {
     this.event = event;
     this.id = id;
-    this.initialVar = initialVar;
-    this.approvedByTokenService = approvedByTokenService;
+    this.source = source;
   }
 
   public final Event getEvent() {
@@ -40,39 +41,21 @@ public class EventPacket implements Serializable {
     return id;
   }
 
-  public final String getInitialVar() {
-    return initialVar;
+  public final String getSource() {
+    return source;
   }
 
-  public final void addFinalExpression(String expression) {
-    finalExpressions.add(expression);
+  public final void setLockReleaseNodes(Set<String> lockReleaseNodes) {
+    this.lockReleaseNodes.addAll(lockReleaseNodes);
   }
 
-  public final Set<String> getFinalExpressions() {
-    return finalExpressions;
-  }
-
-  public final boolean isFinal() {
-    return finalExpressions.contains(event.getSignature());
-  }
-
-  public final EventPacket dup() {
-    final EventPacket result = new EventPacket(event, id, initialVar, approvedByTokenService);
-    result.finalExpressions.addAll(finalExpressions);
-    return result;
-  }
-
-  public final void tokenServiceApproves() {
-    approvedByTokenService = true;
-  }
-
-  public final boolean isApprovedByTokenService() {
-    return approvedByTokenService;
+  public final Set<String> getLockReleaseNodes() {
+    return lockReleaseNodes;
   }
 
   @Override
   public String toString() {
-    return "EventPacket [event=" + event + ", id=" + id + ", initialVar=" + initialVar + ", finalExpressions=" + finalExpressions + "]";
+    return "EventPacket [event=" + event + ", id=" + id + ", source=" + source + ", lockReleaseNodes=" + lockReleaseNodes + "]";
   }
 
 }

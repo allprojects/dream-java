@@ -12,7 +12,6 @@ import dream.common.Consts;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
-import dream.common.packets.registry.RegistryAdvertisePacket;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.overlay.NeighborhoodChangeListener;
 import polimi.reds.broker.routing.Outbox;
@@ -45,11 +44,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
       final AdvertisementPacket advPkt = (AdvertisementPacket) packet;
       logger.fine("Received an advertisement packet: " + advPkt);
       processAdvertisement(sender, advPkt, neighbors, outbox);
-    } else if (subject.equals(RegistryAdvertisePacket.subject)) {
-      assert packet instanceof RegistryAdvertisePacket;
-      final RegistryAdvertisePacket regAdvPkt = (RegistryAdvertisePacket) packet;
-      logger.fine("Received a registry advertise packet: " + regAdvPkt);
-      processRegistryAdvertise(sender, regAdvPkt);
     } else {
       assert false;
       logger.warning("Received an unknown packet subject");
@@ -80,20 +74,10 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
   }
 
   private void processEvent(NodeDescriptor sender, EventPacket packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
-    // In case of atomic consistency, each initial event must be first delivered
-    // to the token service
-    if (Consts.consistencyType == ConsistencyType.ATOMIC && !packet.isApprovedByTokenService()) {
-      sendToTokenService(EventPacket.subject, packet, outbox);
-    } else {
-      sendEvent(packet, outbox);
-    }
-  }
-
-  private final void sendEvent(EventPacket pkt, Outbox outbox) {
-    final Map<NodeDescriptor, Integer> matchingClients = clientsSubTable.getMatchingNodes(pkt.getEvent());
-    final Map<NodeDescriptor, Integer> matchingBrokers = brokersSubTable.getMatchingNodes(pkt.getEvent());
-    sendTo(EventPacket.subject, pkt, outbox, matchingClients.keySet());
-    sendTo(EventPacket.subject, pkt, outbox, matchingBrokers.keySet());
+    final Map<NodeDescriptor, Integer> matchingClients = clientsSubTable.getMatchingNodes(packet.getEvent());
+    final Map<NodeDescriptor, Integer> matchingBrokers = brokersSubTable.getMatchingNodes(packet.getEvent());
+    sendTo(EventPacket.subject, packet, outbox, matchingClients.keySet());
+    sendTo(EventPacket.subject, packet, outbox, matchingBrokers.keySet());
   }
 
   private final int getSubscribersCount(Map<NodeDescriptor, Integer> clients) {
@@ -120,19 +104,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
       }
     }
     outbox.add(AdvertisementPacket.subject, packet, getAllNodesExcept(sender, neighbors));
-  }
-
-  private final void processRegistryAdvertise(NodeDescriptor sender, RegistryAdvertisePacket packet) {
-    switch (packet.getType()) {
-    case ADV:
-      registry = sender;
-      break;
-    case UNADV:
-      registry = null;
-      break;
-    default:
-      assert false : packet.getType();
-    }
   }
 
   private final void sendToTokenService(String subject, Serializable packet, Outbox box) {

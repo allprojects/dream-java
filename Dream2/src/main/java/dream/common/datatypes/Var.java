@@ -12,12 +12,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import dream.client.ClientEventForwarder;
+import dream.common.ConsistencyType;
 import dream.common.Consts;
 import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
+import dream.common.packets.locking.LockGrantPacket;
 
-public class Var<T extends Serializable> implements UpdateProducer<T> {
+public class Var<T extends Serializable> implements UpdateProducer<T>, LockApplicant {
   protected final ClientEventForwarder forwarder;
 
   protected final String host;
@@ -55,14 +57,14 @@ public class Var<T extends Serializable> implements UpdateProducer<T> {
     final Supplier<T> supplier = () -> val;
     waitingModifications.add(supplier);
     if (waitingModifications.size() == 1) {
-      processNextUpdate();
+      tryToProcessNextUpdate();
     }
   }
 
   public final synchronized void modify(Consumer<T> modification) {
     waitingModifications.add(modification);
     if (waitingModifications.size() == 1) {
-      processNextUpdate();
+      tryToProcessNextUpdate();
     }
   }
 
@@ -71,29 +73,40 @@ public class Var<T extends Serializable> implements UpdateProducer<T> {
     return val;
   }
 
-  private final void processNextUpdate() {
+  private final void tryToProcessNextUpdate() {
     if (pendingAcks == 0 && !waitingModifications.isEmpty()) {
-      final Object mod = waitingModifications.poll();
-      // Apply modification
-      if (mod instanceof Consumer) {
-        final Consumer<T> consumer = (Consumer<T>) mod;
-        consumer.accept(val);
-      } else if (mod instanceof Supplier) {
-        final Supplier<T> supplier = (Supplier<T>) mod;
-        val = supplier.get();
+      // In the case of complete glitch freedom or atomic consistency, we
+      // possibly need to acquire a lock before processing the update
+      if (Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
+          Consts.consistencyType == ConsistencyType.ATOMIC) {
+
       }
+      // Otherwise the update can be immediately processed
+      else {
+        processNextUpdate(UUID.randomUUID());
+      }
+    }
+  }
 
-      // Propagate modification to local and remote subscribers
-      final Event<? extends Serializable> ev = new Event(Consts.hostName, object, val);
-      final UUID eventId = UUID.randomUUID();
-      final EventPacket packet = new EventPacket(ev, eventId, ev.getSignature(), false);
-
-      pendingAcks = consumers.size();
-      consumers.forEach(c -> c.updateFromProducer(packet, this));
-
-      forwarder.sendEvent(eventId, ev, ev.getSignature(), false);
+  private final void processNextUpdate(UUID eventId) {
+    final Object mod = waitingModifications.poll();
+    // Apply modification
+    if (mod instanceof Consumer) {
+      final Consumer<T> consumer = (Consumer<T>) mod;
+      consumer.accept(val);
+    } else if (mod instanceof Supplier) {
+      final Supplier<T> supplier = (Supplier<T>) mod;
+      val = supplier.get();
     }
 
+    // Propagate modification to local and remote subscribers
+    final Event<? extends Serializable> ev = new Event(Consts.hostName, object, val);
+    final EventPacket packet = new EventPacket(ev, eventId, ev.getSignature());
+
+    pendingAcks = consumers.size();
+    consumers.forEach(c -> c.updateFromProducer(packet, this));
+
+    forwarder.sendEvent(eventId, ev, ev.getSignature());
   }
 
   @Override
@@ -104,7 +117,7 @@ public class Var<T extends Serializable> implements UpdateProducer<T> {
   @Override
   public final void notifyUpdateFinished() {
     pendingAcks--;
-    processNextUpdate();
+    tryToProcessNextUpdate();
   }
 
   @Override
@@ -130,6 +143,11 @@ public class Var<T extends Serializable> implements UpdateProducer<T> {
   @Override
   public List<SerializablePredicate> getConstraints() {
     return constraints;
+  }
+
+  @Override
+  public void notifyLockGranted(LockGrantPacket lockGrant) {
+    processNextUpdate(lockGrant.getLockID());
   }
 
 }

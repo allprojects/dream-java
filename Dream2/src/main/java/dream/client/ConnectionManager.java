@@ -4,9 +4,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
+import dream.common.ConsistencyType;
 import dream.common.Consts;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
@@ -16,6 +22,10 @@ import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.content.SubType;
 import dream.common.packets.content.Subscription;
+import dream.common.packets.discovery.LockManagerHelloPacket;
+import dream.common.packets.discovery.ServerHelloPacket;
+import dream.common.packets.locking.LockReleasePacket;
+import dream.common.packets.locking.LockRequestPacket;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.overlay.GenericOverlay;
 import polimi.reds.broker.overlay.NotRunningException;
@@ -25,11 +35,20 @@ import polimi.reds.broker.overlay.TCPTransport;
 import polimi.reds.broker.overlay.TopologyManager;
 import polimi.reds.broker.overlay.Transport;
 import polimi.reds.broker.routing.GenericRouter;
+import polimi.reds.broker.routing.Outbox;
 import polimi.reds.broker.routing.PacketForwarder;
 
-class ConnectionManager {
+class ConnectionManager implements PacketForwarder {
   private final Overlay overlay;
   private final GenericRouter router;
+
+  private NodeDescriptor server;
+  private NodeDescriptor lockManager;
+
+  private final Queue<PacketSubjectPair> serverQueue = new LinkedList<>();
+  private final Queue<PacketSubjectPair> lockManagerQueue = new LinkedList<>();
+
+  private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   ConnectionManager() {
     Transport tr = null;
@@ -41,28 +60,38 @@ class ConnectionManager {
     final TopologyManager tm = new SimpleTopologyManager();
     overlay = new GenericOverlay(tm, tr, false);
     router = new GenericRouter(overlay);
+    router.setPacketForwarder(ServerHelloPacket.subject, this);
+    router.setPacketForwarder(LockManagerHelloPacket.subject, this);
     overlay.start();
     try {
       overlay.addNeighbor(Consts.serverAddr);
+      if (Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
+          Consts.consistencyType == ConsistencyType.ATOMIC) {
+        overlay.addNeighbor(Consts.lockManagerAddr);
+      }
     } catch (ConnectException | MalformedURLException | NotRunningException e) {
       e.printStackTrace();
     }
   }
 
-  final void sendEvent(UUID id, Event<? extends Serializable> event, String initialVar, Set<String> finalExpressions, boolean approvedByTokenService) {
-    final EventPacket pkt = new EventPacket(event, id, initialVar, approvedByTokenService);
-    finalExpressions.forEach(pkt::addFinalExpression);
-    send(EventPacket.subject, pkt);
+  final NodeDescriptor getNodeDescriptor() {
+    return overlay.getNodeDescriptor();
+  }
+
+  final void sendEvent(UUID id, Event<? extends Serializable> event, String initialVar, Set<String> lockReleaseNodes) {
+    final EventPacket pkt = new EventPacket(event, id, initialVar);
+    pkt.setLockReleaseNodes(lockReleaseNodes);
+    sendToServer(EventPacket.subject, pkt);
   }
 
   final void sendSubscription(Subscription sub) {
     final SubscriptionPacket pkt = new SubscriptionPacket(sub, SubType.SUB);
-    send(SubscriptionPacket.subject, pkt);
+    sendToServer(SubscriptionPacket.subject, pkt);
   }
 
   final void sendUnsubscription(Subscription sub) {
     final SubscriptionPacket pkt = new SubscriptionPacket(sub, SubType.UNSUB);
-    send(SubscriptionPacket.subject, pkt);
+    sendToServer(SubscriptionPacket.subject, pkt);
   }
 
   final void sendAdvertisement(Advertisement adv, boolean isPublic) {
@@ -81,9 +110,17 @@ class ConnectionManager {
     sendAdvertisement(adv, AdvType.UNADV, subs, isPublic);
   }
 
+  final void sendLockRequest(LockRequestPacket req) {
+    sendToLockManager(LockRequestPacket.subject, req);
+  }
+
+  final void sendLockRelease(LockReleasePacket rel) {
+    sendToLockManager(LockReleasePacket.subject, rel);
+  }
+
   private final void sendAdvertisement(Advertisement adv, AdvType advType, Set<Subscription> subs, boolean isPublic) {
     final AdvertisementPacket pkt = subs != null ? new AdvertisementPacket(adv, advType, subs, isPublic) : new AdvertisementPacket(adv, advType, isPublic);
-    send(AdvertisementPacket.subject, pkt);
+    sendToServer(AdvertisementPacket.subject, pkt);
   }
 
   final void registerForwarder(PacketForwarder forwarder, String subject) {
@@ -94,16 +131,66 @@ class ConnectionManager {
     overlay.stop();
   }
 
-  private final void send(String subject, Serializable packet) {
-    assert overlay.getNumberOfBrokers() == 1;
-    assert overlay.getNumberOfClients() == 0;
-    for (final NodeDescriptor node : overlay.getNeighbors()) {
+  private final void sendToServer(String subject, Serializable packet) {
+    if (server == null) {
+      serverQueue.add(new PacketSubjectPair(subject, packet));
+    } else {
       try {
-        overlay.send(subject, packet, node);
+        overlay.send(subject, packet, server);
       } catch (IOException | NotRunningException e) {
         e.printStackTrace();
       }
     }
+  }
+
+  private final void sendToLockManager(String subject, Serializable packet) {
+    if (server == null) {
+      lockManagerQueue.add(new PacketSubjectPair(subject, packet));
+    } else {
+      try {
+        overlay.send(subject, packet, lockManager);
+      } catch (IOException | NotRunningException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  @Override
+  public final Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender, Serializable packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
+    if (subject.equals(ServerHelloPacket.subject)) {
+      logger.info("Received server hello packet");
+      assert packet instanceof ServerHelloPacket;
+      server = sender;
+      serverQueue.forEach(p -> sendToServer(p.getSubject(), p.getPacket()));
+    } else if (subject.equals(LockManagerHelloPacket.subject)) {
+      logger.info("Received lock manager hello packet");
+      assert packet instanceof LockManagerHelloPacket;
+      lockManager = sender;
+      lockManagerQueue.forEach(p -> sendToLockManager(p.getSubject(), p.getPacket()));
+    } else {
+      assert false : subject;
+    }
+    return new ArrayList<>();
+  }
+
+  private class PacketSubjectPair {
+    private final String subject;
+    private final Serializable packet;
+
+    public PacketSubjectPair(String subject, Serializable packet) {
+      super();
+      this.subject = subject;
+      this.packet = packet;
+    }
+
+    final String getSubject() {
+      return subject;
+    }
+
+    final Serializable getPacket() {
+      return packet;
+    }
+
   }
 
 }

@@ -17,6 +17,9 @@ class LockManager {
   // Pending requests
   private final List<LockRequestPacket> pendingRequests = new ArrayList<>();
 
+  // All stored locks
+  private final Map<UUID, LockRequestPacket> activeLocks = new HashMap<>();
+
   // Stored read and write locks
   private final Map<String, Integer> readLocks = new HashMap<>();
   private final WriteLockManager writeLocks = new WriteLockManager();
@@ -47,15 +50,20 @@ class LockManager {
    * @return the set of granted locks.
    */
   final Set<LockRequestPacket> processLockRelease(LockReleasePacket release) {
-    release(release);
+    final UUID lockID = release.getLockID();
+    assert activeLocks.containsKey(lockID);
+    final LockRequestPacket reqPkt = activeLocks.get(lockID);
+
     final Set<LockRequestPacket> result = new HashSet<>();
-    final Iterator<LockRequestPacket> it = pendingRequests.iterator();
-    while (it.hasNext()) {
-      final LockRequestPacket request = it.next();
-      if (canBeGranted(request)) {
-        lock(request);
-        result.add(request);
-        it.remove();
+    if (release(reqPkt.getLockID(), reqPkt.getLockNodes(), reqPkt.getType())) {
+      final Iterator<LockRequestPacket> it = pendingRequests.iterator();
+      while (it.hasNext()) {
+        final LockRequestPacket request = it.next();
+        if (canBeGranted(request)) {
+          lock(request);
+          result.add(request);
+          it.remove();
+        }
       }
     }
     return result;
@@ -100,9 +108,7 @@ class LockManager {
   /**
    * Return true if the packet released at least one node
    */
-  private final boolean release(LockReleasePacket release) {
-    final LockType type = release.getType();
-    final Set<String> lockNodes = release.getLockNodes();
+  private final boolean release(UUID lockId, Set<String> lockNodes, LockType type) {
     boolean result = false;
     switch (type) {
     case READ_ONLY:
@@ -110,6 +116,7 @@ class LockManager {
         final int newCount = readLocks.get(lockNode) - 1;
         if (newCount == 0) {
           readLocks.remove(lockNode);
+          activeLocks.remove(lockId);
           result = true;
         } else {
           readLocks.put(lockNode, newCount);
@@ -117,7 +124,8 @@ class LockManager {
       }
       break;
     case READ_WRITE:
-      if (writeLocks.release(release)) {
+      if (writeLocks.release(lockId)) {
+        activeLocks.remove(lockId);
         result = true;
       }
       break;
@@ -160,8 +168,7 @@ class LockManager {
     /**
      * Return true if the lock has been entirely released.
      */
-    boolean release(LockReleasePacket release) {
-      final UUID lockId = release.getLockID();
+    boolean release(UUID lockId) {
       assert grantedLocks.containsKey(lockId);
       Integer count = grantedLocks.get(lockId);
       if (--count == 0) {

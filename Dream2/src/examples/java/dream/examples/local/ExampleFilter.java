@@ -1,7 +1,7 @@
 package dream.examples.local;
 
-import dream.common.datatypes.Signal;
-import dream.common.datatypes.Var;
+import dream.client.Signal;
+import dream.client.Var;
 
 public class ExampleFilter {
   public static void main(String args[]) {

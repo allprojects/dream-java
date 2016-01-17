@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import dream.common.datatypes.EventProducerPair;
 import dream.common.packets.EventPacket;
 import dream.common.utils.IntraSourceDependencyDetector;
 import dream.common.utils.WaitRecommendations;
@@ -18,14 +17,14 @@ import dream.common.utils.WaitRecommendations;
  * This class is responsible for temporarily accumulating events before delivery
  * to make sure that no glitch can occur.
  */
-public class QueueManager {
+class QueueManager {
   // WaitingElements, partitioned by id
   private final Map<UUID, WaitingElement> waitingElements = new HashMap<UUID, WaitingElement>();
   // Candidate results to deliver (they can be effectively delivered only there
   // are no waiting elements).
   private final Set<EventProducerPair> pendingResults = new HashSet<>();
 
-  public final List<EventProducerPair> processEventPacket(EventProducerPair event, String expression) {
+  final List<EventProducerPair> processEventPacket(EventProducerPair event, String expression) {
     final EventPacket evPkt = event.getEventPacket();
     final UUID id = evPkt.getId();
     final Set<WaitRecommendations> waitingRecommendations = //

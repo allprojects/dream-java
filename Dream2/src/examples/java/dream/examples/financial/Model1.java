@@ -1,10 +1,10 @@
-package dream.financial;
+package dream.examples.financial;
 
+import dream.client.RemoteVar;
+import dream.client.Signal;
+import dream.client.ValueChangeListener;
+import dream.client.Var;
 import dream.common.Consts;
-import dream.common.datatypes.RemoteVar;
-import dream.common.datatypes.Signal;
-import dream.common.datatypes.ValueChangeListener;
-import dream.common.datatypes.Var;
 
 public class Model1 implements ValueChangeListener<Integer> {
 	public void start() {

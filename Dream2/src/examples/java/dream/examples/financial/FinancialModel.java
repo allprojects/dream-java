@@ -1,6 +1,6 @@
-package dream.financial;
+package dream.examples.financial;
 
-import dream.common.datatypes.Signal;
+import dream.client.Signal;
 
 public interface FinancialModel {
 	public Signal<Integer> compute();

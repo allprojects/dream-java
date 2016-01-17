@@ -2,8 +2,8 @@ package dream.examples.local;
 
 import java.util.ArrayList;
 
-import dream.common.datatypes.Signal;
-import dream.common.datatypes.Var;
+import dream.client.Signal;
+import dream.client.Var;
 
 public class ExampleList {
 

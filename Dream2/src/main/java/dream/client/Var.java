@@ -1,4 +1,4 @@
-package dream.common.datatypes;
+package dream.client;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
@@ -11,26 +11,26 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import dream.client.ClientEventForwarder;
 import dream.common.ConsistencyType;
 import dream.common.Consts;
+import dream.common.SerializablePredicate;
 import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.locking.LockGrantPacket;
 
 public class Var<T extends Serializable> implements UpdateProducer<T>, LockApplicant {
-  protected final ClientEventForwarder forwarder;
+  private final ClientEventForwarder forwarder;
 
-  protected final String host;
-  protected final String object;
+  private final String host;
+  private final String object;
   private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
 
   private final Set<UpdateConsumer> consumers = new HashSet<>();
   private final Queue<Object> waitingModifications = new ArrayDeque<>();
   private int pendingAcks = 0;
 
-  protected T val;
+  private T val;
 
   public Var(String object, T val) {
     this.forwarder = ClientEventForwarder.get();

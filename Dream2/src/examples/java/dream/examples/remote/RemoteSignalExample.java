@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Set;
 
 import dream.client.DreamClient;
+import dream.client.RemoteVar;
+import dream.client.Signal;
 import dream.common.Consts;
-import dream.common.datatypes.RemoteVar;
-import dream.common.datatypes.Signal;
 
 public class RemoteSignalExample {
 

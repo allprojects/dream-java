@@ -1,4 +1,4 @@
-package dream.common.datatypes;
+package dream.client;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
@@ -11,10 +11,9 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-import dream.client.ClientEventForwarder;
-import dream.client.QueueManager;
 import dream.common.ConsistencyType;
 import dream.common.Consts;
+import dream.common.SerializablePredicate;
 import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;

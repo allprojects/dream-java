@@ -1,9 +1,9 @@
-package dream.financial;
+package dream.examples.financial;
 
 import java.util.Random;
 
+import dream.client.Var;
 import dream.common.Consts;
-import dream.common.datatypes.Var;
 import dream.locking.LockManagerLauncher;
 import dream.server.ServerLauncher;
 

@@ -1,4 +1,4 @@
-package dream.common.datatypes;
+package dream.common;
 
 import java.io.Serializable;
 import java.util.function.Predicate;

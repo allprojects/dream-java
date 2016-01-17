@@ -1,4 +1,4 @@
-package dream.common.datatypes;
+package dream.client;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -8,9 +8,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import dream.client.ClientEventForwarder;
-import dream.client.Subscriber;
 import dream.common.Consts;
+import dream.common.SerializablePredicate;
 import dream.common.packets.EventPacket;
 import dream.common.packets.content.Subscription;
 

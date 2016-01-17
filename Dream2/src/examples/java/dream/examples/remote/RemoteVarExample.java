@@ -3,8 +3,8 @@ package dream.examples.remote;
 import java.util.ArrayList;
 import java.util.Random;
 
+import dream.client.Var;
 import dream.common.Consts;
-import dream.common.datatypes.Var;
 
 public class RemoteVarExample {
 

@@ -1,9 +1,9 @@
-package dream.financial;
+package dream.examples.financial;
 
+import dream.client.RemoteVar;
+import dream.client.Signal;
+import dream.client.ValueChangeListener;
 import dream.common.Consts;
-import dream.common.datatypes.RemoteVar;
-import dream.common.datatypes.Signal;
-import dream.common.datatypes.ValueChangeListener;
 
 public class FinancialApp implements ValueChangeListener<Integer> {
   private Signal<Integer> f1Signal;

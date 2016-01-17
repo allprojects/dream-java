@@ -1,4 +1,4 @@
-package dream.common.datatypes;
+package dream.client;
 
 /**
  * Represents a generic time changing value.

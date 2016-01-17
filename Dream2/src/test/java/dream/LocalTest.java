@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import dream.common.datatypes.Signal;
-import dream.common.datatypes.Var;
+import dream.client.Signal;
+import dream.client.Var;
 import dream.common.utils.DependencyGraph;
 import dream.locking.LockManagerLauncher;
 import dream.server.ServerLauncher;

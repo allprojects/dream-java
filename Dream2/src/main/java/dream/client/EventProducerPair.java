@@ -1,4 +1,4 @@
-package dream.common.datatypes;
+package dream.client;
 
 import dream.common.packets.EventPacket;
 

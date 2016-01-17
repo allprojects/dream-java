@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import dream.common.datatypes.SerializablePredicate;
+import dream.common.SerializablePredicate;
 
 public class Subscription<T extends Serializable> implements Serializable {
   private static final long serialVersionUID = -3452847781395458670L;

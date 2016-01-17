@@ -16,6 +16,12 @@ public class RemoteVarExample {
     final Var<ArrayList<Integer>> remoteList = new Var<ArrayList<Integer>>("remoteList", new ArrayList<Integer>());
     final Random random = new Random();
 
+    try {
+      Thread.sleep(5000);
+    } catch (final InterruptedException e) {
+      e.printStackTrace();
+    }
+
     while (true) {
       remoteInt.set(random.nextInt(1000));
       remoteString1.set(String.valueOf(random.nextInt(10)) + " ");

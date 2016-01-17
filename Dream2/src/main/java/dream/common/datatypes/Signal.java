@@ -96,14 +96,22 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 
     if (!pairs.isEmpty()) {
       logger.finest("Actual update");
+      // Extract information from any of the packets
+      final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
 
       // Compute the new value
       try {
         val = evaluate();
         logger.finest("New value computed for the reactive object: " + val);
       } catch (final Exception e) {
-        logger.info("Exception during the evaluation of the expression. Acknowledging the producers and returning.");
+        logger.info("Exception during the evaluation of the expression. Acknowledging the producers, releasing the locks, and returning.");
         pairs.forEach(pair -> pair.getUpdateProducer().notifyUpdateFinished());
+        // Release locks, if needed
+        if ((Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
+            Consts.consistencyType == ConsistencyType.ATOMIC) && //
+            anyPkt.getLockReleaseNodes().contains(object + "@" + host)) {
+          clientEventForwarder.sendLockRelease(anyPkt.getId());
+        }
         return;
       }
 
@@ -114,8 +122,6 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
       // Notify local and remote dependent objects
       logger.finest("Sending event to dependent objects.");
       final Event<T> event = new Event<T>(Consts.hostName, object, val);
-      // Extract information from any of the packets
-      final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
       // Notify remote subscribers
       clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getSource());
       // Notify local subscribers

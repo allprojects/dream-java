@@ -1,7 +1,10 @@
 package dream.examples.remote;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import dream.client.DreamClient;
 import dream.common.Consts;
 import dream.common.datatypes.RemoteVar;
 import dream.common.datatypes.Signal;
@@ -10,6 +13,22 @@ public class RemoteSignalExample {
 
   public static void main(String args[]) {
     Consts.hostName = "Signal";
+
+    final DreamClient client = DreamClient.instance;
+    client.connect();
+
+    final Set<String> relevantRemoteVars = new HashSet<>();
+    relevantRemoteVars.add("remoteInt@Remote");
+    relevantRemoteVars.add("remoteString1@Remote");
+    relevantRemoteVars.add("remoteString2@Remote");
+    relevantRemoteVars.add("remoteList@Remote");
+    while (!client.listVariables().containsAll(relevantRemoteVars)) {
+      try {
+        Thread.sleep(100);
+      } catch (final InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
 
     final RemoteVar<Integer> remoteInt = new RemoteVar<Integer>("Remote", "remoteInt");
     final RemoteVar<String> remoteString1 = new RemoteVar<String>("Remote", "remoteString1");

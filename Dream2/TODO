@@ -1,9 +1,9 @@
 - Filters are not properly implemented
-- Atomicity is not implemented (read locks are not acquired)
 
-- Can we create a proxy to a method (not to an object)?
-- Can we consider methods with parameters?
-- Can we define constraints on the return values of methods?
+- Currently, atomic consistency requires accessing a time changing 
+  variable using a separate atomic get method. This is necessary to
+  avoid deadlocks when the computation of a signal invokes the get()
+  method of a variable it depends on
 
 - Currently, a lock is acquired at a source and released only
   when a propagation terminated. This can be improved to
@@ -12,3 +12,9 @@
      from the last nodes from which all shared nodes depend.
   -> In the case of complete glitch freedom, locks can be released
      after the shared nodes have been updated.
+     
+- Can we create a proxy to a method (not to an object)?
+
+- Can we consider methods with parameters?
+
+- Can we define constraints on the return values of methods?

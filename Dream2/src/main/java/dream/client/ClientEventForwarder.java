@@ -129,31 +129,55 @@ public class ClientEventForwarder implements PacketForwarder {
   /**
    * Return false if the lock request is not needed
    */
-  public final boolean sentLockRequest(String source, LockApplicant applicant, LockType type) {
+  public final void sendReadOnlyLockRequest(String node, LockApplicant applicant) {
+    if (Consts.consistencyType != ConsistencyType.ATOMIC) {
+      assert false : Consts.consistencyType;
+      logger.warning("Invoked sendReadOnlyLockRequest() even if the consistency level does not require it.");
+      return;
+    }
+
+    logger.finer("Invoked sendReadOnlyLockRequest for node " + node);
+    final Set<String> nodesToLock = new HashSet<>();
+    nodesToLock.add(node);
+
+    final LockRequestPacket reqPkt = new LockRequestPacket(connectionManager.getNodeDescriptor(), nodesToLock, nodesToLock, LockType.READ_ONLY);
+    final UUID lockId = reqPkt.getLockID();
+    lockApplicants.put(lockId, applicant);
+
+    connectionManager.sendLockRequest(reqPkt);
+  }
+
+  /**
+   * Return false if the lock request is not needed
+   */
+  public final boolean sendReadWriteLockRequest(String source, LockApplicant applicant) {
     if (Consts.consistencyType != ConsistencyType.COMPLETE_GLITCH_FREE && //
         Consts.consistencyType != ConsistencyType.ATOMIC) {
       assert false : Consts.consistencyType;
-      logger.warning("Invoked sendLockRequest() even if the consistency level does not require it.");
+      logger.warning("Invoked sendReadWriteLockRequest() even if the consistency level does not require it.");
       return false;
     }
 
-    logger.finer("Invoked sendLockRequest for source " + source);
+    logger.finer("Invoked sendReadWriteLockRequest for source " + source);
     final Set<String> nodesToLock = interDepDetector.getNodesToLockFor(source);
-    final Set<String> releaseNodes = //
-    Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE //
-        ? new HashSet<>(nodesToLock) //
-        : finalNodesDetector.getFinalNodesFor(source);
+    final Set<String> releaseNodes = getLockReleaseNodesFor(source);
 
     if (nodesToLock.isEmpty()) {
       return false;
     }
 
-    final LockRequestPacket reqPkt = new LockRequestPacket(connectionManager.getNodeDescriptor(), nodesToLock, releaseNodes, type);
+    final LockRequestPacket reqPkt = new LockRequestPacket(connectionManager.getNodeDescriptor(), nodesToLock, releaseNodes, LockType.READ_WRITE);
     final UUID lockId = reqPkt.getLockID();
     lockApplicants.put(lockId, applicant);
 
     connectionManager.sendLockRequest(reqPkt);
     return true;
+  }
+
+  public final Set<String> getLockReleaseNodesFor(String source) {
+    return Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE //
+        ? interDepDetector.getNodesToLockFor(source) //
+        : finalNodesDetector.getFinalNodesFor(source);
   }
 
   public final void sendLockRelease(UUID lockID) {

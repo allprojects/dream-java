@@ -83,6 +83,7 @@ class LockManager {
   }
 
   private final void lock(LockRequestPacket request) {
+    activeLocks.put(request.getLockID(), request);
     final LockType type = request.getType();
     final Set<String> lockNodes = request.getLockNodes();
     switch (type) {

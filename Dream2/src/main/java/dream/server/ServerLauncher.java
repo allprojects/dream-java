@@ -35,6 +35,7 @@ public class ServerLauncher implements NeighborhoodChangeListener {
     router.setPacketForwarder(EventPacket.subject, forwarder);
     router.setPacketForwarder(SubscriptionPacket.subject, forwarder);
     router.setPacketForwarder(AdvertisementPacket.subject, forwarder);
+    overlay.addNeighborhoodChangeListener(this);
   }
 
   public static final void start() {

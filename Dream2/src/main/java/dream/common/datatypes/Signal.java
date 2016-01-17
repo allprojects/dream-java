@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -18,8 +19,9 @@ import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.content.Subscription;
+import dream.common.packets.locking.LockGrantPacket;
 
-public class Signal<T extends Serializable> implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer {
+public class Signal<T extends Serializable> implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer, LockApplicant {
   private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<>();
 
   // Management of local subscribers
@@ -37,9 +39,11 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 
   private final Supplier<T> evaluation;
 
-  private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+  private UUID lockID = null;
 
-  protected T val;
+  private T val;
+
+  private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   public Signal(String object, Supplier<T> evaluation, UpdateProducer... prods) {
     this.host = Consts.hostName;
@@ -118,12 +122,15 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
       if (!consumers.isEmpty()) {
         pairs.forEach(pair -> waitingProducers.add(pair.getUpdateProducer()));
         pendingAcks = consumers.size();
-        consumers.forEach(c -> c.updateFromProducer(new EventPacket(event, anyPkt.getId(), anyPkt.getSource()), this));
+        final EventPacket newEvPkt = new EventPacket(event, anyPkt.getId(), anyPkt.getSource());
+        newEvPkt.setLockReleaseNodes(anyPkt.getLockReleaseNodes());
+        consumers.forEach(c -> c.updateFromProducer(newEvPkt, this));
       } else {
         // Acknowledge the producers if there are no pending acks
         logger.finest("Acknowledging the producers.");
         pairs.forEach(pair -> pair.getUpdateProducer().notifyUpdateFinished());
       }
+
       // Release locks, if needed
       if ((Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
           Consts.consistencyType == ConsistencyType.ATOMIC) && //
@@ -153,6 +160,36 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 
   public T get() {
     return val;
+  }
+
+  public T atomicGet() {
+    acquireLock();
+    // TODO: this should actually be a copy of the object
+    final T currentVal = val;
+    releaseLock();
+    return currentVal;
+  }
+
+  private final synchronized void acquireLock() {
+    if (Consts.consistencyType != ConsistencyType.ATOMIC) {
+      return;
+    }
+    clientEventForwarder.sendReadOnlyLockRequest(object + "@" + host, this);
+    while (lockID == null) {
+      try {
+        wait();
+      } catch (final InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private final synchronized void releaseLock() {
+    if (Consts.consistencyType != ConsistencyType.ATOMIC) {
+      return;
+    }
+    clientEventForwarder.sendLockRelease(lockID);
+    lockID = null;
   }
 
   @Override
@@ -201,6 +238,12 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
   @Override
   public List<SerializablePredicate> getConstraints() {
     return constraints;
+  }
+
+  @Override
+  public final synchronized void notifyLockGranted(LockGrantPacket lockGrant) {
+    lockID = lockGrant.getLockID();
+    notifyAll();
   }
 
 }

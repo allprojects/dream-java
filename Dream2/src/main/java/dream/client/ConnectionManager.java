@@ -42,8 +42,8 @@ class ConnectionManager implements PacketForwarder {
   private final Overlay overlay;
   private final GenericRouter router;
 
-  private NodeDescriptor server;
-  private NodeDescriptor lockManager;
+  private NodeDescriptor server = null;
+  private NodeDescriptor lockManager = null;
 
   private final Queue<PacketSubjectPair> serverQueue = new LinkedList<>();
   private final Queue<PacketSubjectPair> lockManagerQueue = new LinkedList<>();
@@ -144,7 +144,7 @@ class ConnectionManager implements PacketForwarder {
   }
 
   private final void sendToLockManager(String subject, Serializable packet) {
-    if (server == null) {
+    if (lockManager == null) {
       lockManagerQueue.add(new PacketSubjectPair(subject, packet));
     } else {
       try {

@@ -8,6 +8,7 @@ import dream.common.utils.CompleteGlitchFreeDependencyDetectorTest;
 import dream.common.utils.DependencyGraphUtilsTest;
 import dream.common.utils.FinalNodesDetectorTest;
 import dream.common.utils.IntraSourceDependencyDetectorTest;
+import dream.locking.LockManagerTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ //
@@ -16,6 +17,7 @@ import dream.common.utils.IntraSourceDependencyDetectorTest;
     CompleteGlitchFreeDependencyDetectorTest.class, //
     AtomicDependencyDetectorTest.class, //
     FinalNodesDetectorTest.class, //
+    LockManagerTest.class, //
     LocalTest.class })
 
 public class RegressionTests {

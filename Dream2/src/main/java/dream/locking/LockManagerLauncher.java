@@ -32,6 +32,7 @@ public class LockManagerLauncher implements NeighborhoodChangeListener {
     final LockManagerForwarder forwarder = new LockManagerForwarder();
     router.setPacketForwarder(LockRequestPacket.subject, forwarder);
     router.setPacketForwarder(LockReleasePacket.subject, forwarder);
+    overlay.addNeighborhoodChangeListener(this);
   }
 
   public static final void start() {

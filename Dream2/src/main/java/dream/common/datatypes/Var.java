@@ -18,7 +18,6 @@ import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.locking.LockGrantPacket;
-import dream.common.packets.locking.LockType;
 
 public class Var<T extends Serializable> implements UpdateProducer<T>, LockApplicant {
   protected final ClientEventForwarder forwarder;
@@ -80,7 +79,7 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
       // possibly need to acquire a lock before processing the update
       if (Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
           Consts.consistencyType == ConsistencyType.ATOMIC) {
-        final boolean lockRequired = forwarder.sentLockRequest(object + "@" + host, this, LockType.READ_WRITE);
+        final boolean lockRequired = forwarder.sendReadWriteLockRequest(object + "@" + host, this);
         if (!lockRequired) {
           processNextUpdate(UUID.randomUUID());
         }
@@ -105,7 +104,9 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 
     // Propagate modification to local and remote subscribers
     final Event<? extends Serializable> ev = new Event(Consts.hostName, object, val);
-    final EventPacket packet = new EventPacket(ev, eventId, ev.getSignature());
+    final String source = ev.getSignature();
+    final EventPacket packet = new EventPacket(ev, eventId, source);
+    packet.setLockReleaseNodes(forwarder.getLockReleaseNodesFor(source));
 
     pendingAcks = consumers.size();
     consumers.forEach(c -> c.updateFromProducer(packet, this));

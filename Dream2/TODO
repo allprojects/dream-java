@@ -1,4 +1,4 @@
-- Filters are not properly implemented
+- Filters not tested and working only with causal consistency
 
 - Currently, atomic consistency requires accessing a time changing 
   variable using a separate atomic get method. This is necessary to

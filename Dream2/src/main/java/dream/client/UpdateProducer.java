@@ -16,12 +16,15 @@ public interface UpdateProducer<T> {
   void notifyUpdateFinished();
 
   /**
-   * Register a new consumer for the updates of this producer.
+   * Register a new consumer for the updates of this producer. The consumer is
+   * notified only if the given constraints are safisfied.
    *
    * @param consumer
    *          the consumer.
+   * @param constraints
+   *          the constraints.
    */
-  void registerUpdateConsumer(UpdateConsumer consumer);
+  void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate> constraints);
 
   /**
    * Unregister the consumer from the updates of this producer.

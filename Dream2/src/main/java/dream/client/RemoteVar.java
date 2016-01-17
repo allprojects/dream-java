@@ -2,11 +2,13 @@ package dream.client;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import dream.common.Consts;
 import dream.common.SerializablePredicate;
@@ -17,7 +19,7 @@ public class RemoteVar<T> implements Subscriber, UpdateProducer<T> {
   private T val;
 
   private final ClientEventForwarder forwarder;
-  private final Set<UpdateConsumer> consumers = new HashSet<>();
+  private final Map<UpdateConsumer, List<SerializablePredicate>> consumers = new HashMap<>();
 
   private final Queue<EventPacket> eventsQueue = new ArrayDeque<>();
   private int pendingAcks = 0;
@@ -80,8 +82,13 @@ public class RemoteVar<T> implements Subscriber, UpdateProducer<T> {
 
   private final void sendEventPacketToListeners(EventPacket evPkt) {
     if (!consumers.isEmpty()) {
-      pendingAcks = consumers.size();
-      consumers.forEach(c -> c.updateFromProducer(evPkt, this));
+      final Set<UpdateConsumer> satConsumers = //
+      consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> ((SerializablePredicate<T>) constr).test(val)))//
+          .map(e -> e.getKey())//
+          .collect(Collectors.toSet());
+
+      pendingAcks = satConsumers.size();
+      satConsumers.forEach(c -> c.updateFromProducer(evPkt, this));
     } else {
       processNextEvent();
     }
@@ -103,8 +110,8 @@ public class RemoteVar<T> implements Subscriber, UpdateProducer<T> {
   }
 
   @Override
-  public final void registerUpdateConsumer(UpdateConsumer consumer) {
-    consumers.add(consumer);
+  public final void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate> constraints) {
+    consumers.put(consumer, constraints);
   }
 
   @Override
@@ -113,8 +120,10 @@ public class RemoteVar<T> implements Subscriber, UpdateProducer<T> {
   }
 
   @Override
-  public UpdateProducer<T> filter(SerializablePredicate constraint) {
-    return this; // TODO
+  public UpdateProducer<T> filter(SerializablePredicate<T> constraint) {
+    final List<SerializablePredicate> constrList = new ArrayList<>();
+    constrList.add(constraint);
+    return new FilteredUpdateProducer<>(this, constrList);
   }
 
 }

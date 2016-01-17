@@ -19,38 +19,16 @@ public class ExampleFilter {
       e.printStackTrace();
     }
 
+    System.out.println("Expected results:");
+    System.out.println("SignalInt: 12");
+    System.out.println("SignalInt: 21");
+    System.out.println("SignalInt2: 22");
+    System.out.println();
+
     varInt.set(1);
-
-    try {
-      Thread.sleep(500);
-    } catch (final InterruptedException e) {
-      e.printStackTrace();
-    }
-
     varInt.set(2);
-
-    try {
-      Thread.sleep(500);
-    } catch (final InterruptedException e) {
-      e.printStackTrace();
-    }
-
     varInt.set(11);
-
-    try {
-      Thread.sleep(500);
-    } catch (final InterruptedException e) {
-      e.printStackTrace();
-    }
-
     varInt.set(20);
-
-    try {
-      Thread.sleep(500);
-    } catch (final InterruptedException e) {
-      e.printStackTrace();
-    }
-
     varInt.set(10);
 
   }

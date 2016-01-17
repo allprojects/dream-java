@@ -174,9 +174,14 @@ class ClientEventForwarder implements PacketForwarder {
   }
 
   final Set<String> getLockReleaseNodesFor(String source) {
-    return Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE //
-        ? interDepDetector.getNodesToLockFor(source) //
-        : finalNodesDetector.getFinalNodesFor(source);
+    switch (Consts.consistencyType) {
+    case COMPLETE_GLITCH_FREE:
+      return interDepDetector.getNodesToLockFor(source);
+    case ATOMIC:
+      return finalNodesDetector.getFinalNodesFor(source);
+    default:
+      return new HashSet<>();
+    }
   }
 
   final void sendLockRelease(UUID lockID) {

@@ -3,13 +3,16 @@ package dream.client;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import dream.common.ConsistencyType;
 import dream.common.Consts;
@@ -24,7 +27,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
   private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<>();
 
   // Management of local subscribers
-  private final Set<UpdateConsumer> consumers = new HashSet<>();
+  private final Map<UpdateConsumer, List<SerializablePredicate>> consumers = new HashMap<>();
   private final Queue<EventProducerPair> eventQueue = new ArrayDeque<>();
   private int pendingAcks = 0;
   private final Set<UpdateProducer> waitingProducers = new HashSet<>();
@@ -51,27 +54,12 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 
     final Set<Subscription> subs = new HashSet<>();
     for (final UpdateProducer prod : prods) {
-      prod.registerUpdateConsumer(this);
+      prod.registerUpdateConsumer(this, prod.getConstraints());
       subs.add(new Subscription(prod.getHost(), prod.getObject(), prod.getConstraints()));
     }
 
     clientEventForwarder = ClientEventForwarder.get();
     clientEventForwarder.advertise(new Advertisement(Consts.hostName, object), subs, true);
-  }
-
-  /**
-   * Private constructor used only for filters. Does not send advertisements and
-   * does not retain any value.
-   */
-  private Signal(Signal<T> copy, SerializablePredicate constraint) {
-    this.host = copy.host;
-    this.object = copy.object;
-    this.evaluation = null;
-    this.val = null;
-    clientEventForwarder = ClientEventForwarder.get();
-
-    constraints.addAll(copy.constraints);
-    constraints.add(constraint);
   }
 
   private final synchronized void processNextUpdate() {
@@ -123,13 +111,18 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
       final Event<T> event = new Event<T>(Consts.hostName, object, val);
       // Notify remote subscribers
       clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getSource());
+
+      final Set<UpdateConsumer> satConsumers = //
+      consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> ((SerializablePredicate<T>) constr).test(val)))//
+          .map(e -> e.getKey())//
+          .collect(Collectors.toSet());
       // Notify local subscribers
-      if (!consumers.isEmpty()) {
+      if (!satConsumers.isEmpty()) {
         pairs.forEach(pair -> waitingProducers.add(pair.getUpdateProducer()));
-        pendingAcks = consumers.size();
         final EventPacket newEvPkt = new EventPacket(event, anyPkt.getId(), anyPkt.getSource());
         newEvPkt.setLockReleaseNodes(anyPkt.getLockReleaseNodes());
-        consumers.forEach(c -> c.updateFromProducer(newEvPkt, this));
+        pendingAcks = satConsumers.size();
+        satConsumers.forEach(c -> c.updateFromProducer(newEvPkt, this));
       } else {
         // Acknowledge the producers if there are no pending acks
         logger.finest("Acknowledging the producers.");
@@ -199,7 +192,9 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 
   @Override
   public UpdateProducer<T> filter(SerializablePredicate<T> constraint) {
-    return new Signal<T>(this, constraint);
+    final List<SerializablePredicate> constrList = new ArrayList<>();
+    constrList.add(constraint);
+    return new FilteredUpdateProducer<>(this, constrList);
   }
 
   @Override
@@ -221,8 +216,8 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
   }
 
   @Override
-  public void registerUpdateConsumer(UpdateConsumer consumer) {
-    consumers.add(consumer);
+  public void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate> constraints) {
+    consumers.put(consumer, constraints);
   }
 
   @Override

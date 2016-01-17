@@ -3,13 +3,15 @@ package dream.client;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import dream.common.ConsistencyType;
 import dream.common.Consts;
@@ -26,7 +28,7 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
   private final String object;
   private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
 
-  private final Set<UpdateConsumer> consumers = new HashSet<>();
+  private final Map<UpdateConsumer, List<SerializablePredicate>> consumers = new HashMap<>();
   private final Queue<Object> waitingModifications = new ArrayDeque<>();
   private int pendingAcks = 0;
 
@@ -38,19 +40,6 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
     this.object = object;
     this.val = val;
     forwarder.advertise(new Advertisement(Consts.hostName, object), true);
-  }
-
-  /**
-   * Private constructor used only for filters. Does not send advertisements and
-   * does not retain any value.
-   */
-  private Var(Var<T> copy, SerializablePredicate<T> constraint) {
-    this.forwarder = ClientEventForwarder.get();
-    this.host = copy.host;
-    this.object = copy.object;
-    this.val = null;
-    constraints.addAll(copy.constraints);
-    constraints.add(constraint);
   }
 
   public final synchronized void set(T val) {
@@ -108,15 +97,22 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
     final EventPacket packet = new EventPacket(ev, eventId, source);
     packet.setLockReleaseNodes(forwarder.getLockReleaseNodesFor(source));
 
-    pendingAcks = consumers.size();
-    consumers.forEach(c -> c.updateFromProducer(packet, this));
+    final Set<UpdateConsumer> satConsumers = //
+    consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> ((SerializablePredicate<T>) constr).test(val)))//
+        .map(e -> e.getKey())//
+        .collect(Collectors.toSet());
+
+    pendingAcks = satConsumers.size();
+    satConsumers.forEach(c -> c.updateFromProducer(packet, this));
 
     forwarder.sendEvent(eventId, ev, ev.getSignature());
   }
 
   @Override
   public UpdateProducer<T> filter(SerializablePredicate<T> constraint) {
-    return new Var<T>(this, constraint);
+    final List<SerializablePredicate> constrList = new ArrayList<>();
+    constrList.add(constraint);
+    return new FilteredUpdateProducer<>(this, constrList);
   }
 
   @Override
@@ -126,8 +122,8 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
   }
 
   @Override
-  public void registerUpdateConsumer(UpdateConsumer consumer) {
-    consumers.add(consumer);
+  public void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate> constraints) {
+    consumers.put(consumer, constraints);
   }
 
   @Override

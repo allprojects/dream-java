@@ -18,3 +18,7 @@
 - Can we consider methods with parameters?
 
 - Can we define constraints on the return values of methods?
+
+- Currently, clients only receive advertisements sent after they
+  connected to the network of brokers. We should implement a setup
+  phase used by the clients to download the current advertisements.

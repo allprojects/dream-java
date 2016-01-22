@@ -21,7 +21,6 @@ public class LockManagerForwarder extends BasePeerlet {
   @Override
   public void init(Peer peer) {
     super.init(peer);
-    // TODO: connect to clients?
   }
 
   @Override

@@ -245,28 +245,8 @@ class ClientEventForwarder extends BasePeerlet {
   }
 
   private final void processAdvertisementFromServer(AdvertisementPacket advPkt) {
-    if (conf.consistencyType == DreamConfiguration.SINGLE_SOURCE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.ATOMIC) {
-      final Set<Subscription> subs = advPkt.getSubscriptions();
-      switch (advPkt.getAdvType()) {
-      case ADV:
-        if (subs.isEmpty()) {
-          dependencyGraph.processAdv(advPkt.getAdvertisement());
-        } else {
-          dependencyGraph.processAdv(advPkt.getAdvertisement(), subs);
-        }
-        break;
-      case UNADV:
-        if (subs.isEmpty()) {
-          dependencyGraph.processUnAdv(advPkt.getAdvertisement());
-        } else {
-          dependencyGraph.processUnAdv(advPkt.getAdvertisement(), subs);
-        }
-        break;
-      }
-      updateDetectors();
-    }
+    // Nothing to do: in the simulation the update detectors are implemented as
+    // a singleton object shared between nodes
   }
 
   private final void processSubscriptionFromServer(SubscriptionPacket subPkt) {

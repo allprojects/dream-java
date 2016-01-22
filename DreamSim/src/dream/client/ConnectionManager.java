@@ -26,7 +26,7 @@ import protopeer.network.NetworkAddress;
 
 class ConnectionManager extends BasePeerlet {
   private NetworkAddress server = null;
-  private final NetworkAddress lockManager = null;
+  private NetworkAddress lockManager = null;
   private DreamConfiguration conf;
 
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -44,7 +44,11 @@ class ConnectionManager extends BasePeerlet {
         break;
       }
     }
+    lockManager = Experiment.getSingleton().getAddressToBindTo(conf.numberOfBrokers + conf.numberOfClients + 1);
     if (server == null) {
+      logger.warning("server is null");
+    }
+    if (lockManager == null) {
       logger.warning("server is null");
     }
   }

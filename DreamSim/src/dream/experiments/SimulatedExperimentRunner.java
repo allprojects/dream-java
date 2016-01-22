@@ -181,9 +181,10 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     numPeers += DreamConfiguration.get().numberOfClients;
 
     // Init the lock manager
-    if (DreamConfiguration.get().consistencyType == DreamConfiguration.ATOMIC) {
-      final PeerFactory tokenServiceFactory = new LockManagerFactory();
-      experiment.initPeers(numPeers + 1, 1, tokenServiceFactory);
+    if (DreamConfiguration.get().consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
+        DreamConfiguration.get().consistencyType == DreamConfiguration.ATOMIC) {
+      final PeerFactory lockManagerFactory = new LockManagerFactory();
+      experiment.initPeers(numPeers + 1, 1, lockManagerFactory);
       numPeers++;
     }
 

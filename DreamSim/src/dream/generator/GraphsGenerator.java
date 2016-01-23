@@ -2,6 +2,7 @@ package dream.generator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import dream.experiments.DreamConfiguration;
 
@@ -26,13 +27,13 @@ public class GraphsGenerator {
 
   public final void generateGraphs(int id) {
     // Only the first client triggers a graph generation
-    if (id != 0) {
-      return;
-    }
-    for (int i = 0; i < DreamConfiguration.get().numGraphs; i++) {
-      final GraphGenerator graphGen = new GraphGenerator(i);
-      graphGen.generateGraph();
-      generators.add(graphGen);
+    if (id == 0) {
+      IntStream.range(0, DreamConfiguration.get().numGraphs)//
+          .mapToObj(GraphGenerator::new)//
+          .forEach(graphGen -> {
+            graphGen.generateGraph();
+            generators.add(graphGen);
+          });
     }
   }
 

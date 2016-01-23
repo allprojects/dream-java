@@ -20,10 +20,7 @@ import dream.common.packets.locking.LockRequestPacket;
 import dream.common.packets.locking.LockType;
 import dream.common.utils.AtomicDependencyDetector;
 import dream.common.utils.CompleteGlitchFreeDependencyDetector;
-import dream.common.utils.DependencyGraph;
 import dream.common.utils.FinalNodesDetector;
-import dream.common.utils.InterSourceDependencyDetector;
-import dream.common.utils.IntraSourceDependencyDetector;
 import dream.experiments.DreamConfiguration;
 import protopeer.BasePeerlet;
 import protopeer.Peer;
@@ -35,15 +32,11 @@ class ClientEventForwarder extends BasePeerlet {
   private ConnectionManager connectionManager;
   private final ClientSubscriptionTable subTable = new ClientSubscriptionTable();
   private DreamConfiguration conf;
-  private final double timeBeforeSendingSubscriptionsInSeconds = 10;
-
-  // Dependency graph
-  private final DependencyGraph dependencyGraph = DependencyGraph.instance;
 
   // Dependency detectors
-  private IntraSourceDependencyDetector intraDepDetector;
-  private InterSourceDependencyDetector interDepDetector;
-  private FinalNodesDetector finalNodesDetector;
+  private final CompleteGlitchFreeDependencyDetector completeGlitchDepDetector = CompleteGlitchFreeDependencyDetector.instance;
+  private final AtomicDependencyDetector atomicDepDetector = AtomicDependencyDetector.instance;
+  private final FinalNodesDetector finalNodesDetector = FinalNodesDetector.instance;
 
   // Lock applicants waiting for a grant
   private final Map<UUID, LockApplicant> lockApplicants = new HashMap<>();
@@ -55,13 +48,6 @@ class ClientEventForwarder extends BasePeerlet {
     super.init(peer);
     conf = DreamConfiguration.get();
     connectionManager = (ConnectionManager) peer.getPeerletOfType(ConnectionManager.class);
-
-    intraDepDetector = IntraSourceDependencyDetector.instance;
-    interDepDetector = //
-    conf.consistencyType == DreamConfiguration.ATOMIC //
-        ? new AtomicDependencyDetector() //
-        : new CompleteGlitchFreeDependencyDetector();
-    finalNodesDetector = new FinalNodesDetector();
   }
 
   @Override
@@ -86,7 +72,7 @@ class ClientEventForwarder extends BasePeerlet {
     Set<String> lockReleaseNodes;
     switch (conf.consistencyType) {
     case DreamConfiguration.COMPLETE_GLITCH_FREE:
-      lockReleaseNodes = interDepDetector.getNodesToLockFor(initialVar);
+      lockReleaseNodes = completeGlitchDepDetector.getNodesToLockFor(initialVar);
       break;
     case DreamConfiguration.ATOMIC:
       lockReleaseNodes = finalNodesDetector.getFinalNodesFor(initialVar);
@@ -95,8 +81,11 @@ class ClientEventForwarder extends BasePeerlet {
       lockReleaseNodes = new HashSet<>();
     }
 
+    final EventPacket evPkt = new EventPacket(ev, id, creationTime, initialVar);
+    evPkt.setLockReleaseNodes(lockReleaseNodes);
+    subTable.getMatchingSubscribers(ev).forEach(s -> s.notifyEventReceived(evPkt));
     if (subTable.needsToDeliverToServer(ev)) {
-      connectionManager.sendEvent(id, ev, initialVar, creationTime, lockReleaseNodes);
+      connectionManager.sendEvent(evPkt);
     }
   }
 
@@ -133,7 +122,10 @@ class ClientEventForwarder extends BasePeerlet {
     }
 
     logger.finer("Invoked sendReadWriteLockRequest for source " + source);
-    final Set<String> nodesToLock = interDepDetector.getNodesToLockFor(source);
+    final Set<String> nodesToLock = //
+    conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE //
+        ? completeGlitchDepDetector.getNodesToLockFor(source) //
+        : atomicDepDetector.getNodesToLockFor(source);
     final Set<String> releaseNodes = getLockReleaseNodesFor(source);
 
     if (nodesToLock.isEmpty()) {
@@ -151,7 +143,7 @@ class ClientEventForwarder extends BasePeerlet {
   final Set<String> getLockReleaseNodesFor(String source) {
     switch (conf.consistencyType) {
     case DreamConfiguration.COMPLETE_GLITCH_FREE:
-      return interDepDetector.getNodesToLockFor(source);
+      return completeGlitchDepDetector.getNodesToLockFor(source);
     case DreamConfiguration.ATOMIC:
       return finalNodesDetector.getFinalNodesFor(source);
     default:
@@ -172,45 +164,21 @@ class ClientEventForwarder extends BasePeerlet {
 
   final void advertise(Advertisement adv) {
     logger.fine("Sending advertisement " + adv);
-    if (conf.consistencyType == DreamConfiguration.SINGLE_SOURCE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.ATOMIC) {
-      dependencyGraph.processAdv(adv);
-      updateDetectors();
-    }
     connectionManager.sendAdvertisement(adv);
   }
 
   final void unadvertise(Advertisement adv) {
     logger.fine("Sending unadvertisement " + adv);
-    if (conf.consistencyType == DreamConfiguration.SINGLE_SOURCE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.ATOMIC) {
-      dependencyGraph.processUnAdv(adv);
-      updateDetectors();
-    }
     connectionManager.sendUnadvertisement(adv);
   }
 
   final void advertise(Advertisement adv, Set<Subscription> subs) {
     logger.fine("Sending advertisement " + adv + " with subscriptions " + subs);
-    if (conf.consistencyType == DreamConfiguration.SINGLE_SOURCE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.ATOMIC) {
-      dependencyGraph.processAdv(adv, subs);
-      updateDetectors();
-    }
     connectionManager.sendAdvertisement(adv, subs);
   }
 
   final void unadvertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
     logger.fine("Sending unadvertisement " + adv + " with subscriptions " + subs);
-    if (conf.consistencyType == DreamConfiguration.SINGLE_SOURCE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
-        conf.consistencyType == DreamConfiguration.ATOMIC) {
-      dependencyGraph.processUnAdv(adv, subs);
-      updateDetectors();
-    }
     connectionManager.sendUnadvertisement(adv);
   }
 
@@ -222,7 +190,7 @@ class ClientEventForwarder extends BasePeerlet {
       timer.addTimerListener(t -> {
         connectionManager.sendSubscription(subscription);
       });
-      timer.schedule(Time.inSeconds(timeBeforeSendingSubscriptionsInSeconds));
+      timer.schedule(Time.inSeconds(Consts.delayBeforeSendingSubscriptions));
     }
   }
 
@@ -267,12 +235,6 @@ class ClientEventForwarder extends BasePeerlet {
     assert lockApplicants.containsKey(lockID);
     final LockApplicant applicant = lockApplicants.remove(lockID);
     applicant.notifyLockGranted(lockGrant);
-  }
-
-  private final void updateDetectors() {
-    finalNodesDetector.consolidate();
-    intraDepDetector.consolidate();
-    interDepDetector.consolidate();
   }
 
 }

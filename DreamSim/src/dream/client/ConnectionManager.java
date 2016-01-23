@@ -1,7 +1,6 @@
 package dream.client;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import dream.common.packets.AdvertisementPacket;
@@ -9,7 +8,6 @@ import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
 import dream.common.packets.content.AdvType;
 import dream.common.packets.content.Advertisement;
-import dream.common.packets.content.Event;
 import dream.common.packets.content.SubType;
 import dream.common.packets.content.Subscription;
 import dream.common.packets.locking.LockReleasePacket;
@@ -53,9 +51,7 @@ class ConnectionManager extends BasePeerlet {
     }
   }
 
-  final void sendEvent(UUID id, Event event, String initialVar, double creationTime, Set<String> lockReleaseNodes) {
-    final EventPacket pkt = new EventPacket(event, id, creationTime, initialVar);
-    pkt.setLockReleaseNodes(lockReleaseNodes);
+  final void sendEvent(EventPacket pkt) {
     sendToServer(EventPacket.subject, pkt);
   }
 

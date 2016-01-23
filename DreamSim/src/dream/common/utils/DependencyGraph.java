@@ -5,10 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import dream.common.packets.content.Advertisement;
-import dream.common.packets.content.Subscription;
 
 public enum DependencyGraph {
   instance;
@@ -23,26 +19,13 @@ public enum DependencyGraph {
     sources.clear();
   }
 
-  public synchronized final void processAdv(Advertisement adv) {
-    final String advSignature = adv.getSignature();
-    sources.add(advSignature);
+  public synchronized final void addVar(String name) {
+    sources.add(name);
   }
 
-  public synchronized final void processAdv(Advertisement adv, Set<Subscription> subs) {
-    final String advSignature = adv.getSignature();
-    assert!subs.isEmpty();
-    final Set<String> subSignatures = subs.stream().//
-        map(sub -> sub.getSignature()).//
-        collect(Collectors.toSet());
-    graph.put(advSignature, subSignatures);
-  }
-
-  public synchronized final void processUnAdv(Advertisement adv) {
-    // TODO manage unadvertisements
-  }
-
-  public synchronized final void processUnAdv(Advertisement adv, Set<Subscription> subs) {
-    // TODO manage unadvertisements
+  public synchronized final void addSignal(String name, Collection<String> deps) {
+    assert!deps.isEmpty();
+    graph.put(name, deps);
   }
 
   public synchronized final Map<String, Collection<String>> getGraph() {

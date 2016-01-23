@@ -46,24 +46,28 @@ public class Var implements LockApplicant {
           conf.consistencyType == DreamConfiguration.ATOMIC) {
         final boolean lockRequired = forwarder.sendReadWriteLockRequest(object + "@" + host, this);
         if (!lockRequired) {
-          final EventPacket p = pendingEvents.poll();
-          forwarder.sendEvent(p.getId(), p.getEvent(), p.getCreationTime(), p.getSource());
+          sendNextEventPacket();
           processNextEvent();
         }
       }
       // Otherwise the update can be immediately processed
       else {
-        final EventPacket p = pendingEvents.poll();
-        forwarder.sendEvent(p.getId(), p.getEvent(), p.getCreationTime(), p.getSource());
+        sendNextEventPacket();
         processNextEvent();
       }
     }
   }
 
+  private final void sendNextEventPacket() {
+    assert!pendingEvents.isEmpty();
+    final EventPacket p = pendingEvents.poll();
+    forwarder.sendEvent(p.getId(), p.getEvent(), p.getCreationTime(), p.getSource());
+  }
+
   @Override
   public void notifyLockGranted(LockGrantPacket lockGrant) {
     assert!pendingEvents.isEmpty() && pendingEvents.peek().getId().equals(lockGrant.getLockID());
-    processNextEvent();
+    sendNextEventPacket();
   }
 
   private final EventPacket generateEventPacket(UUID eventId) {

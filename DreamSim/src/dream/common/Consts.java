@@ -13,12 +13,11 @@ public final class Consts {
   public static final String hostPrefix = "host";
   public static final String objPrefix = "obj";
 
-  public static final double startTokenServiceAdvertiseAtSecond = 1;
-  public static final double startRegistryAdvertiseAtSecond = 2;
-  public static final double startGraphCreationAtSecond = 3;
-  public static final double registerToGraphsGeneratorAtSecond = 4;
-  public static final double startNotifyGraphsAtSecond = 5;
-  public static final double startSendingEventsAtSecond = 6;
+  public static final double startGraphCreationAtSecond = 1;
+  public static final double registerToGraphsGeneratorAtSecond = 2;
+  public static final double startNotifyGraphsAtSecond = 3;
+  public static final double delayBeforeSendingSubscriptions = 1;
+  public static final double startSendingEventsAtSecond = 10;
 
   static {
     /**

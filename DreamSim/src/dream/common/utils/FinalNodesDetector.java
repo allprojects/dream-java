@@ -10,7 +10,9 @@ import java.util.Set;
  * for each source, that is to say the set of nodes that are reachable from a
  * given source and do not have any other node that deoends on them.
  */
-public final class FinalNodesDetector {
+public enum FinalNodesDetector {
+  instance;
+
   DependencyGraph depGraph = DependencyGraph.instance;
 
   // Source -> set of final nodes

@@ -10,6 +10,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import dream.common.Consts;
+import dream.common.utils.AtomicDependencyDetector;
+import dream.common.utils.CompleteGlitchFreeDependencyDetector;
+import dream.common.utils.DependencyGraph;
+import dream.common.utils.FinalNodesDetector;
+import dream.common.utils.IntraSourceDependencyDetector;
 import dream.experiments.DreamConfiguration;
 
 class GraphGenerator {
@@ -19,7 +24,7 @@ class GraphGenerator {
   private final int graphId;
   private int count;
 
-  // Node -> List of nodes it depends from
+  // Node -> List of nodes it depends on
   private final Map<String, List<String>> dependencyMap = new HashMap<>();
   private final List<String> existingNodes = new ArrayList<>();
 
@@ -48,6 +53,21 @@ class GraphGenerator {
   }
 
   final void notifyListeners() {
+    // Consolidates the data structures used during the processing of the events
+    final DependencyGraph graph = DependencyGraph.instance;
+    existingNodes.forEach(node -> {
+      final List<String> deps = dependencyMap.get(node);
+      if (deps.isEmpty()) {
+        graph.addVar(node);
+      } else {
+        graph.addSignal(node, deps);
+      }
+    });
+    IntraSourceDependencyDetector.instance.consolidate();
+    CompleteGlitchFreeDependencyDetector.instance.consolidate();
+    AtomicDependencyDetector.instance.consolidate();
+    FinalNodesDetector.instance.consolidate();
+
     // Guarantees that existing nodes are iterated in insertion order
     existingNodes.forEach(node -> {
       final boolean isVar = dependencyMap.get(node).isEmpty();

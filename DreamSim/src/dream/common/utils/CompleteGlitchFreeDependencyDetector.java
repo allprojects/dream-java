@@ -16,15 +16,28 @@ import java.util.stream.Collectors;
  * depends on both s and another source s'; (2) there is another node n' that
  * depends on both s and s'.
  */
-public class CompleteGlitchFreeDependencyDetector extends InterSourceDependencyDetector {
+public enum CompleteGlitchFreeDependencyDetector {
+  instance;
+
   private final Map<String, Set<String>> sharedExpressions = new HashMap<>();
 
-  @Override
-  public final void computeDataStructs() {
+  protected final DependencyGraph graph = DependencyGraph.instance;
+
+  protected Map<String, Set<String>> dependencyClosure = new HashMap<>();
+
+  public final void consolidate() {
+    dependencyClosure = DependencyGraphUtils.computeDependencyClosure();
     computeSharedExpressions();
   }
 
-  @Override
+  /**
+   * Returns the nodes that require to be locked during the propagation of an
+   * update originated at the given source.
+   *
+   * @param source
+   *          the source.
+   * @return the nodes that need to be locked during the propagation.
+   */
   public final synchronized Set<String> getNodesToLockFor(String source) {
     return sharedExpressions.containsKey(source) ? //
         sharedExpressions.get(source)

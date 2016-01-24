@@ -3,4 +3,4 @@
    
 2) Enable simultaneous updates from multiple sources. [DONE]
 
-3) Implement read locks for atomic consistency.
+3) Implement read locks for atomic consistency. [DONE]

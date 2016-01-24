@@ -120,13 +120,28 @@ public class DreamConfiguration extends Configuration {
   public double locality;
 
   /**
-   * Min time between two events in a client
+   * Min time between two updates to a var
    */
   public int minTimeBetweenEventsInMs;
 
   /**
-   * Max time between two events in a client
+   * Max time between two updates to a var
    */
   public int maxTimeBetweenEventsInMs;
+
+  /**
+   * Min time between two reads of a signal
+   */
+  public int minTimeBetweenSignalReadsInMs;
+
+  /**
+   * Max time between two reads of a signal
+   */
+  public int maxTimeBetweenSignalReadsInMs;
+
+  /**
+   * Duration of a read lock (how long the lock is retained)
+   */
+  public int readLockDurationInMs;
 
 }

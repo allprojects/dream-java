@@ -13,6 +13,8 @@ import dream.common.packets.locking.LockGrantPacket;
 import dream.experiments.DreamConfiguration;
 import dream.measurement.MeasurementLogger;
 import protopeer.Peer;
+import protopeer.time.Timer;
+import protopeer.util.quantities.Time;
 
 public class Signal implements LockApplicant, Subscriber {
   private final ClientEventForwarder forwarder;
@@ -93,8 +95,10 @@ public class Signal implements LockApplicant, Subscriber {
   @Override
   public final synchronized void notifyLockGranted(LockGrantPacket lockGrant) {
     final UUID lockID = lockGrant.getLockID();
-    // TODO: properly implement delay
-    releaseLock(lockID);
+    final int lockDuration = DreamConfiguration.get().readLockDurationInMs;
+    final Timer timer = peer.getClock().createNewTimer();
+    timer.addTimerListener(t -> releaseLock(lockID));
+    timer.schedule(Time.inMilliseconds(lockDuration));
   }
 
 }

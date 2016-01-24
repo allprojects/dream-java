@@ -18,6 +18,7 @@ public final class Consts {
   public static final double startNotifyGraphsAtSecond = 3;
   public static final double delayBeforeSendingSubscriptions = 1;
   public static final double startSendingEventsAtSecond = 10;
+  public static final double startReadingSignalsAtSecond = 10;
 
   static {
     /**

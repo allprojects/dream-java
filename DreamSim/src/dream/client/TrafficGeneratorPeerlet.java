@@ -41,7 +41,7 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
 
     timer.addTimerListener(t -> {
       var.modify();
-      t.schedule(Time.inMilliseconds(getUpdateTimeInMs()));
+      t.schedule(Time.inMilliseconds(getTimeBetweenVarUpdateInMs()));
     });
 
     timer.schedule(Time.inSeconds(Consts.startSendingEventsAtSecond));
@@ -52,7 +52,18 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     final Set<Subscription> subs = dependencies.stream()//
         .map(dep -> new Subscription(dep.split("@")[1], dep.split("@")[0]))//
         .collect(Collectors.toSet());
-    new Signal(getPeer(), signalName.split("@")[1], signalName.split("@")[0], subs);
+    final Signal s = new Signal(getPeer(), signalName.split("@")[1], signalName.split("@")[0], subs);
+
+    if (DreamConfiguration.get().consistencyType == DreamConfiguration.ATOMIC) {
+      final Timer timer = getPeer().getClock().createNewTimer();
+
+      timer.addTimerListener(t -> {
+        s.atomicRead();
+        t.schedule(Time.inMilliseconds(getTimeBetweenSignalReadInMs()));
+      });
+
+      timer.schedule(Time.inSeconds(Consts.startReadingSignalsAtSecond));
+    }
   }
 
   public int getClientId() {
@@ -83,11 +94,19 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     notifyGraphsTimer.schedule(Time.inSeconds(Consts.startNotifyGraphsAtSecond));
   }
 
-  private final double getUpdateTimeInMs() {
+  private final double getTimeBetweenVarUpdateInMs() {
     final DreamConfiguration conf = DreamConfiguration.get();
     final Random rand = RandomGenerator.get();
     final int minTime = conf.minTimeBetweenEventsInMs;
     final int maxTime = conf.maxTimeBetweenEventsInMs;
+    return minTime == maxTime ? maxTime : minTime + rand.nextInt(maxTime - minTime);
+  }
+
+  private final double getTimeBetweenSignalReadInMs() {
+    final DreamConfiguration conf = DreamConfiguration.get();
+    final Random rand = RandomGenerator.get();
+    final int minTime = conf.minTimeBetweenSignalReadsInMs;
+    final int maxTime = conf.maxTimeBetweenSignalReadsInMs;
     return minTime == maxTime ? maxTime : minTime + rand.nextInt(maxTime - minTime);
   }
 

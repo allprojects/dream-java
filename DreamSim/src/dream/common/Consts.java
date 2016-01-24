@@ -15,7 +15,7 @@ public final class Consts {
 
   public static final double startGraphCreationAtSecond = 1;
   public static final double registerToGraphsGeneratorAtSecond = 2;
-  public static final double startNotifyGraphsAtSecond = 3;
+  public static final double startNotifyGraphAtSecond = 3;
   public static final double delayBeforeSendingSubscriptions = 1;
   public static final double startSendingEventsAtSecond = 10;
   public static final double startReadingSignalsAtSecond = 10;

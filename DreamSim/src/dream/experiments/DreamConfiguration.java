@@ -96,28 +96,30 @@ public class DreamConfiguration extends Configuration {
   public int consistencyType;
 
   /**
-   * Number of reactive graphs
+   * Number of sources (vars) in the dependency graph
    */
-  public int numGraphs;
+  public int graphNumSources;
 
   /**
-   * Number of nodes per graph
+   * Number of inner nodes (signals) in the dependency graph
    */
-  public int numGraphNodes;
+  public int graphNumInnerNodes;
 
   /**
-   * Number of dependencies per node
+   * Minimum number of nodes a given signal depends on.
    */
-  public int numGraphDependencies;
+  public int graphMinDepPerNode;
 
   /**
-   * Locality (range 0--1).
-   *
-   * 0: an expression can involve reactive on every client.
-   *
-   * 1: an expression is entirely internal to a node.
+   * Maximum number of nodes a given signal depends on.
    */
-  public double locality;
+  public int graphMaxDepPerNode;
+
+  /**
+   * Probability for a node to share the same host with one of its dependent
+   * nodes.
+   */
+  public double graphLocality;
 
   /**
    * Min time between two updates to a var

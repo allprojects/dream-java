@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import dream.common.Consts;
 import dream.common.packets.content.Subscription;
 import dream.experiments.DreamConfiguration;
+import dream.generator.GraphGenerator;
 import dream.generator.GraphGeneratorListener;
-import dream.generator.GraphsGenerator;
 import dream.generator.RandomGenerator;
 import protopeer.BasePeerlet;
 import protopeer.Peer;
@@ -29,9 +29,9 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     super.init(peer);
     clientId = clientIdCount;
     clientIdCount++;
-    startGraphsGeneration();
-    registerToGraphsGenerator();
-    notifyGraphs();
+    startGraphGeneration();
+    registerToGraphGenerator();
+    notifyGraph();
   }
 
   @Override
@@ -70,28 +70,28 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     return clientId;
   }
 
-  private final void registerToGraphsGenerator() {
+  private final void registerToGraphGenerator() {
     final Timer registerGraphTimer = getPeer().getClock().createNewTimer();
     registerGraphTimer.addTimerListener(timer -> {
-      GraphsGenerator.get().addGraphGeneratorListener(TrafficGeneratorPeerlet.this, clientId);
+      GraphGenerator.get().addGraphGeneratorListener(TrafficGeneratorPeerlet.this, clientId);
     });
     registerGraphTimer.schedule(Time.inSeconds(Consts.registerToGraphsGeneratorAtSecond));
   }
 
-  private final void startGraphsGeneration() {
-    final Timer graphsGenTimer = getPeer().getClock().createNewTimer();
-    graphsGenTimer.addTimerListener(timer -> {
-      GraphsGenerator.get().generateGraphs(clientId);
+  private final void startGraphGeneration() {
+    final Timer graphGenTimer = getPeer().getClock().createNewTimer();
+    graphGenTimer.addTimerListener(timer -> {
+      GraphGenerator.get().generateGraphs(clientId);
     });
-    graphsGenTimer.schedule(Time.inSeconds(Consts.startGraphCreationAtSecond));
+    graphGenTimer.schedule(Time.inSeconds(Consts.startGraphCreationAtSecond));
   }
 
-  private final void notifyGraphs() {
-    final Timer notifyGraphsTimer = getPeer().getClock().createNewTimer();
-    notifyGraphsTimer.addTimerListener(timer -> {
-      GraphsGenerator.get().notifyListeners(clientId);
+  private final void notifyGraph() {
+    final Timer notifyGraphTimer = getPeer().getClock().createNewTimer();
+    notifyGraphTimer.addTimerListener(timer -> {
+      GraphGenerator.get().notifyListeners(clientId);
     });
-    notifyGraphsTimer.schedule(Time.inSeconds(Consts.startNotifyGraphsAtSecond));
+    notifyGraphTimer.schedule(Time.inSeconds(Consts.startNotifyGraphAtSecond));
   }
 
   private final double getTimeBetweenVarUpdateInMs() {

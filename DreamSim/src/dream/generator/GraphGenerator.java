@@ -1,7 +1,9 @@
 package dream.generator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -17,107 +19,105 @@ import dream.common.utils.FinalNodesDetector;
 import dream.common.utils.IntraSourceDependencyDetector;
 import dream.experiments.DreamConfiguration;
 
-class GraphGenerator {
+public class GraphGenerator {
+  private static GraphGenerator instance;
+
+  private final DependencyGraph depGraph = DependencyGraph.instance;
+  private final Set<String> existingNodes = new HashSet<>();
+
   private final DreamConfiguration config = DreamConfiguration.get();
   private final Random random = RandomGenerator.get();
 
-  private final int graphId;
-  private int count;
-
-  // Node -> List of nodes it depends on
-  private final Map<String, List<String>> dependencyMap = new HashMap<>();
-  private final List<String> existingNodes = new ArrayList<>();
-
-  // NodeId -> Associated listener
   private final Map<String, GraphGeneratorListener> listeners = new HashMap<>();
 
-  GraphGenerator(int graphId) {
-    this.graphId = graphId;
-    count = 0;
+  public static final GraphGenerator get() {
+    if (instance == null) {
+      instance = new GraphGenerator();
+    }
+    return instance;
   }
 
-  final void addGraphGeneratorListener(GraphGeneratorListener listener, int id) {
+  private GraphGenerator() {
+    // Nothing to do
+  }
+
+  public void clean() {
+    depGraph.clear();
+    existingNodes.clear();
+    listeners.clear();
+  }
+
+  public final void generateGraphs(int id) {
+    // Only the first client triggers a graph generation
+    if (id == 0) {
+      IntStream.range(0, config.graphNumSources).forEach(i -> generateVar());
+      IntStream.range(0, config.graphNumInnerNodes).forEach(i -> generateSignal());
+    }
+  }
+
+  public final void addGraphGeneratorListener(GraphGeneratorListener listener, int id) {
     final String hostName = Consts.hostPrefix + id;
     listeners.put(hostName, listener);
   }
 
-  final void removeGraphGeneratorListener(int id) {
-    listeners.remove(id);
-  }
+  public final void notifyListeners(int id) {
+    // Only the first client triggers listeners notification
+    if (id == 0) {
+      // Consolidates the data structures used during the processing of the
+      // events
+      IntraSourceDependencyDetector.instance.consolidate();
+      CompleteGlitchFreeDependencyDetector.instance.consolidate();
+      AtomicDependencyDetector.instance.consolidate();
+      FinalNodesDetector.instance.consolidate();
 
-  final void generateGraph() {
-    String previousHost = null;
-    for (int i = 0; i < config.numGraphNodes; i++) {
-      previousHost = generateNode(previousHost);
+      depGraph.getSources().forEach(s -> {
+        final String hostId = s.split("@")[1];
+        listeners.get(hostId).notifyVar(s);
+      });
+
+      depGraph.getGraph().entrySet().forEach(e -> {
+        final String name = e.getKey();
+        final String hostId = name.split("@")[1];
+        final Set<String> deps = e.getValue().stream().collect(Collectors.toSet());
+        listeners.get(hostId).notifySignal(name, deps);
+      });
     }
   }
 
-  final void notifyListeners() {
-    // Consolidates the data structures used during the processing of the events
-    final DependencyGraph graph = DependencyGraph.instance;
-    existingNodes.forEach(node -> {
-      final List<String> deps = dependencyMap.get(node);
-      if (deps.isEmpty()) {
-        graph.addVar(node);
-      } else {
-        graph.addSignal(node, deps);
-      }
-    });
-    IntraSourceDependencyDetector.instance.consolidate();
-    CompleteGlitchFreeDependencyDetector.instance.consolidate();
-    AtomicDependencyDetector.instance.consolidate();
-    FinalNodesDetector.instance.consolidate();
-
-    // Guarantees that existing nodes are iterated in insertion order
-    existingNodes.forEach(node -> {
-      final boolean isVar = dependencyMap.get(node).isEmpty();
-      final String hostId = node.split("@")[1];
-      if (isVar) {
-        listeners.get(hostId).notifyVar(node);
-      } else {
-        final Set<String> deps = dependencyMap.get(node).stream()//
-            .collect(Collectors.toSet());
-        listeners.get(hostId).notifySignal(node, deps);
-      }
-    });
-  }
-
-  private final String generateNode(String previousHost) {
-    final String hostName = selectHost(previousHost);
-    final String name = Consts.objPrefix + graphId + "x" + count;
-    count++;
-    final String node = name + "@" + hostName;
-    final List<String> dependingFrom = selectNodes();
-    dependencyMap.put(node, dependingFrom);
+  private final void generateVar() {
+    final String host = selectRandomHost();
+    final String name = Consts.objPrefix + existingNodes.size();
+    final String node = name + "@" + host;
     existingNodes.add(node);
-    return hostName;
+    depGraph.addVar(node);
   }
 
-  private final String selectHost(String previousHost) {
-    final float prob = random.nextFloat();
-    if (prob > config.locality || previousHost == null) {
-      final int id = random.nextInt(config.numberOfClients);
-      return Consts.hostPrefix + id;
-    } else {
-      return previousHost;
-    }
+  private final void generateSignal() {
+    final String name = Consts.objPrefix + existingNodes.size();
+    final Set<String> depNodes = selectDepNodes();
+    final String host = random.nextDouble() < config.graphLocality//
+        ? depNodes.stream().findAny().get().split("@")[1] //
+        : selectRandomHost();
+
+    final String node = name + "@" + host;
+    existingNodes.add(node);
+    depGraph.addSignal(node, depNodes);
   }
 
-  private final List<String> selectNodes() {
-    final List<String> result = new ArrayList<String>();
-    final int numNodesToSelect = Math.min(existingNodes.size(), config.numGraphDependencies);
-    IntStream.range(0, numNodesToSelect).forEach(i -> addNode(result));
-    return result;
+  private final Set<String> selectDepNodes() {
+    final int numDeps = config.graphMinDepPerNode + random.nextInt(config.graphMaxDepPerNode - config.graphMinDepPerNode);
+    return selectRandomNodes(numDeps);
   }
 
-  private final void addNode(List<String> selectedNodes) {
-    final int numNodes = existingNodes.size();
-    String selectedNode = null;
-    do {
-      final int nodeId = random.nextInt(numNodes);
-      selectedNode = existingNodes.get(nodeId);
-    } while (selectedNodes.contains(selectedNode));
-    selectedNodes.add(selectedNode);
+  private final Set<String> selectRandomNodes(int numNodes) {
+    final List<String> shuffleList = new ArrayList<>(existingNodes);
+    Collections.shuffle(shuffleList);
+    return shuffleList.stream().limit(numNodes).collect(Collectors.toSet());
+  }
+
+  private final String selectRandomHost() {
+    final int id = random.nextInt(config.numberOfClients);
+    return Consts.hostPrefix + id;
   }
 
 }

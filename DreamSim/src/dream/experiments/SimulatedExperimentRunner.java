@@ -2,7 +2,7 @@ package dream.experiments;
 
 import dream.client.ClientFactory;
 import dream.client.TrafficGeneratorPeerlet;
-import dream.generator.GraphsGenerator;
+import dream.generator.GraphGenerator;
 import dream.generator.RandomGenerator;
 import dream.locking.LockManagerFactory;
 import dream.measurement.MeasurementLogger;
@@ -31,19 +31,18 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
   };
 
   public final void runExperiments() {
-    // FIXME
-    runFromFile(0);
-
-    // for (int seed = 0; seed < 1; seed++) {
-    // runFromFile(seed);
-    // runDefault(seed);
-    // runDefaultCentralized(seed);
-    // runLocality(seed);
-    // runNumBrokers(seed);
-    // runNumGraphNodes(seed);
-    // runNumGraphDependencies(seed);
-    // runTimeBetweenEvents(seed);
-    // }
+    // runFromFile(0);
+    for (int seed = 0; seed < 1; seed++) {
+      runFromFile(seed);
+      runDefault(seed);
+      runDefaultCentralized(seed);
+      runLocality(seed);
+      runNumBrokers(seed);
+      runNumVars(seed);
+      runNumSignals(seed);
+      runNumGraphDependencies(seed);
+      runTimeBetweenEvents(seed);
+    }
   }
 
   private final void runFromFile(int seed) {
@@ -65,7 +64,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     loadFromFile();
     DreamConfiguration.get().seed = seed;
     DreamConfiguration.get().numberOfBrokers = 1;
-    DreamConfiguration.get().linkLength = 2;
+    DreamConfiguration.get().linkLength = 4;
     DreamConfiguration.get().minCommunicationDelayInMs *= DreamConfiguration.get().linkLength;
     DreamConfiguration.get().maxCommunicationDelayInMs *= DreamConfiguration.get().linkLength;
     for (final int i : protocols) {
@@ -79,8 +78,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (float locality = 0; locality <= 1; locality += 0.2) {
-        DreamConfiguration.get().locality = locality;
+      for (float locality = 0; locality <= 1; locality += 0.1) {
+        DreamConfiguration.get().graphLocality = locality;
         runExperiment("locality", String.valueOf(locality), getProtocolName(i));
       }
     }
@@ -91,21 +90,43 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int numBrokers = 1; numBrokers < 32; numBrokers += 5) {
+      for (int numBrokers = 2; numBrokers < 20; numBrokers += 2) {
         DreamConfiguration.get().numberOfBrokers = numBrokers;
         runExperiment("numBrokers", String.valueOf(numBrokers), getProtocolName(i));
       }
     }
   }
 
-  private final void runNumGraphNodes(int seed) {
+  private final void runNumVars(int seed) {
     loadFromFile();
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int numGraphNodes = 2; numGraphNodes <= 16; numGraphNodes += 2) {
-        DreamConfiguration.get().numGraphNodes = numGraphNodes;
-        runExperiment("numGraphNodes", String.valueOf(numGraphNodes), getProtocolName(i));
+      for (int numVars = 1; numVars <= 100;) {
+        DreamConfiguration.get().graphNumSources = numVars;
+        runExperiment("numVars", String.valueOf(numVars), getProtocolName(i));
+        if (numVars < 10) {
+          numVars += 3;
+        } else {
+          numVars += 30;
+        }
+      }
+    }
+  }
+
+  private final void runNumSignals(int seed) {
+    loadFromFile();
+    DreamConfiguration.get().seed = seed;
+    for (final int i : protocols) {
+      DreamConfiguration.get().consistencyType = i;
+      for (int numSignals = 10; numSignals <= 1000;) {
+        DreamConfiguration.get().graphNumInnerNodes = numSignals;
+        runExperiment("numSignals", String.valueOf(numSignals), getProtocolName(i));
+        if (numSignals < 100) {
+          numSignals += 30;
+        } else {
+          numSignals += 300;
+        }
       }
     }
   }
@@ -115,10 +136,10 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      DreamConfiguration.get().numGraphNodes = 10;
-      for (int numGraphDependencies = 1; numGraphDependencies <= 8; numGraphDependencies++) {
-        DreamConfiguration.get().numGraphDependencies = numGraphDependencies;
-        runExperiment("numGraphDependencies", String.valueOf(numGraphDependencies), getProtocolName(i));
+      for (int dep = 1; dep <= 10; dep++) {
+        DreamConfiguration.get().graphMinDepPerNode = Math.max(1, dep - 1);
+        DreamConfiguration.get().graphMaxDepPerNode = dep + 1;
+        runExperiment("numGraphDependencies", String.valueOf(dep), getProtocolName(i));
       }
     }
   }
@@ -161,7 +182,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     // Cleanup
     RandomGenerator.reset();
     mLogger.resetCounters();
-    GraphsGenerator.get().clean();
+    GraphGenerator.get().clean();
     TrafficGeneratorPeerlet.resetCount();
 
     // Init environment and experiment

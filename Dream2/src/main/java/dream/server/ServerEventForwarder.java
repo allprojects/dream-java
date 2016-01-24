@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import dream.common.ConsistencyType;
-import dream.common.Consts;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
@@ -23,9 +21,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
   protected final SubscriptionTable clientsSubTable = new SubscriptionTable();
   protected final SubscriptionTable brokersSubTable = new SubscriptionTable();
   protected final AdvertisementTable advTable = new AdvertisementTable();
-
-  protected NodeDescriptor registry = null;
-  protected NodeDescriptor tokenService = null;
 
   @Override
   public Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender, Serializable packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
@@ -89,10 +84,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
   }
 
   private final void processAdvertisement(NodeDescriptor sender, AdvertisementPacket packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
-    if (Consts.consistencyType == ConsistencyType.ATOMIC && sender.isClient()) {
-      assert tokenService != null;
-      sendToTokenService(AdvertisementPacket.subject, packet, outbox);
-    }
     if (packet.isPublic()) {
       switch (packet.getAdvType()) {
       case ADV:
@@ -104,10 +95,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
       }
     }
     outbox.add(AdvertisementPacket.subject, packet, getAllNodesExcept(sender, neighbors));
-  }
-
-  private final void sendToTokenService(String subject, Serializable packet, Outbox box) {
-    sendTo(subject, packet, box, tokenService);
   }
 
   private final void sendTo(String subject, Serializable packet, Outbox box, Collection<NodeDescriptor> recipients) {

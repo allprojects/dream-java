@@ -11,9 +11,6 @@ import org.junit.Test;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.content.Subscription;
-import dream.common.utils.DependencyGraph;
-import dream.common.utils.IntraSourceDependencyDetector;
-import dream.common.utils.WaitRecommendations;
 
 public class IntraSourceDependencyDetectorTest {
 
@@ -780,5 +777,107 @@ public class IntraSourceDependencyDetectorTest {
     // Event<Integer>D
     final Event<Integer> evD = new Event<Integer>("Host", "D", 1);
     assertEquals(depDetector.getWaitRecommendations(evD, "A@Host").size(), 0);
+  }
+
+  @Test
+  public void multipleCyclesTest() {
+    // B = f(A)
+    // C = f(A, B)
+    // D = f(B, C)
+    // E = f(A, D)
+    final DependencyGraph graph = DependencyGraph.instance;
+    final IntraSourceDependencyDetector depDetector = IntraSourceDependencyDetector.instance;
+    graph.clear();
+
+    final Subscription subA = new Subscription("Host", "A");
+    final Subscription subB = new Subscription("Host", "B");
+    final Subscription subC = new Subscription("Host", "C");
+    final Subscription subD = new Subscription("Host", "D");
+
+    final Advertisement advA = new Advertisement("Host", "A");
+    final Advertisement advB = new Advertisement("Host", "B");
+    final Advertisement advC = new Advertisement("Host", "C");
+    final Advertisement advD = new Advertisement("Host", "D");
+    final Advertisement advE = new Advertisement("Host", "E");
+
+    // Subscription to A (A generates B)
+    final Set<Subscription> subsB = new HashSet<Subscription>();
+    subsB.add(subA);
+    graph.processAdv(advB, subsB);
+
+    // Subscription to A, B (A, B generate C)
+    final Set<Subscription> subsC = new HashSet<Subscription>();
+    subsC.add(subA);
+    subsC.add(subB);
+    graph.processAdv(advC, subsC);
+
+    // Subscription to B, C (B, C generate D)
+    final Set<Subscription> subsD = new HashSet<Subscription>();
+    subsD.add(subB);
+    subsD.add(subC);
+    graph.processAdv(advD, subsD);
+
+    // Subscription to A, D (A, D generate E)
+    final Set<Subscription> subsE = new HashSet<Subscription>();
+    subsE.add(subA);
+    subsE.add(subD);
+    graph.processAdv(advE, subsE);
+
+    graph.processAdv(advA);
+
+    // Consolidate
+    depDetector.consolidate();
+
+    // Event<Integer>A
+    final Event<Integer> evA = new Event<Integer>("Host", "A", 1);
+    assertEquals(2, depDetector.getWaitRecommendations(evA, "A@Host").size());
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evA, "A@Host")) {
+      assertTrue(wr.getExpression().equals("C@Host") || wr.getExpression().equals("E@Host"));
+      if (wr.getExpression().equals("C@Host")) {
+        assertEquals(1, wr.getRecommendations().size());
+        assertTrue(wr.getRecommendations().contains("B@Host"));
+      }
+      if (wr.getExpression().equals("E@Host")) {
+        assertEquals(1, wr.getRecommendations().size());
+        assertTrue(wr.getRecommendations().contains("D@Host"));
+      }
+    }
+
+    // Event<Integer>B
+    final Event<Integer> evB = new Event<Integer>("Host", "B", 1);
+    assertEquals(2, depDetector.getWaitRecommendations(evB, "A@Host").size());
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evB, "A@Host")) {
+      assertTrue(wr.getExpression().equals("C@Host") || wr.getExpression().equals("D@Host"));
+      if (wr.getExpression().equals("C@Host")) {
+        assertEquals(1, wr.getRecommendations().size());
+        assertTrue(wr.getRecommendations().contains("A@Host"));
+      }
+      if (wr.getExpression().equals("D@Host")) {
+        assertEquals(1, wr.getRecommendations().size());
+        assertTrue(wr.getRecommendations().contains("C@Host"));
+      }
+    }
+
+    // Event<Integer>C
+    final Event<Integer> evC = new Event<Integer>("Host", "C", 1);
+    assertEquals(1, depDetector.getWaitRecommendations(evC, "A@Host").size());
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evC, "A@Host")) {
+      assertTrue(wr.getExpression().equals("D@Host"));
+      assertEquals(1, wr.getRecommendations().size());
+      assertTrue(wr.getRecommendations().contains("B@Host"));
+    }
+
+    // Event<Integer>D
+    final Event<Integer> evD = new Event<Integer>("Host", "D", 1);
+    assertEquals(1, depDetector.getWaitRecommendations(evD, "A@Host").size());
+    for (final WaitRecommendations wr : depDetector.getWaitRecommendations(evD, "A@Host")) {
+      assertTrue(wr.getExpression().equals("E@Host"));
+      assertEquals(1, wr.getRecommendations().size());
+      assertTrue(wr.getRecommendations().contains("A@Host"));
+    }
+
+    // Event<Integer>E
+    final Event<Integer> evE = new Event<Integer>("Host", "E", 1);
+    assertTrue(depDetector.getWaitRecommendations(evE, "A@Host").isEmpty());
   }
 }

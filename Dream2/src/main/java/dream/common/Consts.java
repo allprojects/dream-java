@@ -39,7 +39,7 @@ public final class Consts {
      * Load properties
      */
     try {
-      final FileInputStream input = new FileInputStream("jr.properties");
+      final FileInputStream input = new FileInputStream("dream.properties");
       properties.load(input);
       input.close();
     } catch (final IOException e) {

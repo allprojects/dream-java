@@ -19,7 +19,7 @@ public enum IntraSourceDependencyDetector implements DependencyDetector {
   // Wait recommendations
   private final Map<String, Map<String, Set<WaitRecommendations>>> recommendations = new HashMap<>();
 
-  public synchronized final Set<WaitRecommendations> getWaitRecommendations(Event<?> event, String initialVar) {
+  public synchronized final Set<WaitRecommendations> getWaitRecommendations(Event event, String initialVar) {
     final Map<String, Set<WaitRecommendations>> innerMap = recommendations.get(event.getSignature());
     if (innerMap == null) {
       return new HashSet<>();

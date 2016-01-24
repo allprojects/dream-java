@@ -1,7 +1,5 @@
 package dream.client;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,7 +19,6 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
   private static int clientIdCount = 0;
 
   private int clientId;
-  private final List<Var> vars = new ArrayList<Var>();
 
   public static final void resetCount() {
     clientIdCount = 0;
@@ -35,12 +32,19 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     startGraphsGeneration();
     registerToGraphsGenerator();
     notifyGraphs();
-    startSendingEvents();
   }
 
   @Override
   public void notifyVar(String name) {
-    vars.add(new Var(getPeer(), name.split("@")[1], name.split("@")[0]));
+    final Var var = new Var(getPeer(), name.split("@")[1], name.split("@")[0]);
+    final Timer timer = getPeer().getClock().createNewTimer();
+
+    timer.addTimerListener(t -> {
+      var.modify();
+      t.schedule(Time.inMilliseconds(getUpdateTimeInMs()));
+    });
+
+    timer.schedule(Time.inSeconds(Consts.startSendingEventsAtSecond));
   }
 
   @Override
@@ -79,31 +83,12 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     notifyGraphsTimer.schedule(Time.inSeconds(Consts.startNotifyGraphsAtSecond));
   }
 
-  private final void startSendingEvents() {
-    final Timer eventTimer = getPeer().getClock().createNewTimer();
-    eventTimer.addTimerListener(timer -> {
-      if (!vars.isEmpty()) {
-        final Var var = getVarToUpdate();
-        var.modify();
-        timer.schedule(Time.inMilliseconds(getUpdateTimeInMs()));
-      }
-    });
-    eventTimer.schedule(Time.inSeconds(Consts.startSendingEventsAtSecond));
-  }
-
   private final double getUpdateTimeInMs() {
     final DreamConfiguration conf = DreamConfiguration.get();
     final Random rand = RandomGenerator.get();
     final int minTime = conf.minTimeBetweenEventsInMs;
     final int maxTime = conf.maxTimeBetweenEventsInMs;
     return minTime == maxTime ? maxTime : minTime + rand.nextInt(maxTime - minTime);
-  }
-
-  private final Var getVarToUpdate() {
-    final Random rand = RandomGenerator.get();
-    final int numObservables = vars.size();
-    final int index = rand.nextInt(numObservables);
-    return vars.get(index);
   }
 
 }

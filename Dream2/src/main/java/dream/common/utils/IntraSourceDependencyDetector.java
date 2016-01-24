@@ -43,6 +43,7 @@ public enum IntraSourceDependencyDetector implements DependencyDetector {
 
   private final void storeRecommendationsFor(String expr, String initialExpr) {
     final Set<String> dependentSiblings = computeDependentSiblingsFor(expr, initialExpr);
+
     if (dependentSiblings.size() > 1) {
       dependentSiblings.forEach(sibling -> {
         Map<String, Set<WaitRecommendations>> recommendationsMap = recommendations.get(sibling);
@@ -50,8 +51,11 @@ public enum IntraSourceDependencyDetector implements DependencyDetector {
           recommendationsMap = new HashMap<>();
           recommendations.put(sibling, recommendationsMap);
         }
-        final Set<WaitRecommendations> recommendationsSet = new HashSet<>();
-        recommendationsMap.put(initialExpr, recommendationsSet);
+        Set<WaitRecommendations> recommendationsSet = recommendationsMap.get(initialExpr);
+        if (recommendationsSet == null) {
+          recommendationsSet = new HashSet<>();
+          recommendationsMap.put(initialExpr, recommendationsSet);
+        }
         final WaitRecommendations wr = new WaitRecommendations(expr);
         recommendationsSet.add(wr);
         dependentSiblings.stream().//

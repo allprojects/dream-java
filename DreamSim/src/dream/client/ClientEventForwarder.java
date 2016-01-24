@@ -103,8 +103,8 @@ class ClientEventForwarder extends BasePeerlet {
     final Set<String> nodesToLock = new HashSet<>();
     nodesToLock.add(node);
 
-    final LockRequestPacket reqPkt = new LockRequestPacket(getPeer().getNetworkAddress(), nodesToLock, nodesToLock, LockType.READ_ONLY);
-    final UUID lockId = reqPkt.getLockID();
+    final UUID lockId = UUID.randomUUID();
+    final LockRequestPacket reqPkt = new LockRequestPacket(getPeer().getNetworkAddress(), lockId, nodesToLock, nodesToLock, LockType.READ_ONLY);
     lockApplicants.put(lockId, applicant);
 
     connectionManager.sendLockRequest(reqPkt);
@@ -132,8 +132,8 @@ class ClientEventForwarder extends BasePeerlet {
       return false;
     }
 
-    final LockRequestPacket reqPkt = new LockRequestPacket(getPeer().getNetworkAddress(), nodesToLock, releaseNodes, LockType.READ_WRITE);
-    final UUID lockId = reqPkt.getLockID();
+    final UUID lockId = UUID.randomUUID();
+    final LockRequestPacket reqPkt = new LockRequestPacket(getPeer().getNetworkAddress(), lockId, nodesToLock, releaseNodes, LockType.READ_WRITE);
     lockApplicants.put(lockId, applicant);
 
     connectionManager.sendLockRequest(reqPkt);

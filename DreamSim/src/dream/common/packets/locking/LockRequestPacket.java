@@ -29,10 +29,11 @@ public class LockRequestPacket extends Message implements Serializable {
   private final Set<String> unlockNodes;
 
   private final LockType type;
-  private final UUID lockID = UUID.randomUUID();
+  private final UUID lockID;
 
-  public LockRequestPacket(NetworkAddress applicant, Set<String> lockNodes, Set<String> unlockNodes, LockType type) {
+  public LockRequestPacket(NetworkAddress applicant, UUID lockID, Set<String> lockNodes, Set<String> unlockNodes, LockType type) {
     this.applicant = applicant;
+    this.lockID = lockID;
     this.lockNodes = new HashSet<>(lockNodes);
     this.unlockNodes = new HashSet<>(unlockNodes);
     this.type = type;

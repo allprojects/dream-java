@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
-import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.locking.LockGrantPacket;
@@ -19,7 +18,7 @@ public class Var implements LockApplicant {
   private final String host;
   private final String object;
 
-  private final Queue<EventPacket> pendingEvents = new LinkedList<>();
+  private final Queue<PendingEvent> pendingEvents = new LinkedList<>();
 
   public Var(Peer peer, String host, String object) {
     this.peer = peer;
@@ -31,8 +30,8 @@ public class Var implements LockApplicant {
   }
 
   public final void modify() {
-    final EventPacket packet = generateEventPacket(UUID.randomUUID());
-    pendingEvents.add(packet);
+    final PendingEvent ev = new PendingEvent(new Event(host, object), peer.getClock().getCurrentTime());
+    pendingEvents.add(ev);
     if (pendingEvents.size() == 1) {
       processNextEvent();
     }
@@ -46,37 +45,49 @@ public class Var implements LockApplicant {
           conf.consistencyType == DreamConfiguration.ATOMIC) {
         final boolean lockRequired = forwarder.sendReadWriteLockRequest(object + "@" + host, this);
         if (!lockRequired) {
-          sendNextEventPacket();
+          sendNextEventPacket(UUID.randomUUID());
           processNextEvent();
         }
       }
       // Otherwise the update can be immediately processed
       else {
-        sendNextEventPacket();
+        sendNextEventPacket(UUID.randomUUID());
         processNextEvent();
       }
     }
   }
 
-  private final void sendNextEventPacket() {
+  private final void sendNextEventPacket(UUID eventId) {
     assert!pendingEvents.isEmpty();
-    final EventPacket p = pendingEvents.poll();
-    forwarder.sendEvent(p.getId(), p.getEvent(), p.getCreationTime(), p.getSource());
+    final PendingEvent p = pendingEvents.poll();
+    forwarder.sendEvent(eventId, p.getEvent(), p.getCreationTime(), p.getEvent().getSignature());
   }
 
   @Override
   public void notifyLockGranted(LockGrantPacket lockGrant) {
-    assert!pendingEvents.isEmpty() && pendingEvents.peek().getId().equals(lockGrant.getLockID());
-    sendNextEventPacket();
+    assert!pendingEvents.isEmpty();
+    sendNextEventPacket(lockGrant.getLockID());
+    processNextEvent();
   }
 
-  private final EventPacket generateEventPacket(UUID eventId) {
-    final Event ev = new Event(host, object);
-    final String source = ev.getSignature();
+  private final class PendingEvent {
+    private final Event event;
+    private final double creationTime;
 
-    final EventPacket packet = new EventPacket(ev, eventId, peer.getClock().getCurrentTime(), source);
-    packet.setLockReleaseNodes(forwarder.getLockReleaseNodesFor(source));
-    return packet;
+    PendingEvent(Event event, double creationTime) {
+      super();
+      this.event = event;
+      this.creationTime = creationTime;
+    }
+
+    final Event getEvent() {
+      return event;
+    }
+
+    final double getCreationTime() {
+      return creationTime;
+    }
+
   }
 
 }

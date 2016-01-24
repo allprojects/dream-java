@@ -79,17 +79,17 @@ public class Signal implements LockApplicant, Subscriber {
   private final synchronized void acquireLock() {
     if (conf.consistencyType != DreamConfiguration.ATOMIC) {
       logger.warning("Trying to acquire read lock byt consistency is not atomic");
-      return;
+    } else {
+      forwarder.sendReadOnlyLockRequest(object + "@" + host, this);
     }
-    forwarder.sendReadOnlyLockRequest(object + "@" + host, this);
   }
 
   private final synchronized void releaseLock(UUID lockID) {
     if (conf.consistencyType != DreamConfiguration.ATOMIC) {
       logger.warning("Trying to acquire read lock byt consistency is not atomic");
-      return;
+    } else {
+      forwarder.sendLockRelease(lockID);
     }
-    forwarder.sendLockRelease(lockID);
   }
 
   @Override

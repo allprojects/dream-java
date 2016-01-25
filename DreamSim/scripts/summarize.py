@@ -1,15 +1,17 @@
+from math import sqrt
 import os
+import scipy.stats
 
-def SummarizeAll(filename, values):
+def summarizeAll(filename, values):
     protocols = ["causal", "single_glitch_free", "complete_glitch_free", "atomic"]
     seeds = [0, 1, 2, 3, 4]
     for seed in seeds:
         for protocol in protocols:
-            SummarizeTraffic(filename + "_" + str(seed), protocol + "_Traffic", values)
-            SummarizeTraffic(filename + "_" + str(seed), protocol + "_TrafficByte", values)
-            SummarizeDelay(filename + "_" + str(seed), protocol + "_DelayAvg", values)
+            summarizeTraffic(filename + "_" + str(seed), protocol + "_Traffic", values)
+            summarizeTraffic(filename + "_" + str(seed), protocol + "_TrafficByte", values)
+            summarizeDelay(filename + "_" + str(seed), protocol + "_DelayAvg", values)
 
-def SummarizeTraffic(filename, suffix, values):
+def summarizeTraffic(filename, suffix, values):
     fileOut = open("../resultsAvg/" + filename + "_" + suffix, "w")
 
     for val in values:
@@ -53,7 +55,7 @@ def SummarizeTraffic(filename, suffix, values):
         
     fileOut.close()
 
-def SummarizeDelay(filename, suffix, values):
+def summarizeDelay(filename, suffix, values):
     fileOut = open("../resultsAvg/" + filename + "_" + suffix, "w")
 
     for val in values:
@@ -73,23 +75,149 @@ def SummarizeDelay(filename, suffix, values):
                     
     fileOut.close()
 
-# TODO: compute statistics using multiple seeds
-def AvgAll(filename, values):
+def avgTraffic(filename, suffix, numRepetitions):
+    output = open("../resultsAvg/" + filename + "_" + suffix, "w")
+    temp = open("../resultsAvg/" + filename + "_0_" + suffix, "r")
+    numLines = len(temp.readlines())
+    temp.close()
+
+    for line in range(0, numLines):
+        count = 0
+
+        sumEvents = 0
+        sumSubscriptions = 0
+        sumAdvertisements = 0
+        sumLockRelease = 0
+        sumLockRequest = 0
+        sumLockGrant = 0
+        sumTotal = 0
+
+        sumEventsSquare = 0
+        sumSubscriptionsSquare = 0
+        sumAdvertisementsSquare = 0
+        sumLockReleaseSquare = 0
+        sumLockRequestSquare = 0
+        sumLockGrantSquare = 0
+        sumTotalSquare = 0
+        
+        label = ""
+        for i in range(0, numRepetitions):    
+            count = count+1
+            f = open("../resultsAvg/" + filename + "_" + str(i) + "_" + suffix, "r")
+            lines = f.readlines()
+
+            tokens = lines[line].split("\t")
+            label = tokens[0]
+
+            sumEvents = sumEvents + float(tokens[1])
+            sumSubscriptions = sumSubscriptions + float(tokens[2])
+            sumAdvertisements = sumAdvertisements + float(tokens[3])
+            sumLockRelease = sumLockRelease + float(tokens[4])
+            sumLockRequest = sumLockRequest + float(tokens[5])
+            sumLockGrant = sumLockGrant + float(tokens[6])
+            sumTotal = sumTotal + float(tokens[7])
+
+            sumEventsSquare = sumEventsSquare + (float(tokens[1]))**2
+            sumSubscriptionsSquare = sumSubscriptionsSquare + (float(tokens[2]))**2
+            sumAdvertisementsSquare = sumAdvertisementsSquare + (float(tokens[3]))**2
+            sumLockReleaseSquare = sumLockReleaseSquare + (float(tokens[4]))**2
+            sumLockRequestSquare = sumLockRequestSquare + (float(tokens[5]))**2
+            sumLockGrantSquare = sumLockGrantSquare + (float(tokens[6]))**2
+            sumTotalSquare = sumTotalSquare + (float(tokens[7]))**2
+            
+            f.close()
+
+        meanEvents = sumEvents/count
+        meanSubscriptions = sumSubscriptions/count
+        meanAdvertisements = sumAdvertisements/count
+        meanLockRelease = sumLockRelease/count
+        meanLockRequest = sumLockRequest/count
+        meanLockGrant = sumLockGrant/count
+        meanTotal = sumTotal/count
+
+        sampleStdDevEvents = sqrt((sumEventsSquare/count - meanEvents**2)*count/(count-1))
+        sampleStdDevSubscriptions = sqrt((sumSubscriptionsSquare/count - meanSubscriptions**2)*count/(count-1))
+        sampleStdDevAdvertisements = sqrt((sumAdvertisementsSquare/count - meanAdvertisements**2)*count/(count-1))
+        sampleStdDevLockRelease = sqrt((sumLockReleaseSquare/count - meanLockRelease**2)*count/(count-1))
+        sampleStdDevLockRequest = sqrt((sumLockRequestSquare/count - meanLockRequest**2)*count/(count-1))
+        sampleStdDevLockGrant = sqrt((sumLockGrantSquare/count - meanLockGrant**2)*count/(count-1))
+        sampleStdDevTotal = sqrt((sumTotalSquare/count - meanTotal**2)*count/(count-1))
+
+        deltaEvents = 0
+        deltaSubscriptions = 0
+        deltaAdvertisements = 0
+        deltaLockRelease = 0
+        deltaLockRequest = 0
+        deltaLockGrant = 0
+        deltaTotal = 0
+
+        deltaEvents = (-scipy.stats.t.ppf(0.05,count-1).sum() * sampleStdDevEvents)/sqrt(count)
+        deltaSubscriptions = (-scipy.stats.t.ppf(0.05,count-1).sum() * sampleStdDevSubscriptions)/sqrt(count)
+        deltaAdvertisements = (-scipy.stats.t.ppf(0.05,count-1).sum() * sampleStdDevAdvertisements)/sqrt(count)
+        deltaLockRelease = (-scipy.stats.t.ppf(0.05,count-1).sum() * sampleStdDevLockRelease)/sqrt(count)
+        deltaLockRequest = (-scipy.stats.t.ppf(0.05,count-1).sum() * sampleStdDevLockRequest)/sqrt(count)
+        deltaLockGrant = (-scipy.stats.t.ppf(0.05,count-1).sum() * sampleStdDevLockGrant)/sqrt(count)
+        deltaTotal = (-scipy.stats.t.ppf(0.05,count-1).sum() * sampleStdDevTotal)/sqrt(count)
+
+        output.write(label + \
+                     "\t" + str(meanEvents) + \
+                     "\t" + str(meanSubscriptions) + \
+                     "\t" + str(meanAdvertisements) + \
+                     "\t" + str(meanLockRelease) + \
+                     "\t" + str(meanLockRequest) + \
+                     "\t" + str(meanLockGrant) + \
+                     "\t" + str(meanTotal) + \
+                     "\t" + str(deltaEvents) + \
+                     "\t" + str(deltaSubscriptions) + \
+                     "\t" + str(deltaAdvertisements) + \
+                     "\t" + str(deltaLockRelease) + \
+                     "\t" + str(deltaLockRequest) + \
+                     "\t" + str(deltaLockGrant) + \
+                     "\t" + str(deltaTotal) + \
+                     "\n")
+
+def avgDelay(filename, suffix, numRepetitions):
+    output = open("../resultsAvg/" + filename + "_" + suffix, "w")
+    temp = open("../resultsAvg/" + filename + "_0_" + suffix, "r")
+    numLines = len(temp.readlines())
+    temp.close()
+
+    for line in range(0, numLines):
+        count = 0
+        sumDelay = 0
+        sumDelaySquare = 0
+ 
+        label = ""
+        for i in range(0, numRepetitions):    
+            count = count+1
+            f = open("../resultsAvg/" + filename + "_" + str(i) + "_" + suffix, "r")
+            lines = f.readlines()
+
+            tokens = lines[line].split("\t")
+            label = tokens[0]
+
+            sumDelay = sumDelay + float(tokens[1])
+            sumDelaySquare = sumDelaySquare + (float(tokens[1]))**2
+            
+            f.close()
+
+        meanDelay = sumDelay/count
+        sampleStdDevDelay = sqrt((sumDelaySquare/count - meanDelay**2)*count/(count-1))
+        deltaDelay = (-scipy.stats.t.ppf(0.05,count-1).sum() * sampleStdDevDelay)/sqrt(count)
+
+        output.write(label + \
+                     "\t" + str(meanDelay) + \
+                     "\t" + str(deltaDelay) + \
+                     "\n")
+
+def avgAll(filename, values):
+    numSeeds = 5
     protocols = ["causal", "single_glitch_free", "complete_glitch_free", "atomic"]
     for protocol in protocols:
-        seed = 0
+        avgTraffic(filename, protocol + "_Traffic", numSeeds)
+        avgTraffic(filename, protocol + "_TrafficByte", numSeeds)
+        avgDelay(filename, protocol + "_DelayAvg", numSeeds)
         
-        inTraffic = "../resultsAvg/" + filename + "_" + str(seed) + "_" + protocol + "_Traffic"
-        inTrafficByte = "../resultsAvg/" + filename + "_" + str(seed) + "_" + protocol + "_TrafficByte"
-        inDelay = "../resultsAvg/" + filename + "_" + str(seed) + "_" + protocol + "_DelayAvg"
-
-        outTraffic = "../resultsAvg/" + filename + "_" + protocol + "_Traffic"
-        outTrafficByte = "../resultsAvg/" + filename + "_" + protocol + "_TrafficByte"
-        outDelay = "../resultsAvg/" + filename + "_" + protocol + "_DelayAvg"
-
-        shutil.copyfile(inTraffic, outTraffic)
-        shutil.copyfile(inTrafficByte, outTrafficByte)
-        shutil.copyfile(inDeay, outDelay)
     
 # Values
 default = [0]
@@ -103,22 +231,22 @@ timeBetweenEvents = [1, 4, 7, 10, 40, 70, 100, 400, 700, 1000]
 timeBetweenReads = [100, 400, 700, 1000, 4000, 7000, 10000]
 
 # Invocations
-SummarizeAll("default", default)
-SummarizeAll("centralized", centralized)
-SummarizeAll("locality", locality)
-SummarizeAll("numBrokers", numBrokers)
-SummarizeAll("numVars", numVars)
-SummarizeAll("numSignals", numSignals)
-SummarizeAll("numGraphDependencies", numGraphDependencies)
-SummarizeAll("timeBetweenEvents", timeBetweenEvents)
-SummarizeAll("timeBetweenReads", timeBetweenReads)
+summarizeAll("default", default)
+summarizeAll("centralized", centralized)
+summarizeAll("locality", locality)
+summarizeAll("numBrokers", numBrokers)
+summarizeAll("numVars", numVars)
+summarizeAll("numSignals", numSignals)
+summarizeAll("numGraphDependencies", numGraphDependencies)
+summarizeAll("timeBetweenEvents", timeBetweenEvents)
+summarizeAll("timeBetweenReads", timeBetweenReads)
 
-AvgAll("default", default)
-AvgAll("centralized", centralized)
-AvgAll("locality", locality)
-AvgAll("numBrokers", numBrokers)
-AvgAll("numVars", numVars)
-AvgAll("numSignals", numSignals)
-AvgAll("numGraphDependencies", numGraphDependencies)
-AvgAll("timeBetweenEvents", timeBetweenEvents)
-AvgAll("timeBetweenReads", timeBetweenReads)
+avgAll("default", default)
+avgAll("centralized", centralized)
+avgAll("locality", locality)
+avgAll("numBrokers", numBrokers)
+avgAll("numVars", numVars)
+avgAll("numSignals", numSignals)
+avgAll("numGraphDependencies", numGraphDependencies)
+avgAll("timeBetweenEvents", timeBetweenEvents)
+avgAll("timeBetweenReads", timeBetweenReads)

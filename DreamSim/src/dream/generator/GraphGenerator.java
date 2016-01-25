@@ -105,7 +105,7 @@ public class GraphGenerator {
   }
 
   private final Set<String> selectDepNodes() {
-    final int numDeps = config.graphMinDepPerNode + random.nextInt(config.graphMaxDepPerNode - config.graphMinDepPerNode);
+    final int numDeps = config.graphMinDepPerNode + random.nextInt(config.graphMaxDepPerNode - config.graphMinDepPerNode + 1);
     return selectRandomNodes(numDeps);
   }
 

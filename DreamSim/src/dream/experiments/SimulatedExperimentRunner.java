@@ -32,7 +32,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
 
   public final void runExperiments() {
     // runFromFile(0);
-    for (int seed = 0; seed < 1; seed++) {
+    for (int seed = 0; seed < 5; seed++) {
       runFromFile(seed);
       runDefault(seed);
       runDefaultCentralized(seed);
@@ -42,13 +42,14 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       runNumSignals(seed);
       runNumGraphDependencies(seed);
       runTimeBetweenEvents(seed);
+      runTimeBetweenReads(seed);
     }
   }
 
   private final void runFromFile(int seed) {
     loadFromFile();
     DreamConfiguration.get().seed = seed;
-    runExperiment("fromFile", "0", getProtocolName(DreamConfiguration.get().consistencyType));
+    runExperiment("fromFile", String.valueOf(seed), "0", getProtocolName(DreamConfiguration.get().consistencyType));
   }
 
   private final void runDefault(int seed) {
@@ -56,7 +57,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      runExperiment("default", String.valueOf(0), getProtocolName(i));
+      runExperiment("default", String.valueOf(seed), String.valueOf(0), getProtocolName(i));
     }
   }
 
@@ -69,7 +70,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().maxCommunicationDelayInMs *= DreamConfiguration.get().linkLength;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      runExperiment("centralized", String.valueOf(0), getProtocolName(i));
+      runExperiment("centralized", String.valueOf(seed), String.valueOf(0), getProtocolName(i));
     }
   }
 
@@ -78,9 +79,10 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (float locality = 0; locality <= 1; locality += 0.1) {
-        DreamConfiguration.get().graphLocality = locality;
-        runExperiment("locality", String.valueOf(locality), getProtocolName(i));
+      for (int locality = 0; locality <= 100; locality += 10) {
+        final float floatLoc = (float) locality / 100;
+        DreamConfiguration.get().graphLocality = floatLoc;
+        runExperiment("locality", String.valueOf(seed), String.valueOf(floatLoc), getProtocolName(i));
       }
     }
   }
@@ -90,9 +92,9 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int numBrokers = 2; numBrokers < 20; numBrokers += 2) {
+      for (int numBrokers = 2; numBrokers < 25; numBrokers += 2) {
         DreamConfiguration.get().numberOfBrokers = numBrokers;
-        runExperiment("numBrokers", String.valueOf(numBrokers), getProtocolName(i));
+        runExperiment("numBrokers", String.valueOf(seed), String.valueOf(numBrokers), getProtocolName(i));
       }
     }
   }
@@ -104,7 +106,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       DreamConfiguration.get().consistencyType = i;
       for (int numVars = 1; numVars <= 100;) {
         DreamConfiguration.get().graphNumSources = numVars;
-        runExperiment("numVars", String.valueOf(numVars), getProtocolName(i));
+        runExperiment("numVars", String.valueOf(seed), String.valueOf(numVars), getProtocolName(i));
         if (numVars < 10) {
           numVars += 3;
         } else {
@@ -121,7 +123,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       DreamConfiguration.get().consistencyType = i;
       for (int numSignals = 10; numSignals <= 1000;) {
         DreamConfiguration.get().graphNumInnerNodes = numSignals;
-        runExperiment("numSignals", String.valueOf(numSignals), getProtocolName(i));
+        runExperiment("numSignals", String.valueOf(seed), String.valueOf(numSignals), getProtocolName(i));
         if (numSignals < 100) {
           numSignals += 30;
         } else {
@@ -139,7 +141,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       for (int dep = 1; dep <= 10; dep++) {
         DreamConfiguration.get().graphMinDepPerNode = Math.max(1, dep - 1);
         DreamConfiguration.get().graphMaxDepPerNode = dep + 1;
-        runExperiment("numGraphDependencies", String.valueOf(dep), getProtocolName(i));
+        runExperiment("numGraphDependencies", String.valueOf(seed), String.valueOf(dep), getProtocolName(i));
       }
     }
   }
@@ -154,13 +156,31 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
         DreamConfiguration.get().epochDuration = 2 * timeBetweenEvents;
         DreamConfiguration.get().minTimeBetweenEventsInMs = Math.min(1, timeBetweenEvents - 1);
         DreamConfiguration.get().maxTimeBetweenEventsInMs = timeBetweenEvents + 1;
-        runExperiment("timeBetweenEvents", String.valueOf(timeBetweenEvents), getProtocolName(i));
+        runExperiment("timeBetweenEvents", String.valueOf(seed), String.valueOf(timeBetweenEvents), getProtocolName(i));
         if (timeBetweenEvents < 10) {
           timeBetweenEvents += 3;
         } else if (timeBetweenEvents < 100) {
           timeBetweenEvents += 30;
         } else {
           timeBetweenEvents += 300;
+        }
+      }
+    }
+  }
+
+  private final void runTimeBetweenReads(int seed) {
+    loadFromFile();
+    DreamConfiguration.get().seed = seed;
+    for (final int i : protocols) {
+      DreamConfiguration.get().consistencyType = i;
+      for (int timeBetweenReads = 100; timeBetweenReads <= 1000;) {
+        DreamConfiguration.get().minTimeBetweenSignalReadsInMs = Math.min(1, timeBetweenReads - 1);
+        DreamConfiguration.get().maxTimeBetweenSignalReadsInMs = timeBetweenReads + 1;
+        runExperiment("timeBetweenReads", String.valueOf(seed), String.valueOf(timeBetweenReads), getProtocolName(i));
+        if (timeBetweenReads < 1000) {
+          timeBetweenReads += 300;
+        } else {
+          timeBetweenReads += 3000;
         }
       }
     }
@@ -175,8 +195,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     }
   }
 
-  private final void runExperiment(String name, String value, String protocol) {
-    final String experimentName = name + "_" + value + "_" + protocol;
+  private final void runExperiment(String name, String seed, String value, String protocol) {
+    final String experimentName = name + "_" + seed + "_" + value + "_" + protocol;
     final MeasurementLogger mLogger = MeasurementLogger.getLogger();
 
     // Cleanup

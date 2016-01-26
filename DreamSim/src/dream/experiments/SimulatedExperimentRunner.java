@@ -175,7 +175,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int timeBetweenReads = 100; timeBetweenReads <= 1000;) {
+      for (int timeBetweenReads = 100; timeBetweenReads <= 10000;) {
         DreamConfiguration.get().minTimeBetweenSignalReadsInMs = Math.min(1, timeBetweenReads - 1);
         DreamConfiguration.get().maxTimeBetweenSignalReadsInMs = timeBetweenReads + 1;
         runExperiment("timeBetweenReads", String.valueOf(seed), String.valueOf(timeBetweenReads), getProtocolName(i));

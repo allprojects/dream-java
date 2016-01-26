@@ -20,18 +20,18 @@ public class TreeOverlayGenerator implements IOverlayGenerator {
   private final int type;
 
   private static TreeOverlayGenerator instance = null;
-  private final Set<Link> links = new HashSet<Link>();
+  private final Set<Link> links = new HashSet<>();
   private boolean linksGenerated = false;
 
-  public static final TreeOverlayGenerator get(int type) {
+  public static final IOverlayGenerator get() {
     if (instance == null) {
-      instance = new TreeOverlayGenerator(type);
+      instance = new TreeOverlayGenerator();
     }
     return instance;
   }
 
-  private TreeOverlayGenerator(int type) {
-    this.type = type;
+  private TreeOverlayGenerator() {
+    this.type = DreamConfiguration.get().brokersTopologyType;
     switch (type) {
     case LINEAR:
     case STAR:
@@ -40,6 +40,12 @@ public class TreeOverlayGenerator implements IOverlayGenerator {
     default:
       throw new IllegalArgumentException("Unknown Tree Topology Type");
     }
+  }
+
+  @Override
+  public void clean() {
+    linksGenerated = false;
+    links.clear();
   }
 
   @Override

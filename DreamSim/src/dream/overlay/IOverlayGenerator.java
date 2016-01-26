@@ -17,4 +17,9 @@ public interface IOverlayGenerator {
    * @return a set of links that constitutes the generated topology
    */
   public Set<Link> generateOverlay();
+
+  /**
+   * Reset the topology generation.
+   */
+  public void clean();
 }

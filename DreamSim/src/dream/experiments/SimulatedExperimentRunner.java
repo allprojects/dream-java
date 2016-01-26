@@ -6,6 +6,8 @@ import dream.generator.GraphGenerator;
 import dream.generator.RandomGenerator;
 import dream.locking.LockManagerFactory;
 import dream.measurement.MeasurementLogger;
+import dream.overlay.ClientAssociationGenerator;
+import dream.overlay.TreeOverlayGenerator;
 import dream.server.ServerFactory;
 import protopeer.ConfigurationException;
 import protopeer.Experiment;
@@ -202,6 +204,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     // Cleanup
     RandomGenerator.reset();
     mLogger.resetCounters();
+    TreeOverlayGenerator.get().clean();
+    ClientAssociationGenerator.get().clean();
     GraphGenerator.get().clean();
     TrafficGeneratorPeerlet.resetCount();
 

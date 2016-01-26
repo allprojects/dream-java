@@ -33,7 +33,7 @@ class ConnectionManager extends BasePeerlet {
   public void init(Peer peer) {
     super.init(peer);
     conf = DreamConfiguration.get();
-    final IClientAssociationGenerator associationGenerator = new ClientAssociationGenerator(conf.clientsAssociationType, conf.percentageOfPureForwarders);
+    final IClientAssociationGenerator associationGenerator = ClientAssociationGenerator.get();
     final Set<Link> componentAssociations = associationGenerator.getAssociation();
     for (final Link l : componentAssociations) {
       if (l.getNode2().getId() == peer.getIndexNumber()) {

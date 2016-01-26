@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 import dream.common.packets.overlay.AddBrokerMessage;
 import dream.common.packets.overlay.RemoveBrokerMessage;
 import dream.common.packets.overlay.ReplaceBrokerMessage;
-import dream.experiments.DreamConfiguration;
 import protopeer.BasePeerlet;
 import protopeer.Experiment;
 import protopeer.Peer;
@@ -20,15 +19,13 @@ public class OverlayPeerlet extends BasePeerlet implements IOverlayPeerlet {
   private Set<NetworkAddress> components;
   private Set<NetworkAddress> brokers;
   private Peer peer;
-  private DreamConfiguration conf;
 
   @Override
   public void init(Peer peer) {
     this.peer = peer;
-    conf = DreamConfiguration.get();
     components = new HashSet<NetworkAddress>();
     brokers = new HashSet<NetworkAddress>();
-    final IOverlayGenerator overlayGenerator = TreeOverlayGenerator.get(conf.brokersTopologyType);
+    final IOverlayGenerator overlayGenerator = TreeOverlayGenerator.get();
     final Set<Link> initialTopology = overlayGenerator.generateOverlay();
     for (final Link l : initialTopology) {
       if (l.getNode1().getId() == peer.getIndexNumber()) {
@@ -38,7 +35,7 @@ public class OverlayPeerlet extends BasePeerlet implements IOverlayPeerlet {
       }
     }
 
-    final IClientAssociationGenerator associationGenerator = new ClientAssociationGenerator(conf.clientsAssociationType, conf.percentageOfPureForwarders);
+    final IClientAssociationGenerator associationGenerator = ClientAssociationGenerator.get();
     final Set<Link> componentAssociations = associationGenerator.getAssociation();
     for (final Link l : componentAssociations) {
       if (l.getNode1().getId() == peer.getIndexNumber()) {

@@ -70,6 +70,7 @@ public class EventPacket extends Message implements Serializable {
 
   public final void setLockReleaseNodes(Set<String> lockReleaseNodes) {
     this.lockReleaseNodes.addAll(lockReleaseNodes);
+    lockReleaseNodes.remove(lockRequestingNode);
   }
 
   public final Set<String> getLockReleaseNodes() {

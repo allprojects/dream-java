@@ -10,7 +10,8 @@ public class DreamConfiguration extends Configuration {
   public static final int CAUSAL = 1;
   public static final int SINGLE_SOURCE_GLITCH_FREE = 2;
   public static final int COMPLETE_GLITCH_FREE = 3;
-  public static final int ATOMIC = 4;
+  public static final int COMPLETE_GLITCH_FREE_OPTIMIZED = 4;
+  public static final int ATOMIC = 5;
 
   private static DreamConfiguration singleton;
 
@@ -90,8 +91,8 @@ public class DreamConfiguration extends Configuration {
   public int linkLength;
 
   /**
-   * Consistency type CAUSAL = 1 SINGLE_GLITCH_FREE = 2 COMPLETE_GLITCH_FREE = 3
-   * ATOMIC = 4
+   * Consistency type CAUSAL=1, SINGLE_GLITCH_FREE=2, COMPLETE_GLITCH_FREE=3,
+   * COMPLETE_GLITCH_FREE_OPTIMIZED=4, ATOMIC=5
    */
   public int consistencyType;
 

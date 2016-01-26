@@ -29,21 +29,22 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       DreamConfiguration.CAUSAL, //
       DreamConfiguration.SINGLE_SOURCE_GLITCH_FREE, //
       DreamConfiguration.COMPLETE_GLITCH_FREE, //
+      DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED, //
       DreamConfiguration.ATOMIC //
   };
 
   public final void runExperiments() {
-    // runFromFile(0);
+    runFromFile(0);
     for (int seed = 0; seed < 5; seed++) {
-      runDefault(seed);
-      runDefaultCentralized(seed);
-      runLocality(seed);
-      runNumBrokers(seed);
-      runNumVars(seed);
-      runNumSignals(seed);
-      runNumGraphDependencies(seed);
-      runTimeBetweenEvents(seed);
-      runTimeBetweenReads(seed);
+      // runDefault(seed);
+      // runDefaultCentralized(seed);
+      // runLocality(seed);
+      // runNumBrokers(seed);
+      // runNumVars(seed);
+      // runNumSignals(seed);
+      // runNumGraphDependencies(seed);
+      // runTimeBetweenEvents(seed);
+      // runTimeBetweenReads(seed);
     }
   }
 
@@ -226,6 +227,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
 
     // Init the lock manager
     if (DreamConfiguration.get().consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
+        DreamConfiguration.get().consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED || //
         DreamConfiguration.get().consistencyType == DreamConfiguration.ATOMIC) {
       final PeerFactory lockManagerFactory = new LockManagerFactory();
       experiment.initPeers(numPeers + 1, 1, lockManagerFactory);
@@ -251,6 +253,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       return "single_glitch_free";
     case DreamConfiguration.COMPLETE_GLITCH_FREE:
       return "complete_glitch_free";
+    case DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED:
+      return "complete_glitch_free_optimized";
     case DreamConfiguration.ATOMIC:
       return "atomic";
     default:

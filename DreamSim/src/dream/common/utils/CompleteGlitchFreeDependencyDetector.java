@@ -32,6 +32,7 @@ public enum CompleteGlitchFreeDependencyDetector {
     sharedNodes.clear();
     lockRequestNode.clear();
     computeSharedNodes();
+    computeLockRequestNodes();
   }
 
   /**

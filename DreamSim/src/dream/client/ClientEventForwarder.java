@@ -72,6 +72,7 @@ class ClientEventForwarder extends BasePeerlet {
     Set<String> lockReleaseNodes;
     switch (conf.consistencyType) {
     case DreamConfiguration.COMPLETE_GLITCH_FREE:
+    case DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED:
       lockReleaseNodes = completeGlitchDepDetector.getNodesToLockFor(initialVar);
       break;
     case DreamConfiguration.ATOMIC:
@@ -113,8 +114,9 @@ class ClientEventForwarder extends BasePeerlet {
   /**
    * Return false if the lock request is not needed
    */
-  final boolean sendReadWriteLockRequest(String source, LockApplicant applicant) {
+  final boolean sendReadWriteLockRequest(String source, UUID packetID, LockApplicant applicant) {
     if (conf.consistencyType != DreamConfiguration.COMPLETE_GLITCH_FREE && //
+        conf.consistencyType != DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED && //
         conf.consistencyType != DreamConfiguration.ATOMIC) {
       assert false : conf.consistencyType;
       logger.warning("Invoked sendReadWriteLockRequest() even if the consistency level does not require it.");
@@ -123,7 +125,7 @@ class ClientEventForwarder extends BasePeerlet {
 
     logger.finer("Invoked sendReadWriteLockRequest for source " + source);
     final Set<String> nodesToLock = //
-    conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE //
+    conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED //
         ? completeGlitchDepDetector.getNodesToLockFor(source) //
         : atomicDepDetector.getNodesToLockFor(source);
     final Set<String> releaseNodes = getLockReleaseNodesFor(source);
@@ -132,9 +134,8 @@ class ClientEventForwarder extends BasePeerlet {
       return false;
     }
 
-    final UUID lockId = UUID.randomUUID();
-    final LockRequestPacket reqPkt = new LockRequestPacket(getPeer().getNetworkAddress(), lockId, nodesToLock, releaseNodes, LockType.READ_WRITE);
-    lockApplicants.put(lockId, applicant);
+    final LockRequestPacket reqPkt = new LockRequestPacket(getPeer().getNetworkAddress(), packetID, nodesToLock, releaseNodes, LockType.READ_WRITE);
+    lockApplicants.put(packetID, applicant);
 
     connectionManager.sendLockRequest(reqPkt);
     return true;
@@ -143,6 +144,7 @@ class ClientEventForwarder extends BasePeerlet {
   final Set<String> getLockReleaseNodesFor(String source) {
     switch (conf.consistencyType) {
     case DreamConfiguration.COMPLETE_GLITCH_FREE:
+    case DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED:
       return completeGlitchDepDetector.getNodesToLockFor(source);
     case DreamConfiguration.ATOMIC:
       return finalNodesDetector.getFinalNodesFor(source);
@@ -153,6 +155,7 @@ class ClientEventForwarder extends BasePeerlet {
 
   final void sendLockRelease(UUID lockID) {
     if (conf.consistencyType != DreamConfiguration.COMPLETE_GLITCH_FREE && //
+        conf.consistencyType != DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED && //
         conf.consistencyType != DreamConfiguration.ATOMIC) {
       assert false : conf.consistencyType;
       logger.warning("Invoked sendLockRelease() even if the consistency level does not require it.");

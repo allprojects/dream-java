@@ -34,17 +34,17 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
   };
 
   public final void runExperiments() {
-    runFromFile(0);
+    // runFromFile(0);
     for (int seed = 0; seed < 5; seed++) {
-      // runDefault(seed);
-      // runDefaultCentralized(seed);
-      // runLocality(seed);
-      // runNumBrokers(seed);
-      // runNumVars(seed);
-      // runNumSignals(seed);
-      // runNumGraphDependencies(seed);
-      // runTimeBetweenEvents(seed);
-      // runTimeBetweenReads(seed);
+      runDefault(seed);
+      runDefaultCentralized(seed);
+      runLocality(seed);
+      runNumBrokers(seed);
+      runNumVars(seed);
+      runNumSignals(seed);
+      runNumGraphDependencies(seed);
+      runTimeBetweenEvents(seed);
+      runTimeBetweenReads(seed);
     }
   }
 

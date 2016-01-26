@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import dream.common.packets.EventPacket;
 import dream.common.utils.IntraSourceDependencyDetector;
 import dream.common.utils.WaitRecommendations;
+import dream.experiments.DreamConfiguration;
 
 /**
  * This class is responsible for temporarily accumulating events before delivery
@@ -25,6 +26,12 @@ class QueueManager {
   private final Set<EventPacket> pendingResults = new HashSet<>();
 
   final List<EventPacket> processEventPacket(EventPacket evPkt, String expression) {
+    if (DreamConfiguration.get().consistencyType == DreamConfiguration.CAUSAL) {
+      final List<EventPacket> result = new ArrayList<>();
+      result.add(evPkt);
+      return result;
+    }
+
     final UUID id = evPkt.getId();
     final Set<WaitRecommendations> waitingRecommendations = //
     IntraSourceDependencyDetector.instance.//

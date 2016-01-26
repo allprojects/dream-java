@@ -2,10 +2,10 @@ set terminal postscript enhance color dashed dl 4 font 16
 set pointsize 3
 # set size ratio 0.55
 
-set style line 1 lw 4 lt rgb 'red' pt 1
+set style line 1 lw 4 lt rgb 'orange' pt 1
 set style line 2 lw 4 lt rgb 'black' pt 6
-set style line 3 lw 4 lt rgb 'orange' pt 8
-set style line 4 lw 4 lt rgb 'brown' pt 10 
+set style line 3 lw 4 lt rgb 'green' pt 8
+set style line 4 lw 4 lt rgb 'blue' pt 3
 
 set key above
 set log y

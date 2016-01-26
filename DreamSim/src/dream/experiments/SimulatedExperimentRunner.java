@@ -35,7 +35,6 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
   public final void runExperiments() {
     // runFromFile(0);
     for (int seed = 0; seed < 5; seed++) {
-      runFromFile(seed);
       runDefault(seed);
       runDefaultCentralized(seed);
       runLocality(seed);

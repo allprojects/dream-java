@@ -35,14 +35,15 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
 
   public final void runExperiments() {
     // runFromFile(0);
-    for (int seed = 0; seed < 5; seed++) {
+    for (int seed = 0; seed < 10; seed++) {
       runDefault(seed);
       runDefaultCentralized(seed);
       runLocality(seed);
       runNumBrokers(seed);
       runNumVars(seed);
-      runNumSignals(seed);
+      runGraphDepth(seed);
       runNumGraphDependencies(seed);
+      runGraphShareProbability(seed);
       runTimeBetweenEvents(seed);
       runTimeBetweenReads(seed);
     }
@@ -118,19 +119,14 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     }
   }
 
-  private final void runNumSignals(int seed) {
+  private final void runGraphDepth(int seed) {
     loadFromFile();
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int numSignals = 10; numSignals <= 1000;) {
-        DreamConfiguration.get().graphNumInnerNodes = numSignals;
-        runExperiment("numSignals", String.valueOf(seed), String.valueOf(numSignals), getProtocolName(i));
-        if (numSignals < 100) {
-          numSignals += 30;
-        } else {
-          numSignals += 300;
-        }
+      for (int depth = 1; depth <= 10; depth++) {
+        DreamConfiguration.get().graphDepth = depth;
+        runExperiment("graphDepth", String.valueOf(seed), String.valueOf(depth), getProtocolName(i));
       }
     }
   }
@@ -141,9 +137,21 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
       for (int dep = 1; dep <= 10; dep++) {
-        DreamConfiguration.get().graphMinDepPerNode = Math.max(1, dep - 1);
-        DreamConfiguration.get().graphMaxDepPerNode = dep + 1;
+        DreamConfiguration.get().graphMaxDependenciesPerNode = dep;
         runExperiment("numGraphDependencies", String.valueOf(seed), String.valueOf(dep), getProtocolName(i));
+      }
+    }
+  }
+
+  private final void runGraphShareProbability(int seed) {
+    loadFromFile();
+    DreamConfiguration.get().seed = seed;
+    for (final int i : protocols) {
+      DreamConfiguration.get().consistencyType = i;
+      for (int share = 10; share <= 80; share += 10) {
+        final float shareFloat = (float) share / 100;
+        DreamConfiguration.get().graphNodeShareProbability = shareFloat;
+        runExperiment("graphShare", String.valueOf(seed), String.valueOf(shareFloat), getProtocolName(i));
       }
     }
   }

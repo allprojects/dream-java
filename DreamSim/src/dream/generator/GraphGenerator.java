@@ -113,7 +113,7 @@ public class GraphGenerator {
   private final Set<String> generateLevel(String source, Set<String> previousLevel) {
     final int numNodes = config.graphMinNodesPerLevel + random.nextInt(config.graphMaxNodesPerLevel - config.graphMinNodesPerLevel + 1);
     final Set<String> currentLevel = new HashSet<>();
-    for (int i = 0; i < numNodes; i++) {
+    for (int i = 0; i <= numNodes; i++) {
       currentLevel.add(generateSignal(source, previousLevel));
     }
     return currentLevel;
@@ -135,7 +135,7 @@ public class GraphGenerator {
 
   private final Set<String> selectDepNodes(String source, Set<String> previousLevel) {
     final Set<String> result = new HashSet<>();
-    int numDeps = Math.min(1 + random.nextInt(config.graphMaxDependenciesPerNode + 1), allNodes.size());
+    int numDeps = Math.min(1 + random.nextInt(config.graphMaxDependenciesPerNode), allNodes.size());
     // To avoid long lasting loops
     if (config.graphNodeShareProbability < 0.3) {
       numDeps = Math.min(numDeps, nodesPerSource.get(source).size());

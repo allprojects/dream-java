@@ -16,15 +16,13 @@ import protopeer.network.NetworkAddress;
 
 public class OverlayPeerlet extends BasePeerlet implements IOverlayPeerlet {
   private static final Logger logger = Logger.getLogger(OverlayPeerlet.class);
-  private Set<NetworkAddress> components;
-  private Set<NetworkAddress> brokers;
+  private final Set<NetworkAddress> components = new HashSet<NetworkAddress>();
+  private final Set<NetworkAddress> brokers = new HashSet<NetworkAddress>();
   private Peer peer;
 
   @Override
   public void init(Peer peer) {
     this.peer = peer;
-    components = new HashSet<NetworkAddress>();
-    brokers = new HashSet<NetworkAddress>();
     final IOverlayGenerator overlayGenerator = TreeOverlayGenerator.get();
     final Set<Link> initialTopology = overlayGenerator.generateOverlay();
     for (final Link l : initialTopology) {

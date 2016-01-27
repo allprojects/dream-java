@@ -51,7 +51,7 @@ class QueueManager {
     }
 
     final List<EventProducerPair> result = new ArrayList<>();
-    if (waitingElements.isEmpty()) {
+    if (!waitingElements.containsKey(id)) {
       result.addAll(pendingResults);
       pendingResults.clear();
     }

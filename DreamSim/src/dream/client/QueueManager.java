@@ -47,9 +47,9 @@ class QueueManager {
         waitingElements.remove(id);
       }
     } else {
-      final Set<String> expressionsToWaitFrom = getExpressionsToWaitFrom(waitingRecommendations);
-      if (!expressionsToWaitFrom.isEmpty()) {
-        final WaitingElement elem = new WaitingElement(expressionsToWaitFrom, evPkt);
+      final Set<String> expressionsToWaitFor = getExpressionsToWaitFor(waitingRecommendations);
+      if (!expressionsToWaitFor.isEmpty()) {
+        final WaitingElement elem = new WaitingElement(expressionsToWaitFor, evPkt);
         waitingElements.put(id, elem);
       } else {
         pendingResults.add(evPkt);
@@ -57,14 +57,14 @@ class QueueManager {
     }
 
     final List<EventPacket> result = new ArrayList<>();
-    if (waitingElements.isEmpty()) {
+    if (!waitingElements.containsKey(id)) {
       result.addAll(pendingResults);
       pendingResults.clear();
     }
     return result;
   }
 
-  private final Set<String> getExpressionsToWaitFrom(Set<WaitRecommendations> recommendations) {
+  private final Set<String> getExpressionsToWaitFor(Set<WaitRecommendations> recommendations) {
     return recommendations.stream().//
         map(wr -> wr.getRecommendations()).//
         collect(HashSet::new, HashSet::addAll, HashSet::addAll);

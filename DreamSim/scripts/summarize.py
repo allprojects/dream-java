@@ -228,7 +228,7 @@ numVars = [1, 4, 7, 10, 40, 70, 100]
 graphDepth = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 numGraphDependencies = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 graphShare = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
-timeBetweenEvents = [1, 4, 7, 10, 40, 70, 100, 400, 700, 1000]
+timeBetweenEvents = [100, 400, 700, 1000, 4000, 7000, 10000]
 timeBetweenReads = [100, 400, 700, 1000, 4000, 7000, 10000]
 
 # Invocations

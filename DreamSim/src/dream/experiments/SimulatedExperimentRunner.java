@@ -34,18 +34,18 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
   };
 
   public final void runExperiments() {
-    // runFromFile(0);
+    runFromFile(0);
     for (int seed = 0; seed < 10; seed++) {
-      runDefault(seed);
-      runDefaultCentralized(seed);
-      runLocality(seed);
-      runNumBrokers(seed);
-      runNumVars(seed);
-      runGraphDepth(seed);
-      runNumGraphDependencies(seed);
-      runGraphShareProbability(seed);
-      runTimeBetweenEvents(seed);
-      runTimeBetweenReads(seed);
+      // runDefault(seed);
+      // runDefaultCentralized(seed);
+      // runLocality(seed);
+      // runNumBrokers(seed);
+      // runNumVars(seed);
+      // runGraphDepth(seed);
+      // runNumGraphDependencies(seed);
+      // runGraphShareProbability(seed);
+      // runTimeBetweenEvents(seed);
+      // runTimeBetweenReads(seed);
     }
   }
 
@@ -161,18 +161,16 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int timeBetweenEvents = 1; timeBetweenEvents <= 1000;) {
-        DreamConfiguration.get().simulationTimeInSeconds = 10 * timeBetweenEvents;
+      for (int timeBetweenEvents = 100; timeBetweenEvents <= 10000;) {
+        // TODO: change simulation time accordingly?
         DreamConfiguration.get().epochDuration = 2 * timeBetweenEvents;
         DreamConfiguration.get().minTimeBetweenEventsInMs = Math.min(1, timeBetweenEvents - 1);
         DreamConfiguration.get().maxTimeBetweenEventsInMs = timeBetweenEvents + 1;
         runExperiment("timeBetweenEvents", String.valueOf(seed), String.valueOf(timeBetweenEvents), getProtocolName(i));
-        if (timeBetweenEvents < 10) {
-          timeBetweenEvents += 3;
-        } else if (timeBetweenEvents < 100) {
-          timeBetweenEvents += 30;
-        } else {
+        if (timeBetweenEvents < 1000) {
           timeBetweenEvents += 300;
+        } else {
+          timeBetweenEvents += 3000;
         }
       }
     }

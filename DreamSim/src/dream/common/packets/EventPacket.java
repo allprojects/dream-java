@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import dream.common.packets.content.Event;
+import dream.common.utils.CompleteGlitchFreeDependencyDetector;
+import dream.experiments.DreamConfiguration;
 import protopeer.network.Message;
 import protopeer.util.quantities.Data;
 
@@ -29,6 +31,9 @@ public class EventPacket extends Message implements Serializable {
   // Original source of the change
   private final String source;
 
+  // Node that should request the lock for the propagation, if any
+  private final String lockRequestingNode;
+
   // Nodes that should release the lock for the propagation, if any
   private final Set<String> lockReleaseNodes = new HashSet<>();
 
@@ -37,6 +42,10 @@ public class EventPacket extends Message implements Serializable {
     this.id = id;
     this.creationTime = creationTime;
     this.source = source;
+    this.lockRequestingNode = //
+    DreamConfiguration.get().consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED //
+        ? CompleteGlitchFreeDependencyDetector.instance.getLockRequestNodeFor(source) //
+        : source;
   }
 
   public final Event getEvent() {
@@ -55,8 +64,13 @@ public class EventPacket extends Message implements Serializable {
     return source;
   }
 
+  public final String getLockRequestingNode() {
+    return lockRequestingNode;
+  }
+
   public final void setLockReleaseNodes(Set<String> lockReleaseNodes) {
     this.lockReleaseNodes.addAll(lockReleaseNodes);
+    lockReleaseNodes.remove(lockRequestingNode);
   }
 
   public final Set<String> getLockReleaseNodes() {

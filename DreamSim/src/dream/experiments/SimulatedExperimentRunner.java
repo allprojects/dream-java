@@ -6,6 +6,8 @@ import dream.generator.GraphGenerator;
 import dream.generator.RandomGenerator;
 import dream.locking.LockManagerFactory;
 import dream.measurement.MeasurementLogger;
+import dream.overlay.ClientAssociationGenerator;
+import dream.overlay.TreeOverlayGenerator;
 import dream.server.ServerFactory;
 import protopeer.ConfigurationException;
 import protopeer.Experiment;
@@ -27,20 +29,21 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       DreamConfiguration.CAUSAL, //
       DreamConfiguration.SINGLE_SOURCE_GLITCH_FREE, //
       DreamConfiguration.COMPLETE_GLITCH_FREE, //
+      DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED, //
       DreamConfiguration.ATOMIC //
   };
 
   public final void runExperiments() {
     // runFromFile(0);
-    for (int seed = 0; seed < 5; seed++) {
-      runFromFile(seed);
+    for (int seed = 0; seed < 10; seed++) {
       runDefault(seed);
       runDefaultCentralized(seed);
       runLocality(seed);
       runNumBrokers(seed);
       runNumVars(seed);
-      runNumSignals(seed);
+      runGraphDepth(seed);
       runNumGraphDependencies(seed);
+      runGraphShareProbability(seed);
       runTimeBetweenEvents(seed);
       runTimeBetweenReads(seed);
     }
@@ -116,19 +119,14 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     }
   }
 
-  private final void runNumSignals(int seed) {
+  private final void runGraphDepth(int seed) {
     loadFromFile();
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int numSignals = 10; numSignals <= 1000;) {
-        DreamConfiguration.get().graphNumInnerNodes = numSignals;
-        runExperiment("numSignals", String.valueOf(seed), String.valueOf(numSignals), getProtocolName(i));
-        if (numSignals < 100) {
-          numSignals += 30;
-        } else {
-          numSignals += 300;
-        }
+      for (int depth = 1; depth <= 10; depth++) {
+        DreamConfiguration.get().graphDepth = depth;
+        runExperiment("graphDepth", String.valueOf(seed), String.valueOf(depth), getProtocolName(i));
       }
     }
   }
@@ -139,9 +137,21 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
       for (int dep = 1; dep <= 10; dep++) {
-        DreamConfiguration.get().graphMinDepPerNode = Math.max(1, dep - 1);
-        DreamConfiguration.get().graphMaxDepPerNode = dep + 1;
+        DreamConfiguration.get().graphMaxDependenciesPerNode = dep;
         runExperiment("numGraphDependencies", String.valueOf(seed), String.valueOf(dep), getProtocolName(i));
+      }
+    }
+  }
+
+  private final void runGraphShareProbability(int seed) {
+    loadFromFile();
+    DreamConfiguration.get().seed = seed;
+    for (final int i : protocols) {
+      DreamConfiguration.get().consistencyType = i;
+      for (int share = 10; share <= 80; share += 10) {
+        final float shareFloat = (float) share / 100;
+        DreamConfiguration.get().graphNodeShareProbability = shareFloat;
+        runExperiment("graphShare", String.valueOf(seed), String.valueOf(shareFloat), getProtocolName(i));
       }
     }
   }
@@ -151,18 +161,16 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int timeBetweenEvents = 1; timeBetweenEvents <= 1000;) {
-        DreamConfiguration.get().simulationTimeInSeconds = 10 * timeBetweenEvents;
+      for (int timeBetweenEvents = 100; timeBetweenEvents <= 10000;) {
+        // TODO: change simulation time accordingly?
         DreamConfiguration.get().epochDuration = 2 * timeBetweenEvents;
         DreamConfiguration.get().minTimeBetweenEventsInMs = Math.min(1, timeBetweenEvents - 1);
         DreamConfiguration.get().maxTimeBetweenEventsInMs = timeBetweenEvents + 1;
         runExperiment("timeBetweenEvents", String.valueOf(seed), String.valueOf(timeBetweenEvents), getProtocolName(i));
-        if (timeBetweenEvents < 10) {
-          timeBetweenEvents += 3;
-        } else if (timeBetweenEvents < 100) {
-          timeBetweenEvents += 30;
-        } else {
+        if (timeBetweenEvents < 1000) {
           timeBetweenEvents += 300;
+        } else {
+          timeBetweenEvents += 3000;
         }
       }
     }
@@ -173,7 +181,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int timeBetweenReads = 100; timeBetweenReads <= 1000;) {
+      for (int timeBetweenReads = 100; timeBetweenReads <= 10000;) {
         DreamConfiguration.get().minTimeBetweenSignalReadsInMs = Math.min(1, timeBetweenReads - 1);
         DreamConfiguration.get().maxTimeBetweenSignalReadsInMs = timeBetweenReads + 1;
         runExperiment("timeBetweenReads", String.valueOf(seed), String.valueOf(timeBetweenReads), getProtocolName(i));
@@ -202,6 +210,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     // Cleanup
     RandomGenerator.reset();
     mLogger.resetCounters();
+    TreeOverlayGenerator.get().clean();
+    ClientAssociationGenerator.get().clean();
     GraphGenerator.get().clean();
     TrafficGeneratorPeerlet.resetCount();
 
@@ -223,6 +233,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
 
     // Init the lock manager
     if (DreamConfiguration.get().consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
+        DreamConfiguration.get().consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED || //
         DreamConfiguration.get().consistencyType == DreamConfiguration.ATOMIC) {
       final PeerFactory lockManagerFactory = new LockManagerFactory();
       experiment.initPeers(numPeers + 1, 1, lockManagerFactory);
@@ -248,6 +259,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       return "single_glitch_free";
     case DreamConfiguration.COMPLETE_GLITCH_FREE:
       return "complete_glitch_free";
+    case DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED:
+      return "complete_glitch_free_optimized";
     case DreamConfiguration.ATOMIC:
       return "atomic";
     default:

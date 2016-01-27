@@ -1,7 +1,6 @@
 package dream.generator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +22,9 @@ public class GraphGenerator {
   private static GraphGenerator instance;
 
   private final DependencyGraph depGraph = DependencyGraph.instance;
-  private final Set<String> existingNodes = new HashSet<>();
+  // Existing nodes, organized by source
+  private final Map<String, Set<String>> nodesPerSource = new HashMap<>();
+  private final Set<String> allNodes = new HashSet<>();
 
   private final DreamConfiguration config = DreamConfiguration.get();
   private final Random random = RandomGenerator.get();
@@ -43,15 +44,19 @@ public class GraphGenerator {
 
   public void clean() {
     depGraph.clear();
-    existingNodes.clear();
+    nodesPerSource.clear();
+    allNodes.clear();
     listeners.clear();
   }
 
   public final void generateGraphs(int id) {
+    if (config.graphNodeShareProbability > 0.95) {
+      throw new IllegalArgumentException("graphNodeShareProbability must be below 0.95");
+    }
     // Only the first client triggers a graph generation
     if (id == 0) {
       IntStream.range(0, config.graphNumSources).forEach(i -> generateVar());
-      IntStream.range(0, config.graphNumInnerNodes).forEach(i -> generateSignal());
+      nodesPerSource.keySet().forEach(source -> generateGraphFor(source));
     }
   }
 
@@ -86,33 +91,85 @@ public class GraphGenerator {
 
   private final void generateVar() {
     final String host = selectRandomHost();
-    final String name = Consts.objPrefix + existingNodes.size();
+    final String name = Consts.objPrefix + allNodes.size();
     final String node = name + "@" + host;
-    existingNodes.add(node);
+    final Set<String> sourceNodes = new HashSet<>();
+    sourceNodes.add(node);
+    nodesPerSource.put(node, sourceNodes);
+    allNodes.add(node);
     depGraph.addVar(node);
   }
 
-  private final void generateSignal() {
-    final String name = Consts.objPrefix + existingNodes.size();
-    final Set<String> depNodes = selectDepNodes();
+  private final void generateGraphFor(String source) {
+    final int numLevels = config.graphDepth;
+    // Start from 1 because level 0 is the source
+    Set<String> previousLevel = new HashSet<>();
+    previousLevel.add(source);
+    for (int i = 1; i < numLevels; i++) {
+      previousLevel = generateLevel(source, previousLevel);
+    }
+  }
+
+  private final Set<String> generateLevel(String source, Set<String> previousLevel) {
+    final int numNodes = config.graphMinNodesPerLevel + random.nextInt(config.graphMaxNodesPerLevel - config.graphMinNodesPerLevel + 1);
+    final Set<String> currentLevel = new HashSet<>();
+    for (int i = 0; i <= numNodes; i++) {
+      currentLevel.add(generateSignal(source, previousLevel));
+    }
+    return currentLevel;
+  }
+
+  private final String generateSignal(String source, Set<String> previousLevel) {
+    final String name = Consts.objPrefix + allNodes.size();
+    final Set<String> depNodes = selectDepNodes(source, previousLevel);
     final String host = random.nextDouble() < config.graphLocality//
         ? depNodes.stream().findAny().get().split("@")[1] //
         : selectRandomHost();
 
     final String node = name + "@" + host;
-    existingNodes.add(node);
+    nodesPerSource.get(source).add(node);
+    allNodes.add(node);
     depGraph.addSignal(node, depNodes);
+    return node;
   }
 
-  private final Set<String> selectDepNodes() {
-    final int numDeps = config.graphMinDepPerNode + random.nextInt(config.graphMaxDepPerNode - config.graphMinDepPerNode + 1);
-    return selectRandomNodes(numDeps);
+  private final Set<String> selectDepNodes(String source, Set<String> previousLevel) {
+    final Set<String> result = new HashSet<>();
+    int numDeps = Math.min(1 + random.nextInt(config.graphMaxDependenciesPerNode), allNodes.size());
+    // To avoid long lasting loops
+    if (config.graphNodeShareProbability < 0.3) {
+      numDeps = Math.min(numDeps, nodesPerSource.get(source).size());
+    }
+
+    // Always select a node from the previous level of the source graph
+    result.add(selectRandomNodeFromPreviousLevel(previousLevel));
+    while (result.size() < numDeps) {
+      if (random.nextDouble() < config.graphNodeShareProbability && nodesPerSource.size() > 1) {
+        result.add(selectRandomNodeFromOtherSources(source));
+      } else {
+        result.add(selectRandomNodeFromSource(source));
+      }
+    }
+
+    return result;
   }
 
-  private final Set<String> selectRandomNodes(int numNodes) {
-    final List<String> shuffleList = new ArrayList<>(existingNodes);
-    Collections.shuffle(shuffleList);
-    return shuffleList.stream().limit(numNodes).collect(Collectors.toSet());
+  private final String selectRandomNodeFromPreviousLevel(Set<String> previousLevel) {
+    final List<String> levelList = new ArrayList<>(previousLevel);
+    return levelList.get(random.nextInt(levelList.size()));
+  }
+
+  private final String selectRandomNodeFromSource(String source) {
+    final List<String> sourceNodes = new ArrayList<>(nodesPerSource.get(source));
+    return sourceNodes.get(random.nextInt(sourceNodes.size()));
+  }
+
+  private final String selectRandomNodeFromOtherSources(String source) {
+    final List<String> nodes = nodesPerSource.entrySet().stream()//
+        .filter(e -> !e.getKey().equals(source))//
+        .map(e -> e.getValue())//
+        .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
+    return nodes.get(random.nextInt(nodes.size()));
   }
 
   private final String selectRandomHost() {

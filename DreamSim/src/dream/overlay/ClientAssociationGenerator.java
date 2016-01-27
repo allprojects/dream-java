@@ -23,18 +23,33 @@ public class ClientAssociationGenerator implements IClientAssociationGenerator {
   public final int UNIFORM_ALTERNATE_ID = 3;
   public final int UNIFORM_RANDOM_ID = 4;
 
+  private static IClientAssociationGenerator instance;
+
   private final int type;
   private final double percentageOfPureForwarders;
 
-  private Set<Link> association;
-  private final boolean associationGenerated = false;
+  private final Set<Link> association = new HashSet<>();
+  private boolean associationGenerated = false;
 
-  public ClientAssociationGenerator(int type, double percentageOfPureForwarders) {
+  public static final IClientAssociationGenerator get() {
+    if (instance == null) {
+      instance = new ClientAssociationGenerator();
+    }
+    return instance;
+  }
+
+  @Override
+  public void clean() {
+    association.clear();
+    associationGenerated = false;
+  }
+
+  public ClientAssociationGenerator() {
+    this.type = DreamConfiguration.get().clientsAssociationType;
+    this.percentageOfPureForwarders = DreamConfiguration.get().percentageOfPureForwarders;
     if (percentageOfPureForwarders < 0 || percentageOfPureForwarders > 1) {
       throw new IllegalArgumentException("percentageOfPureForwarders is not valid for ComponentAssociationGenerator");
     }
-    this.type = type;
-    this.percentageOfPureForwarders = percentageOfPureForwarders;
     switch (type) {
     case UNIFORM_LOWEST_ID:
     case UNIFORM_HIGHEST_ID:
@@ -49,6 +64,7 @@ public class ClientAssociationGenerator implements IClientAssociationGenerator {
   @Override
   public Set<Link> getAssociation() {
     if (!associationGenerated) {
+      associationGenerated = true;
       final DreamConfiguration conf = DreamConfiguration.get();
       final int minBroker = 1;
       final int maxBroker = conf.numberOfBrokers;
@@ -92,21 +108,19 @@ public class ClientAssociationGenerator implements IClientAssociationGenerator {
         }
         break;
       }
-      association = getAssociation(brokers, clients);
+      getAssociation(brokers, clients);
     }
     return association;
   }
 
-  private Set<Link> getAssociation(final List<Node> brokers, final List<Node> components) {
-    final Set<Link> links = new HashSet<Link>();
+  private void getAssociation(final List<Node> brokers, final List<Node> components) {
     int i = 0;
-    while (links.size() < components.size()) {
+    while (association.size() < components.size()) {
       // TODO: was links.add(new Link(brokers.get(i%components.size()),
       // components.get(i)));
-      links.add(new Link(brokers.get(i % brokers.size()), components.get(i)));
+      association.add(new Link(brokers.get(i % brokers.size()), components.get(i)));
       i++;
     }
-    return links;
   }
 
 }

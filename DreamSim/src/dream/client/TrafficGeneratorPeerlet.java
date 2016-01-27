@@ -99,7 +99,7 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     final Random rand = RandomGenerator.get();
     final int minTime = conf.minTimeBetweenEventsInMs;
     final int maxTime = conf.maxTimeBetweenEventsInMs;
-    return minTime == maxTime ? maxTime : minTime + rand.nextInt(maxTime - minTime);
+    return minTime == maxTime ? maxTime : minTime + rand.nextInt(maxTime - minTime + 1);
   }
 
   private final double getTimeBetweenSignalReadInMs() {
@@ -107,7 +107,7 @@ public class TrafficGeneratorPeerlet extends BasePeerlet implements GraphGenerat
     final Random rand = RandomGenerator.get();
     final int minTime = conf.minTimeBetweenSignalReadsInMs;
     final int maxTime = conf.maxTimeBetweenSignalReadsInMs;
-    return minTime == maxTime ? maxTime : minTime + rand.nextInt(maxTime - minTime);
+    return minTime == maxTime ? maxTime : minTime + rand.nextInt(maxTime - minTime + 1);
   }
 
 }

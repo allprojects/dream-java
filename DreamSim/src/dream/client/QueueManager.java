@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import dream.common.packets.EventPacket;
 import dream.common.utils.IntraSourceDependencyDetector;
 import dream.common.utils.WaitRecommendations;
+import dream.experiments.DreamConfiguration;
 
 /**
  * This class is responsible for temporarily accumulating events before delivery
@@ -25,6 +26,12 @@ class QueueManager {
   private final Set<EventPacket> pendingResults = new HashSet<>();
 
   final List<EventPacket> processEventPacket(EventPacket evPkt, String expression) {
+    if (DreamConfiguration.get().consistencyType == DreamConfiguration.CAUSAL) {
+      final List<EventPacket> result = new ArrayList<>();
+      result.add(evPkt);
+      return result;
+    }
+
     final UUID id = evPkt.getId();
     final Set<WaitRecommendations> waitingRecommendations = //
     IntraSourceDependencyDetector.instance.//
@@ -40,9 +47,9 @@ class QueueManager {
         waitingElements.remove(id);
       }
     } else {
-      final Set<String> expressionsToWaitFrom = getExpressionsToWaitFrom(waitingRecommendations);
-      if (!expressionsToWaitFrom.isEmpty()) {
-        final WaitingElement elem = new WaitingElement(expressionsToWaitFrom, evPkt);
+      final Set<String> expressionsToWaitFor = getExpressionsToWaitFor(waitingRecommendations);
+      if (!expressionsToWaitFor.isEmpty()) {
+        final WaitingElement elem = new WaitingElement(expressionsToWaitFor, evPkt);
         waitingElements.put(id, elem);
       } else {
         pendingResults.add(evPkt);
@@ -50,14 +57,14 @@ class QueueManager {
     }
 
     final List<EventPacket> result = new ArrayList<>();
-    if (waitingElements.isEmpty()) {
+    if (!waitingElements.containsKey(id)) {
       result.addAll(pendingResults);
       pendingResults.clear();
     }
     return result;
   }
 
-  private final Set<String> getExpressionsToWaitFrom(Set<WaitRecommendations> recommendations) {
+  private final Set<String> getExpressionsToWaitFor(Set<WaitRecommendations> recommendations) {
     return recommendations.stream().//
         map(wr -> wr.getRecommendations()).//
         collect(HashSet::new, HashSet::addAll, HashSet::addAll);

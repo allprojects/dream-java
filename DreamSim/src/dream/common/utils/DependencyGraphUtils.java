@@ -48,24 +48,25 @@ class DependencyGraphUtils {
   }
 
   /**
-   * Return, for each source, the set of nodes that directly or indirectly
-   * depend on it.
+   * Return, for each node, the set of nodes that directly or indirectly depend
+   * on it.
    *
-   * @return for each source, the set of nodes that directly or indirectly
-   *         depend on it.
+   * @return for each node, the set of nodes that directly or indirectly depend
+   *         on it.
    */
   static final Map<String, Set<String>> computeDependencyClosure() {
     final Map<String, Set<String>> result = new HashMap<>();
     final DependencyGraph depGraph = DependencyGraph.instance;
-    depGraph.getSources().forEach(s -> result.put(s, computeDependencyClosureFor(s, depGraph)));
+    depGraph.getSources().forEach(n -> result.put(n, computeDependencyClosureFor(n, depGraph)));
+    depGraph.getGraph().keySet().forEach(n -> result.put(n, computeDependencyClosureFor(n, depGraph)));
     return result;
   }
 
-  private static final Set<String> computeDependencyClosureFor(String source, DependencyGraph depGraph) {
+  private static final Set<String> computeDependencyClosureFor(String node, DependencyGraph depGraph) {
     final Set<String> result = new HashSet<>();
     final Set<String> newNodes = new HashSet<>();
-    result.add(source);
-    newNodes.add(source);
+    result.add(node);
+    newNodes.add(node);
     computeDependencyClosureFor(newNodes, result, depGraph);
     return result;
   }

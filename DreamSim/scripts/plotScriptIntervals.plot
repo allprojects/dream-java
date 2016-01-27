@@ -2,10 +2,10 @@ set terminal postscript enhance color dashed dl 4 font 16
 set pointsize 3
 # set size ratio 0.55
 
-set style line 1 lw 4 lt rgb 'red' pt 1
+set style line 1 lw 4 lt rgb 'orange' pt 1
 set style line 2 lw 4 lt rgb 'black' pt 6
-set style line 3 lw 4 lt rgb 'orange' pt 8
-set style line 4 lw 4 lt rgb 'brown' pt 10 
+set style line 3 lw 4 lt rgb 'green' pt 8
+set style line 4 lw 4 lt rgb 'blue' pt 3
 
 set key above
 set log y
@@ -100,35 +100,35 @@ plot "../resultsAvg/numVars_causal_TrafficByte" u ($1):($8/1000):($15/1000) t "C
 "../resultsAvg/numVars_complete_glitch_free_TrafficByte" u ($1):($8/1000) t "Complete" w lines ls 3, \
 "../resultsAvg/numVars_atomic_TrafficByte" u ($1):($8/1000) t "Atomic" w lines ls 4
 
-#####################
-# NUMBER OF SIGNALS #
-#####################
+###############
+# GRAPH DEPTH #
+###############
 
-set xlabel "Number of inner nodes (signals) in the graph" offset 0,0.5
+set xlabel "Depth of the dependency graph" offset 0,0.5
 
-set output "../graphs/numSignalsDelay.ps"
+set output "../graphs/graphDepthDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
 
-plot "../resultsAvg/numSignals_causal_DelayAvg" u 1:2:3 t "Causal" w yerrorbars ls 1, \
-"../resultsAvg/numSignals_single_glitch_free_DelayAvg" u 1:2:3 t "Single" w yerrorbars ls 2, \
-"../resultsAvg/numSignals_complete_glitch_free_DelayAvg" u 1:2:3 t "Complete" w yerrorbars ls 3, \
-"../resultsAvg/numSignals_atomic_DelayAvg" u 1:2:3 t "Atomic" w yerrorbars ls 4, \
-"../resultsAvg/numSignals_causal_DelayAvg" u 1:2 t "Causal" w lines ls 1, \
-"../resultsAvg/numSignals_single_glitch_free_DelayAvg" u 1:2 t "Single" w lines ls 2, \
-"../resultsAvg/numSignals_complete_glitch_free_DelayAvg" u 1:2 t "Complete" w lines ls 3, \
-"../resultsAvg/numSignals_atomic_DelayAvg" u 1:2 t "Atomic" w lines ls 4
+plot "../resultsAvg/graphDepth_causal_DelayAvg" u 1:2:3 t "Causal" w yerrorbars ls 1, \
+"../resultsAvg/graphDepth_single_glitch_free_DelayAvg" u 1:2:3 t "Single" w yerrorbars ls 2, \
+"../resultsAvg/graphDepth_complete_glitch_free_DelayAvg" u 1:2:3 t "Complete" w yerrorbars ls 3, \
+"../resultsAvg/graphDepth_atomic_DelayAvg" u 1:2:3 t "Atomic" w yerrorbars ls 4, \
+"../resultsAvg/graphDepth_causal_DelayAvg" u 1:2 t "Causal" w lines ls 1, \
+"../resultsAvg/graphDepth_single_glitch_free_DelayAvg" u 1:2 t "Single" w lines ls 2, \
+"../resultsAvg/graphDepth_complete_glitch_free_DelayAvg" u 1:2 t "Complete" w lines ls 3, \
+"../resultsAvg/graphDepth_atomic_DelayAvg" u 1:2 t "Atomic" w lines ls 4
 
-set output "../graphs/numSignalsTraffic.ps"
+set output "../graphs/graphDepthTraffic.ps"
 set ylabel "Overall Traffic (KB/s)" offset 0.5,0
 
-plot "../resultsAvg/numSignals_causal_TrafficByte" u ($1):($8/1000):($15/1000) t "Causal" w yerrorbars ls 1, \
-"../resultsAvg/numSignals_single_glitch_free_TrafficByte" u ($1):($8/1000):($15/1000) t "Single" w yerrorbars ls 2, \
-"../resultsAvg/numSignals_complete_glitch_free_TrafficByte" u ($1):($8/1000):($15/1000) t "Complete" w yerrorbars ls 3, \
-"../resultsAvg/numSignals_atomic_TrafficByte" u ($1):($8/1000):($15/1000) t "Atomic" w yerrorbars ls 4, \
-"../resultsAvg/numSignals_causal_TrafficByte" u ($1):($8/1000) t "Causal" w lines ls 1, \
-"../resultsAvg/numSignals_single_glitch_free_TrafficByte" u ($1):($8/1000) t "Single" w lines ls 2, \
-"../resultsAvg/numSignals_complete_glitch_free_TrafficByte" u ($1):($8/1000) t "Complete" w lines ls 3, \
-"../resultsAvg/numSignals_atomic_TrafficByte" u ($1):($8/1000) t "Atomic" w lines ls 4
+plot "../resultsAvg/graphDepth_causal_TrafficByte" u ($1):($8/1000):($15/1000) t "Causal" w yerrorbars ls 1, \
+"../resultsAvg/graphDepth_single_glitch_free_TrafficByte" u ($1):($8/1000):($15/1000) t "Single" w yerrorbars ls 2, \
+"../resultsAvg/graphDepth_complete_glitch_free_TrafficByte" u ($1):($8/1000):($15/1000) t "Complete" w yerrorbars ls 3, \
+"../resultsAvg/graphDepth_atomic_TrafficByte" u ($1):($8/1000):($15/1000) t "Atomic" w yerrorbars ls 4, \
+"../resultsAvg/graphDepth_causal_TrafficByte" u ($1):($8/1000) t "Causal" w lines ls 1, \
+"../resultsAvg/graphDepth_single_glitch_free_TrafficByte" u ($1):($8/1000) t "Single" w lines ls 2, \
+"../resultsAvg/graphDepth_complete_glitch_free_TrafficByte" u ($1):($8/1000) t "Complete" w lines ls 3, \
+"../resultsAvg/graphDepth_atomic_TrafficByte" u ($1):($8/1000) t "Atomic" w lines ls 4
 
 #####################################
 # NUMBER OF DEPENDENCIES PER SIGNAL #
@@ -159,6 +159,36 @@ plot "../resultsAvg/numGraphDependencies_causal_TrafficByte" u ($1):($8/1000):($
 "../resultsAvg/numGraphDependencies_single_glitch_free_TrafficByte" u ($1):($8/1000) t "Single" w lines ls 2, \
 "../resultsAvg/numGraphDependencies_complete_glitch_free_TrafficByte" u ($1):($8/1000) t "Complete" w lines ls 3, \
 "../resultsAvg/numGraphDependencies_atomic_TrafficByte" u ($1):($8/1000) t "Atomic" w lines ls 4
+
+###########################
+# GRAPH SHARE PROBABILITY #
+###########################
+
+set xlabel "Probability for a signal to depend from multiple sources" offset 0,0.5
+
+set output "../graphs/graphShareDelay.ps"
+set ylabel "Average Delay (ms)" offset 0.5,0
+
+plot "../resultsAvg/graphShare_causal_DelayAvg" u 1:2:3 t "Causal" w yerrorbars ls 1, \
+"../resultsAvg/graphShare_single_glitch_free_DelayAvg" u 1:2:3 t "Single" w yerrorbars ls 2, \
+"../resultsAvg/graphShare_complete_glitch_free_DelayAvg" u 1:2:3 t "Complete" w yerrorbars ls 3, \
+"../resultsAvg/graphShare_atomic_DelayAvg" u 1:2:3 t "Atomic" w yerrorbars ls 4, \
+"../resultsAvg/graphShare_causal_DelayAvg" u 1:2 t "Causal" w lines ls 1, \
+"../resultsAvg/graphShare_single_glitch_free_DelayAvg" u 1:2 t "Single" w lines ls 2, \
+"../resultsAvg/graphShare_complete_glitch_free_DelayAvg" u 1:2 t "Complete" w lines ls 3, \
+"../resultsAvg/graphShare_atomic_DelayAvg" u 1:2 t "Atomic" w lines ls 4
+
+set output "../graphs/graphShareTraffic.ps"
+set ylabel "Overall Traffic (KB/s)" offset 0.5,0
+
+plot "../resultsAvg/graphShare_causal_TrafficByte" u ($1):($8/1000):($15/1000) t "Causal" w yerrorbars ls 1, \
+"../resultsAvg/graphShare_single_glitch_free_TrafficByte" u ($1):($8/1000):($15/1000) t "Single" w yerrorbars ls 2, \
+"../resultsAvg/graphShare_complete_glitch_free_TrafficByte" u ($1):($8/1000):($15/1000) t "Complete" w yerrorbars ls 3, \
+"../resultsAvg/graphShare_atomic_TrafficByte" u ($1):($8/1000):($15/1000) t "Atomic" w yerrorbars ls 4, \
+"../resultsAvg/graphShare_causal_TrafficByte" u ($1):($8/1000) t "Causal" w lines ls 1, \
+"../resultsAvg/graphShare_single_glitch_free_TrafficByte" u ($1):($8/1000) t "Single" w lines ls 2, \
+"../resultsAvg/graphShare_complete_glitch_free_TrafficByte" u ($1):($8/1000) t "Complete" w lines ls 3, \
+"../resultsAvg/graphShare_atomic_TrafficByte" u ($1):($8/1000) t "Atomic" w lines ls 4
 
 #######################
 # TIME BETWEEN EVENTS #

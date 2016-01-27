@@ -19,6 +19,7 @@ public enum FinalNodesDetector {
   private final Map<String, Set<String>> finalNodes = new HashMap<>();
 
   public final synchronized void consolidate() {
+    finalNodes.clear();
     computeFinalNodes();
   }
 
@@ -34,12 +35,11 @@ public enum FinalNodesDetector {
   }
 
   private final void computeFinalNodes() {
-    finalNodes.clear();
     final Map<String, Set<String>> closure = DependencyGraphUtils.computeDependencyClosure();
     final Set<String> finalNodesSet = DependencyGraphUtils.computeFinalNodes();
 
-    closure.entrySet().forEach(e -> {
-      finalNodes.put(e.getKey(), intersect(finalNodesSet, e.getValue()));
+    depGraph.getSources().forEach(s -> {
+      finalNodes.put(s, intersect(finalNodesSet, closure.get(s)));
     });
   }
 

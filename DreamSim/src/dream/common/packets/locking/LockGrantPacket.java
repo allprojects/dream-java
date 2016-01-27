@@ -11,13 +11,19 @@ public class LockGrantPacket extends Message implements Serializable {
   public static final String subject = "__DREAM_LOCK_GRANT_PACKET_SUBJECT";
 
   private final UUID lockID;
+  private final LockType type;
 
   public LockGrantPacket(LockRequestPacket reqPkt) {
     this.lockID = reqPkt.getLockID();
+    this.type = reqPkt.getType();
   }
 
   public final UUID getLockID() {
     return lockID;
+  }
+
+  public final LockType getType() {
+    return type;
   }
 
   @Override

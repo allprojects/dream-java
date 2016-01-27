@@ -15,4 +15,9 @@ public interface IClientAssociationGenerator {
    */
   public Set<Link> getAssociation();
 
+  /**
+   * Reset the association.
+   */
+  public void clean();
+
 }

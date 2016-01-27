@@ -151,8 +151,8 @@ class LockManager {
     void grant(LockRequestPacket request) {
       final UUID lockId = request.getLockID();
       final Set<String> nodesToLock = request.getLockNodes();
-      assert!grantedLocks.containsKey(lockId);
-      assert!lockedNodesMap.containsKey(lockId);
+      assert !grantedLocks.containsKey(lockId);
+      assert !lockedNodesMap.containsKey(lockId);
 
       grantedLocks.put(lockId, request.getUnlockNodes().size());
       lockedNodesMap.put(lockId, new HashSet<>(nodesToLock));

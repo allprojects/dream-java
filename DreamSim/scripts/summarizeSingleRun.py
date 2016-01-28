@@ -213,6 +213,21 @@ def avgDelay(filename, suffix, numRepetitions):
                      "\t" + str(deltaDelay) + \
                      "\n")
 
+def prepareDefault():
+    causal = open("../resultsAvg/default_causal_TrafficByte", "r").readlines()[0].split("\t")
+    single = open("../resultsAvg/default_single_glitch_free_TrafficByte", "r").readlines()[0].split("\t")
+    complete = open("../resultsAvg/default_complete_glitch_free_TrafficByte", "r").readlines()[0].split("\t")
+    atomic = open("../resultsAvg/default_atomic_TrafficByte", "r").readlines()[0].split("\t")
+
+    result = open("../resultsAvg/default", "w")
+
+    result.write("Events\t" + causal[1] + "\t" + single[1] + "\t" + complete[1] + "\t" + atomic[1] + "\n")
+    result.write("Adv.\t" + causal[3] + "\t" + single[3] + "\t" + complete[3] + "\t" + atomic[3] + "\n")
+    result.write("Subs.\t" + causal[2] + "\t" + single[2] + "\t" + complete[2] + "\t" + atomic[2] + "\n")
+    result.write("Req.\t" + causal[5] + "\t" + single[5] + "\t" + complete[5] + "\t" + atomic[5] + "\n")
+    result.write("Grant\t" + causal[6] + "\t" + single[6] + "\t" + complete[6] + "\t" + atomic[6] + "\n")        
+    result.write("Rel.\t" + causal[4] + "\t" + single[4] + "\t" + complete[4] + "\t" + atomic[4] + "\n")
+        
 def avgAll(filename, values):
     global seed
     global protocols
@@ -236,7 +251,7 @@ locality = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 numBrokers = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24]
 numVars = [1, 4, 7, 10, 40, 70, 100]
 graphDepth = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-numGraphDependencies = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+numGraphDependencies = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 graphShare = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
 timeBetweenEvents = [100, 400, 700, 1000, 4000, 7000, 10000]
 timeBetweenReads = [100, 400, 700, 1000, 4000, 7000, 10000]
@@ -263,3 +278,5 @@ avgAll("numGraphDependencies", numGraphDependencies)
 avgAll("graphShare", graphShare)
 avgAll("timeBetweenEvents", timeBetweenEvents)
 avgAll("timeBetweenReads", timeBetweenReads)
+
+prepareDefault()

@@ -1,17 +1,18 @@
 from math import sqrt
 import os
 import scipy.stats
+import shutil
 
-numSeeds = 10
+seed = 0
 
 def summarizeAll(filename, values):
-    protocols = ["causal", "single_glitch_free", "complete_glitch_free", "complete_glitch_free", "atomic"]
-    global numSeeds
-    for seed in range(0, numSeeds):
-        for protocol in protocols:
-            summarizeTraffic(filename + "_" + str(seed), protocol + "_Traffic", values)
-            summarizeTraffic(filename + "_" + str(seed), protocol + "_TrafficByte", values)
-            summarizeDelay(filename + "_" + str(seed), protocol + "_DelayAvg", values)
+    global seed
+    protocols = ["causal", "single_glitch_free", "complete_glitch_free", "complete_glitch_free_optimized", "atomic"]
+    
+    for protocol in protocols:
+        summarizeTraffic(filename + "_" + str(seed), protocol + "_Traffic", values)
+        summarizeTraffic(filename + "_" + str(seed), protocol + "_TrafficByte", values)
+        summarizeDelay(filename + "_" + str(seed), protocol + "_DelayAvg", values)
 
 def summarizeTraffic(filename, suffix, values):
     fileOut = open("../resultsAvg/" + filename + "_" + suffix, "w")
@@ -213,13 +214,20 @@ def avgDelay(filename, suffix, numRepetitions):
                      "\n")
 
 def avgAll(filename, values):
-    global numSeeds
+    global seed
     protocols = ["causal", "single_glitch_free", "complete_glitch_free", "atomic"]
     for protocol in protocols:
-        avgTraffic(filename, protocol + "_Traffic", numSeeds)
-        avgTraffic(filename, protocol + "_TrafficByte", numSeeds)
-        avgDelay(filename, protocol + "_DelayAvg", numSeeds)
-        
+        inTraffic = "../resultsAvg/" + filename + "_" + str(seed) + "_" + protocol + "_Traffic"
+        inTrafficByte = "../resultsAvg/" + filename + "_" + str(seed) + "_" + protocol + "_TrafficByte"
+        inDelay = "../resultsAvg/" + filename + "_" + str(seed) + "_" + protocol + "_DelayAvg"
+
+        outTraffic = "../resultsAvg/" + filename + "_" + protocol + "_Traffic"
+        outTrafficByte = "../resultsAvg/" + filename + "_" + protocol + "_TrafficByte"
+        outDelay = "../resultsAvg/" + filename + "_" + protocol + "_DelayAvg"
+
+        shutil.copyfile(inTraffic, outTraffic)
+        shutil.copyfile(inTrafficByte, outTrafficByte)
+        shutil.copyfile(inDelay, outDelay)
     
 # Values
 default = [0]

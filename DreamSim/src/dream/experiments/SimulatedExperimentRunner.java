@@ -136,7 +136,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int dep = 1; dep <= 10; dep++) {
+      for (int dep = 1; dep < 10; dep++) {
         DreamConfiguration.get().graphMaxDependenciesPerNode = dep;
         runExperiment("numGraphDependencies", String.valueOf(seed), String.valueOf(dep), getProtocolName(i));
       }

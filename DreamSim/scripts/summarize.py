@@ -3,9 +3,10 @@ import os
 import scipy.stats
 
 numSeeds = 10
+protocols = ["causal", "single_glitch_free", "complete_glitch_free", "complete_glitch_free_optimized", "atomic"]
 
 def summarizeAll(filename, values):
-    protocols = ["causal", "single_glitch_free", "complete_glitch_free", "complete_glitch_free", "atomic"]
+    global protocols
     global numSeeds
     for seed in range(0, numSeeds):
         for protocol in protocols:
@@ -214,7 +215,7 @@ def avgDelay(filename, suffix, numRepetitions):
 
 def avgAll(filename, values):
     global numSeeds
-    protocols = ["causal", "single_glitch_free", "complete_glitch_free", "atomic"]
+    global protocols
     for protocol in protocols:
         avgTraffic(filename, protocol + "_Traffic", numSeeds)
         avgTraffic(filename, protocol + "_TrafficByte", numSeeds)

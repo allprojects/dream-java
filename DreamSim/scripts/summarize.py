@@ -213,6 +213,21 @@ def avgDelay(filename, suffix, numRepetitions):
                      "\t" + str(deltaDelay) + \
                      "\n")
 
+def prepareDefault():
+    causal = open("../resultsAvg/default_causal_TrafficByte", "r").readlines()[0].split("\t")
+    single = open("../resultsAvg/default_single_glitch_free_TrafficByte", "r").readlines()[0].split("\t")
+    complete = open("../resultsAvg/default_complete_glitch_free_TrafficByte", "r").readlines()[0].split("\t")
+    atomic = open("../resultsAvg/default_atomic_TrafficByte", "r").readlines()[0].split("\t")
+
+    result = open("../resultsAvg/default", "w")
+
+    result.write("Events\t" + causal[1] + "\t" + single[1] + "\t" + complete[1] + "\t" + atomic[1] + "\n")
+    result.write("Adv.\t" + causal[3] + "\t" + single[3] + "\t" + complete[3] + "\t" + atomic[3] + "\n")
+    result.write("Subs.\t" + causal[2] + "\t" + single[2] + "\t" + complete[2] + "\t" + atomic[2] + "\n")
+    result.write("Req.\t" + causal[5] + "\t" + single[5] + "\t" + complete[5] + "\t" + atomic[5] + "\n")
+    result.write("Grant\t" + causal[6] + "\t" + single[6] + "\t" + complete[6] + "\t" + atomic[6] + "\n")        
+    result.write("Rel.\t" + causal[4] + "\t" + single[4] + "\t" + complete[4] + "\t" + atomic[4] + "\n")
+
 def avgAll(filename, values):
     global numSeeds
     global protocols
@@ -220,7 +235,6 @@ def avgAll(filename, values):
         avgTraffic(filename, protocol + "_Traffic", numSeeds)
         avgTraffic(filename, protocol + "_TrafficByte", numSeeds)
         avgDelay(filename, protocol + "_DelayAvg", numSeeds)
-        
     
 # Values
 default = [0]
@@ -256,3 +270,5 @@ avgAll("numGraphDependencies", numGraphDependencies)
 avgAll("graphShare", graphShare)
 avgAll("timeBetweenEvents", timeBetweenEvents)
 avgAll("timeBetweenReads", timeBetweenReads)
+
+prepareDefault()

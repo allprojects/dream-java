@@ -185,3 +185,28 @@ plot "../resultsAvg/timeBetweenReads_causal_TrafficByte" u ($1):($8/1000) t "Cau
 "../resultsAvg/timeBetweenReads_single_glitch_free_TrafficByte" u ($1):($8/1000) t "Single" w linespoint ls 2, \
 "../resultsAvg/timeBetweenReads_complete_glitch_free_TrafficByte" u ($1):($8/1000) t "Complete" w linespoint ls 3, \
 "../resultsAvg/timeBetweenReads_atomic_TrafficByte" u ($1):($8/1000) t "Atomic" w linespoint ls 4
+
+###########
+# DEFAULT #
+###########
+
+reset
+
+set style line 1 lw 2 lt rgb 'orange' pt 1
+set style line 2 lw 2 lt rgb 'black' pt 6
+set style line 3 lw 2 lt rgb 'green' pt 8
+set style line 4 lw 2 lt rgb 'blue' pt 3 
+
+set style data histogram
+set style histogram cluster gap 5
+set style fill solid border 0
+set log y
+unset xlabel
+set xtics rotate by 35 offset -0.5,-2
+
+set output "../graphs/default.ps"
+
+plot "../resultsAvg/default" u 2:xticlabel(1) ls 1 title "Causal", \
+"../resultsAvg/default" u 3:xticlabel(1) ls 2 title "Single", \
+"../resultsAvg/default" u 4:xticlabel(1) ls 3 title "Complete", \
+"../resultsAvg/default" u 5:xticlabel(1) ls 4 title "Atomic"

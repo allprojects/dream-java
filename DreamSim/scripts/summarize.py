@@ -138,13 +138,13 @@ def avgTraffic(filename, suffix, numRepetitions):
         meanLockGrant = sumLockGrant/count
         meanTotal = sumTotal/count
 
-        sampleStdDevEvents = sqrt((sumEventsSquare/count - meanEvents**2)*count/(count-1))
-        sampleStdDevSubscriptions = sqrt((sumSubscriptionsSquare/count - meanSubscriptions**2)*count/(count-1))
-        sampleStdDevAdvertisements = sqrt((sumAdvertisementsSquare/count - meanAdvertisements**2)*count/(count-1))
-        sampleStdDevLockRelease = sqrt((sumLockReleaseSquare/count - meanLockRelease**2)*count/(count-1))
-        sampleStdDevLockRequest = sqrt((sumLockRequestSquare/count - meanLockRequest**2)*count/(count-1))
-        sampleStdDevLockGrant = sqrt((sumLockGrantSquare/count - meanLockGrant**2)*count/(count-1))
-        sampleStdDevTotal = sqrt((sumTotalSquare/count - meanTotal**2)*count/(count-1))
+        sampleStdDevEvents = sqrt(abs(sumEventsSquare/count - meanEvents**2)*count/(count-1))
+        sampleStdDevSubscriptions = sqrt(abs(sumSubscriptionsSquare/count - meanSubscriptions**2)*count/(count-1))
+        sampleStdDevAdvertisements = sqrt(abs(sumAdvertisementsSquare/count - meanAdvertisements**2)*count/(count-1))
+        sampleStdDevLockRelease = sqrt(abs(sumLockReleaseSquare/count - meanLockRelease**2)*count/(count-1))
+        sampleStdDevLockRequest = sqrt(abs(sumLockRequestSquare/count - meanLockRequest**2)*count/(count-1))
+        sampleStdDevLockGrant = sqrt(abs(sumLockGrantSquare/count - meanLockGrant**2)*count/(count-1))
+        sampleStdDevTotal = sqrt(abs(sumTotalSquare/count - meanTotal**2)*count/(count-1))
 
         deltaEvents = 0
         deltaSubscriptions = 0

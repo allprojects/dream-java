@@ -72,7 +72,8 @@ public class Signal implements LockApplicant, Subscriber {
       // Release locks, if needed
       if ((conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
           conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED || //
-          conf.consistencyType == DreamConfiguration.ATOMIC) && //
+          conf.consistencyType == DreamConfiguration.ATOMIC || //
+          conf.consistencyType == DreamConfiguration.SIDUP) && //
           anyPkt.getLockReleaseNodes().contains(object + "@" + host)) {
         forwarder.sendLockRelease(anyPkt.getId());
       }

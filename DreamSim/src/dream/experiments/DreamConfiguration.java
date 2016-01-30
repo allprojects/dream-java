@@ -12,6 +12,7 @@ public class DreamConfiguration extends Configuration {
   public static final int COMPLETE_GLITCH_FREE = 3;
   public static final int COMPLETE_GLITCH_FREE_OPTIMIZED = 4;
   public static final int ATOMIC = 5;
+  public static final int SIDUP = 6;
 
   private static DreamConfiguration singleton;
 
@@ -92,7 +93,7 @@ public class DreamConfiguration extends Configuration {
 
   /**
    * Consistency type CAUSAL=1, SINGLE_GLITCH_FREE=2, COMPLETE_GLITCH_FREE=3,
-   * COMPLETE_GLITCH_FREE_OPTIMIZED=4, ATOMIC=5
+   * COMPLETE_GLITCH_FREE_OPTIMIZED=4, ATOMIC=5, SID_UP=6
    */
   public int consistencyType;
 

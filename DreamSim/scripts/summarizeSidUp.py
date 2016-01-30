@@ -3,7 +3,7 @@ import os
 import scipy.stats
 
 numSeeds = 10
-protocols = ["causal", "single_glitch_free", "complete_glitch_free", "complete_glitch_free_optimized", "atomic"]
+protocols = ["causal", "single_glitch_free", "complete_glitch_free", "complete_glitch_free_optimized", "atomic", "sid_up"]
 
 def summarizeAll(filename, values):
     global protocols
@@ -218,15 +218,16 @@ def prepareDefault():
     single = open("../resultsAvg/default_single_glitch_free_TrafficByte", "r").readlines()[0].split("\t")
     complete = open("../resultsAvg/default_complete_glitch_free_TrafficByte", "r").readlines()[0].split("\t")
     atomic = open("../resultsAvg/default_atomic_TrafficByte", "r").readlines()[0].split("\t")
+    sidup = open("../resultsAvg/default_sid_up_TrafficByte", "r").readlines()[0].split("\t")
 
     result = open("../resultsAvg/default", "w")
 
-    result.write("Events\t" + causal[1] + "\t" + single[1] + "\t" + complete[1] + "\t" + atomic[1] + "\n")
-    result.write("Adv.\t" + causal[3] + "\t" + single[3] + "\t" + complete[3] + "\t" + atomic[3] + "\n")
-    result.write("Subs.\t" + causal[2] + "\t" + single[2] + "\t" + complete[2] + "\t" + atomic[2] + "\n")
-    result.write("Req.\t" + causal[5] + "\t" + single[5] + "\t" + complete[5] + "\t" + atomic[5] + "\n")
-    result.write("Grant\t" + causal[6] + "\t" + single[6] + "\t" + complete[6] + "\t" + atomic[6] + "\n")        
-    result.write("Rel.\t" + causal[4] + "\t" + single[4] + "\t" + complete[4] + "\t" + atomic[4] + "\n")
+    result.write("Events\t" + causal[1] + "\t" + single[1] + "\t" + complete[1] + "\t" + atomic[1] + "\t" + sidup[1] + "\n")
+    result.write("Adv.\t" + causal[3] + "\t" + single[3] + "\t" + complete[3] + "\t" + atomic[3] + "\t" + sidup[3] + "\n")
+    result.write("Subs.\t" + causal[2] + "\t" + single[2] + "\t" + complete[2] + "\t" + atomic[2] + "\t" + sidup[2] + "\n")
+    result.write("Req.\t" + causal[5] + "\t" + single[5] + "\t" + complete[5] + "\t" + atomic[5] + "\t" + sidup[5] + "\n")
+    result.write("Grant\t" + causal[6] + "\t" + single[6] + "\t" + complete[6] + "\t" + atomic[6] + "\t" + sidup[6] + "\n")        
+    result.write("Rel.\t" + causal[4] + "\t" + single[4] + "\t" + complete[4] + "\t" + atomic[4] + "\t" + sidup[4] + "\n")
 
 def avgAll(filename, values):
     global numSeeds

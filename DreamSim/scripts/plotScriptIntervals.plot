@@ -14,7 +14,7 @@ set log y
 # LOCALITY #
 ############
 
-set xlabel "Degree of locality" offset 0,0.5
+set xlabel "Degree of locality" offset 0,0.2
 
 set output "../graphs/localityDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
@@ -44,7 +44,7 @@ plot "../resultsAvg/locality_causal_TrafficByte" u ($1):($8/1000):($15/1000) t "
 # NUMBER OF BROKERS #
 #####################
 
-set xlabel "Number of brokers" offset 0,0.5
+set xlabel "Number of brokers" offset 0,0.2
 
 set output "../graphs/numBrokersDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
@@ -74,7 +74,7 @@ plot "../resultsAvg/numBrokers_causal_TrafficByte" u ($1):($8/1000):($15/1000) t
 # NUMBER OF VARS #
 ##################
 
-set xlabel "Number of sources (vars) in the graph" offset 0,0.5
+set xlabel "Number of sources (vars) in the graph" offset 0,0.2
 
 set output "../graphs/numVarsDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
@@ -104,7 +104,7 @@ plot "../resultsAvg/numVars_causal_TrafficByte" u ($1):($8/1000):($15/1000) t "C
 # GRAPH DEPTH #
 ###############
 
-set xlabel "Depth of the dependency graph" offset 0,0.5
+set xlabel "Depth of the dependency graph" offset 0,0.2
 
 set output "../graphs/graphDepthDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
@@ -134,7 +134,7 @@ plot "../resultsAvg/graphDepth_causal_TrafficByte" u ($1):($8/1000):($15/1000) t
 # NUMBER OF DEPENDENCIES PER SIGNAL #
 #####################################
 
-set xlabel "Number of dependencies per signal" offset 0,0.5
+set xlabel "Number of dependencies per signal" offset 0,0.2
 
 set output "../graphs/numGraphDependenciesDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
@@ -164,7 +164,7 @@ plot "../resultsAvg/numGraphDependencies_causal_TrafficByte" u ($1):($8/1000):($
 # GRAPH SHARE PROBABILITY #
 ###########################
 
-set xlabel "Probability for a signal to depend on multiple sources" offset 0,0.5
+set xlabel "Probability for a signal to depend on multiple sources" offset 0,0.2
 
 set output "../graphs/graphShareDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
@@ -194,7 +194,7 @@ plot "../resultsAvg/graphShare_causal_TrafficByte" u ($1):($8/1000):($15/1000) t
 # TIME BETWEEN EVENTS #
 #######################
 
-set xlabel "Publication frequency (k events/s)" offset 0,0.5
+set xlabel "Publication frequency (k events/s)" offset 0,0.2
 
 set output "../graphs/pubFrequencyDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
@@ -224,7 +224,7 @@ plot "../resultsAvg/timeBetweenEvents_causal_TrafficByte" u ($1):($8/1000):($15/
 # TIME BETWEEN READS #
 ######################
 
-set xlabel "Signal access frequency (k reads/s)" offset 0,0.5
+set xlabel "Signal access frequency (k reads/s)" offset 0,0.2
 
 set output "../graphs/readFrequencyDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
@@ -249,3 +249,28 @@ plot "../resultsAvg/timeBetweenReads_causal_TrafficByte" u ($1):($8/1000):($15/1
 "../resultsAvg/timeBetweenReads_single_glitch_free_TrafficByte" u ($1):($8/1000) notitle w lines ls 2, \
 "../resultsAvg/timeBetweenReads_complete_glitch_free_TrafficByte" u ($1):($8/1000) notitle w lines ls 3, \
 "../resultsAvg/timeBetweenReads_atomic_TrafficByte" u ($1):($8/1000) notitle w lines ls 4
+
+###########
+# DEFAULT #
+###########
+
+reset
+
+set style line 1 lw 2 lt rgb 'orange' pt 1
+set style line 2 lw 2 lt rgb 'black' pt 6
+set style line 3 lw 2 lt rgb 'green' pt 8
+set style line 4 lw 2 lt rgb 'blue' pt 3 
+
+set style data histogram
+set style histogram cluster gap 5
+set style fill solid border 0
+set log y
+unset xlabel
+set xtics rotate by 35 offset -0.5,-2
+
+set output "../graphs/default.ps"
+
+plot "../resultsAvg/default" u 2:xticlabel(1) ls 1 title "Causal", \
+"../resultsAvg/default" u 3:xticlabel(1) ls 2 title "Single", \
+"../resultsAvg/default" u 4:xticlabel(1) ls 3 title "Complete", \
+"../resultsAvg/default" u 5:xticlabel(1) ls 4 title "Atomic"

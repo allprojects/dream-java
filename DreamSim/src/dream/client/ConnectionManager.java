@@ -47,7 +47,7 @@ class ConnectionManager extends BasePeerlet {
       logger.warning("server is null");
     }
     if (lockManager == null) {
-      logger.warning("server is null");
+      logger.warning("lock manager is null");
     }
   }
 

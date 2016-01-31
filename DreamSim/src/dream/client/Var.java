@@ -45,6 +45,7 @@ public class Var implements LockApplicant {
       // possibly need to acquire a lock before processing the update
       if (conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
           conf.consistencyType == DreamConfiguration.ATOMIC || //
+          conf.consistencyType == DreamConfiguration.SIDUP || //
           conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED && //
               packet.getLockRequestingNode().equals(object + "@" + host)) {
         final boolean lockRequired = forwarder.sendReadWriteLockRequest(packet.getSource(), packet.getId(), this);

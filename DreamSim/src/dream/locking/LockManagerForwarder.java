@@ -9,6 +9,7 @@ import dream.common.Outbox;
 import dream.common.packets.locking.LockGrantPacket;
 import dream.common.packets.locking.LockReleasePacket;
 import dream.common.packets.locking.LockRequestPacket;
+import dream.experiments.DreamConfiguration;
 import protopeer.BasePeerlet;
 import protopeer.Peer;
 import protopeer.network.Message;
@@ -16,7 +17,10 @@ import protopeer.network.NetworkAddress;
 
 public class LockManagerForwarder extends BasePeerlet {
   private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-  private final LockManager lockManager = new LockManager();
+  private final LockManager lockManager = //
+  DreamConfiguration.get().consistencyType == DreamConfiguration.SIDUP //
+      ? new SidUpLockManager() //
+      : new DreamLockManager();
 
   @Override
   public void init(Peer peer) {

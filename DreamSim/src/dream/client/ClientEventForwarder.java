@@ -76,6 +76,7 @@ class ClientEventForwarder extends BasePeerlet {
       lockReleaseNodes = completeGlitchDepDetector.getNodesToLockFor(initialVar);
       break;
     case DreamConfiguration.ATOMIC:
+    case DreamConfiguration.SIDUP:
       lockReleaseNodes = finalNodesDetector.getFinalNodesFor(initialVar);
       break;
     default:
@@ -117,17 +118,33 @@ class ClientEventForwarder extends BasePeerlet {
   final boolean sendReadWriteLockRequest(String source, UUID packetID, LockApplicant applicant) {
     if (conf.consistencyType != DreamConfiguration.COMPLETE_GLITCH_FREE && //
         conf.consistencyType != DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED && //
-        conf.consistencyType != DreamConfiguration.ATOMIC) {
+        conf.consistencyType != DreamConfiguration.ATOMIC && //
+        conf.consistencyType != DreamConfiguration.SIDUP) {
       assert false : conf.consistencyType;
       logger.warning("Invoked sendReadWriteLockRequest() even if the consistency level does not require it.");
       return false;
     }
 
     logger.finer("Invoked sendReadWriteLockRequest for source " + source);
-    final Set<String> nodesToLock = //
-    conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED //
-        ? completeGlitchDepDetector.getNodesToLockFor(source) //
-        : atomicDepDetector.getNodesToLockFor(source);
+    Set<String> nodesToLock;
+    switch (conf.consistencyType) {
+    case DreamConfiguration.COMPLETE_GLITCH_FREE:
+    case DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED:
+      nodesToLock = completeGlitchDepDetector.getNodesToLockFor(source);
+      break;
+    case DreamConfiguration.ATOMIC:
+      nodesToLock = atomicDepDetector.getNodesToLockFor(source);
+      break;
+    case DreamConfiguration.SIDUP:
+      nodesToLock = new HashSet<>();
+      nodesToLock.add(source);
+      break;
+    default:
+      assert false : conf.consistencyType;
+      logger.warning("Invoked sendReadWriteLockRequest() even if the consistency level does not require it.");
+      return false;
+    }
+
     final Set<String> releaseNodes = getLockReleaseNodesFor(source);
 
     if (nodesToLock.isEmpty()) {
@@ -147,6 +164,7 @@ class ClientEventForwarder extends BasePeerlet {
     case DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED:
       return completeGlitchDepDetector.getNodesToLockFor(source);
     case DreamConfiguration.ATOMIC:
+    case DreamConfiguration.SIDUP:
       return finalNodesDetector.getFinalNodesFor(source);
     default:
       return new HashSet<>();
@@ -156,7 +174,8 @@ class ClientEventForwarder extends BasePeerlet {
   final void sendLockRelease(UUID lockID) {
     if (conf.consistencyType != DreamConfiguration.COMPLETE_GLITCH_FREE && //
         conf.consistencyType != DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED && //
-        conf.consistencyType != DreamConfiguration.ATOMIC) {
+        conf.consistencyType != DreamConfiguration.ATOMIC && //
+        conf.consistencyType != DreamConfiguration.SIDUP) {
       assert false : conf.consistencyType;
       logger.warning("Invoked sendLockRelease() even if the consistency level does not require it.");
       return;

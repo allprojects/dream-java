@@ -30,7 +30,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       DreamConfiguration.SINGLE_SOURCE_GLITCH_FREE, //
       DreamConfiguration.COMPLETE_GLITCH_FREE, //
       DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED, //
-      DreamConfiguration.ATOMIC //
+      DreamConfiguration.ATOMIC, //
+      DreamConfiguration.SIDUP //
   };
 
   public final void runExperiments() {
@@ -148,7 +149,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int share = 10; share <= 80; share += 10) {
+      for (int share = 0; share <= 80; share += 10) {
         final float shareFloat = (float) share / 100;
         DreamConfiguration.get().graphNodeShareProbability = shareFloat;
         runExperiment("graphShare", String.valueOf(seed), String.valueOf(shareFloat), getProtocolName(i));
@@ -234,7 +235,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     // Init the lock manager
     if (DreamConfiguration.get().consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
         DreamConfiguration.get().consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED || //
-        DreamConfiguration.get().consistencyType == DreamConfiguration.ATOMIC) {
+        DreamConfiguration.get().consistencyType == DreamConfiguration.ATOMIC || //
+        DreamConfiguration.get().consistencyType == DreamConfiguration.SIDUP) {
       final PeerFactory lockManagerFactory = new LockManagerFactory();
       experiment.initPeers(numPeers + 1, 1, lockManagerFactory);
       numPeers++;
@@ -263,6 +265,8 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
       return "complete_glitch_free_optimized";
     case DreamConfiguration.ATOMIC:
       return "atomic";
+    case DreamConfiguration.SIDUP:
+      return "sid_up";
     default:
       assert false : id;
       return null;

@@ -147,44 +147,46 @@ plot "../resultsAvg/graphShare_causal_TrafficByte" u ($1):($8/1000) t "Causal" w
 #######################
 
 set xlabel "Publication frequency (k events/s)" offset 0,0.2
+set log x
 
 set output "../graphs/pubFrequencyDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
 
-plot "../resultsAvg/timeBetweenEvents_causal_DelayAvg" u 1:2 t "Causal" w linespoint ls 1, \
-"../resultsAvg/timeBetweenEvents_single_glitch_free_DelayAvg" u 1:2 t "Single" w linespoint ls 2, \
-"../resultsAvg/timeBetweenEvents_complete_glitch_free_DelayAvg" u 1:2 t "Complete" w linespoint ls 3, \
-"../resultsAvg/timeBetweenEvents_atomic_DelayAvg" u 1:2 t "Atomic" w linespoint ls 4
+plot "../resultsAvg/timeBetweenEvents_causal_DelayAvg" u (1000/$1):($2) t "Causal" w linespoint ls 1, \
+"../resultsAvg/timeBetweenEvents_single_glitch_free_DelayAvg" u (1000/$1):($2) t "Single" w linespoint ls 2, \
+"../resultsAvg/timeBetweenEvents_complete_glitch_free_DelayAvg" u (1000/$1):($2) t "Complete" w linespoint ls 3, \
+"../resultsAvg/timeBetweenEvents_atomic_DelayAvg" u (1000/$1):($2) t "Atomic" w linespoint ls 4
 
 set output "../graphs/pubFrequencyTraffic.ps"
 set ylabel "Overall Traffic (KB/s)" offset 0.5,0
 
-plot "../resultsAvg/timeBetweenEvents_causal_TrafficByte" u ($1):($8/1000) t "Causal" w linespoint ls 1, \
-"../resultsAvg/timeBetweenEvents_single_glitch_free_TrafficByte" u ($1):($8/1000) t "Single" w linespoint ls 2, \
-"../resultsAvg/timeBetweenEvents_complete_glitch_free_TrafficByte" u ($1):($8/1000) t "Complete" w linespoint ls 3, \
-"../resultsAvg/timeBetweenEvents_atomic_TrafficByte" u ($1):($8/1000) t "Atomic" w linespoint ls 4
+plot "../resultsAvg/timeBetweenEvents_causal_TrafficByte" u (1000/$1):($8/1000) t "Causal" w linespoint ls 1, \
+"../resultsAvg/timeBetweenEvents_single_glitch_free_TrafficByte" u (1000/$1):($8/1000) t "Single" w linespoint ls 2, \
+"../resultsAvg/timeBetweenEvents_complete_glitch_free_TrafficByte" u (1000/$1):($8/1000) t "Complete" w linespoint ls 3, \
+"../resultsAvg/timeBetweenEvents_atomic_TrafficByte" u (1000/$1):($8/1000) t "Atomic" w linespoint ls 4
 
 ######################
 # TIME BETWEEN READS #
 ######################
 
 set xlabel "Signal access frequency (k reads/s)" offset 0,0.2
+set log x
 
 set output "../graphs/readFrequencyDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0
 
-plot "../resultsAvg/timeBetweenReads_causal_DelayAvg" u 1:2 t "Causal" w linespoint ls 1, \
-"../resultsAvg/timeBetweenReads_single_glitch_free_DelayAvg" u 1:2 t "Single" w linespoint ls 2, \
-"../resultsAvg/timeBetweenReads_complete_glitch_free_DelayAvg" u 1:2 t "Complete" w linespoint ls 3, \
-"../resultsAvg/timeBetweenReads_atomic_DelayAvg" u 1:2 t "Atomic" w linespoint ls 4
+plot "../resultsAvg/timeBetweenReads_causal_DelayAvg" u (1000/$1):($2) t "Causal" w linespoint ls 1, \
+"../resultsAvg/timeBetweenReads_single_glitch_free_DelayAvg" u (1000/$1):($2) t "Single" w linespoint ls 2, \
+"../resultsAvg/timeBetweenReads_complete_glitch_free_DelayAvg" u (1000/$1):($2) t "Complete" w linespoint ls 3, \
+"../resultsAvg/timeBetweenReads_atomic_DelayAvg" u (1000/$1):($2) t "Atomic" w linespoint ls 4
 
 set output "../graphs/readFrequencyTraffic.ps"
 set ylabel "Overall Traffic (KB/s)" offset 0.5,0
 
-plot "../resultsAvg/timeBetweenReads_causal_TrafficByte" u ($1):($8/1000) t "Causal" w linespoint ls 1, \
-"../resultsAvg/timeBetweenReads_single_glitch_free_TrafficByte" u ($1):($8/1000) t "Single" w linespoint ls 2, \
-"../resultsAvg/timeBetweenReads_complete_glitch_free_TrafficByte" u ($1):($8/1000) t "Complete" w linespoint ls 3, \
-"../resultsAvg/timeBetweenReads_atomic_TrafficByte" u ($1):($8/1000) t "Atomic" w linespoint ls 4
+plot "../resultsAvg/timeBetweenReads_causal_TrafficByte" u (1000/$1):($8/1000) t "Causal" w linespoint ls 1, \
+"../resultsAvg/timeBetweenReads_single_glitch_free_TrafficByte" u (1000/$1):($8/1000) t "Single" w linespoint ls 2, \
+"../resultsAvg/timeBetweenReads_complete_glitch_free_TrafficByte" u (1000/$1):($8/1000) t "Complete" w linespoint ls 3, \
+"../resultsAvg/timeBetweenReads_atomic_TrafficByte" u (1000/$1):($8/1000) t "Atomic" w linespoint ls 4
 
 ###########
 # DEFAULT #
@@ -204,7 +206,7 @@ set log y
 unset xlabel
 set xtics rotate by 35 offset -0.5,-2
 
-set output "../graphs/default.ps"
+set output "../graphs/defaultTraffic.ps"
 
 plot "../resultsAvg/default" u 2:xticlabel(1) ls 1 title "Causal", \
 "../resultsAvg/default" u 3:xticlabel(1) ls 2 title "Single", \

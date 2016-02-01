@@ -1,8 +1,8 @@
 package dream.generator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -23,8 +23,8 @@ public class GraphGenerator {
 
   private final DependencyGraph depGraph = DependencyGraph.instance;
   // Existing nodes, organized by source
-  private final Map<String, Set<String>> nodesPerSource = new HashMap<>();
-  private final Set<String> allNodes = new HashSet<>();
+  private final Map<String, List<String>> nodesPerSource = new HashMap<>();
+  private final List<String> allNodes = new ArrayList<>();
 
   private final DreamConfiguration config = DreamConfiguration.get();
   private final Random random = RandomGenerator.get();
@@ -50,13 +50,11 @@ public class GraphGenerator {
   }
 
   public final void generateGraphs(int id) {
-    if (config.graphNodeShareProbability > 0.95) {
-      throw new IllegalArgumentException("graphNodeShareProbability must be below 0.95");
-    }
     // Only the first client triggers a graph generation
     if (id == 0) {
       IntStream.range(0, config.graphNumSources).forEach(i -> generateVar());
       nodesPerSource.keySet().forEach(source -> generateGraphFor(source));
+      addInterSourceEdges();
     }
   }
 
@@ -93,7 +91,7 @@ public class GraphGenerator {
     final String host = selectRandomHost();
     final String name = Consts.objPrefix + allNodes.size();
     final String node = name + "@" + host;
-    final Set<String> sourceNodes = new HashSet<>();
+    final List<String> sourceNodes = new ArrayList<>();
     sourceNodes.add(node);
     nodesPerSource.put(node, sourceNodes);
     allNodes.add(node);
@@ -103,25 +101,46 @@ public class GraphGenerator {
   private final void generateGraphFor(String source) {
     final int numLevels = config.graphDepth;
     // Start from 1 because level 0 is the source
-    Set<String> previousLevel = new HashSet<>();
+    List<String> previousLevel = new ArrayList<>();
     previousLevel.add(source);
     for (int i = 1; i < numLevels; i++) {
       previousLevel = generateLevel(source, previousLevel);
     }
   }
 
-  private final Set<String> generateLevel(String source, Set<String> previousLevel) {
+  private final void addInterSourceEdges() {
+    final List<String> sourceList = new ArrayList<>(nodesPerSource.keySet());
+    final int numSharedSources = (int) ((sourceList.size() - 1) * config.graphNodeShareProbability);
+    for (int i = 0; i < numSharedSources; i++) {
+      final String source = sourceList.get(i);
+      final String nextSource = sourceList.get(i + 1);
+      addInterSourceEdgesBetween(source, nextSource);
+    }
+  }
+
+  private final void addInterSourceEdgesBetween(String source1, String source2) {
+    if (nodesPerSource.get(source1).size() < 3 || nodesPerSource.get(source2).size() < 3) {
+      throw new IllegalArgumentException("The number of nodes is too small to generate inter-source edges");
+    }
+    final List<String> nodes1 = selectRandomSignalsFromSource(source1, 2);
+    final List<String> nodes2 = selectRandomSignalsFromSource(source2, 2);
+
+    depGraph.getGraph().get(nodes1.get(0)).add(nodes2.get(0));
+    depGraph.getGraph().get(nodes1.get(1)).add(nodes2.get(1));
+  }
+
+  private final List<String> generateLevel(String source, List<String> previousLevel) {
     final int numNodes = config.graphMinNodesPerLevel + random.nextInt(config.graphMaxNodesPerLevel - config.graphMinNodesPerLevel + 1);
-    final Set<String> currentLevel = new HashSet<>();
+    final List<String> currentLevel = new ArrayList<>();
     for (int i = 0; i <= numNodes; i++) {
       currentLevel.add(generateSignal(source, previousLevel));
     }
     return currentLevel;
   }
 
-  private final String generateSignal(String source, Set<String> previousLevel) {
+  private final String generateSignal(String source, List<String> previousLevel) {
     final String name = Consts.objPrefix + allNodes.size();
-    final Set<String> depNodes = selectDepNodes(source, previousLevel);
+    final List<String> depNodes = selectDepNodes(source, previousLevel);
     final String host = random.nextDouble() < config.graphLocality//
         ? depNodes.stream().findAny().get().split("@")[1] //
         : selectRandomHost();
@@ -133,43 +152,42 @@ public class GraphGenerator {
     return node;
   }
 
-  private final Set<String> selectDepNodes(String source, Set<String> previousLevel) {
-    final Set<String> result = new HashSet<>();
-    int numDeps = Math.min(1 + random.nextInt(config.graphMaxDependenciesPerNode), allNodes.size());
-    // To avoid long lasting loops
-    if (config.graphNodeShareProbability < 0.3) {
-      numDeps = Math.min(numDeps, nodesPerSource.get(source).size());
-    }
+  private final List<String> selectDepNodes(String source, List<String> previousLevel) {
+    final List<String> result = new ArrayList<>();
+    final int numDeps = Math.min(1 + random.nextInt(config.graphMaxDependenciesPerNode), nodesPerSource.get(source).size());
 
     // Always select a node from the previous level of the source graph
     result.add(selectRandomNodeFromPreviousLevel(previousLevel));
-    while (result.size() < numDeps) {
-      if (random.nextDouble() < config.graphNodeShareProbability && nodesPerSource.size() > 1) {
-        result.add(selectRandomNodeFromOtherSources(source));
-      } else {
-        result.add(selectRandomNodeFromSource(source));
-      }
-    }
+    // Select the remaining nodes from the same source
+    result.addAll(selectRandomNodesFromSource(source, numDeps - 1));
 
     return result;
   }
 
-  private final String selectRandomNodeFromPreviousLevel(Set<String> previousLevel) {
-    final List<String> levelList = new ArrayList<>(previousLevel);
-    return levelList.get(random.nextInt(levelList.size()));
+  private final String selectRandomNodeFromPreviousLevel(List<String> previousLevel) {
+    return previousLevel.get(random.nextInt(previousLevel.size()));
   }
 
-  private final String selectRandomNodeFromSource(String source) {
-    final List<String> sourceNodes = new ArrayList<>(nodesPerSource.get(source));
-    return sourceNodes.get(random.nextInt(sourceNodes.size()));
+  private final List<String> selectRandomNodesFromSource(String source, int numNodes) {
+    final List<String> sourceNodes = nodesPerSource.get(source);
+    Collections.shuffle(sourceNodes);
+    return IntStream.range(0, numNodes) //
+        .mapToObj(i -> sourceNodes.get(i)) //
+        .collect(Collectors.toList());
   }
 
-  private final String selectRandomNodeFromOtherSources(String source) {
-    final List<String> nodes = nodesPerSource.entrySet().stream()//
-        .filter(e -> !e.getKey().equals(source))//
-        .map(e -> e.getValue())//
-        .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
-    return nodes.get(random.nextInt(nodes.size()));
+  private final List<String> selectRandomSignalsFromSource(String source, int numSignals) {
+    final List<String> sourceNodes = nodesPerSource.get(source);
+    Collections.shuffle(sourceNodes);
+    final List<String> result = new ArrayList<>();
+    int index = 0;
+    while (result.size() < numSignals) {
+      final String node = sourceNodes.get(index++);
+      if (!node.equals(source)) {
+        result.add(node);
+      }
+    }
+    return result;
   }
 
   private final String selectRandomHost() {

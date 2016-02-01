@@ -50,6 +50,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     }
   }
 
+  @SuppressWarnings("unused")
   private final void runFromFile(int seed) {
     loadFromFile();
     DreamConfiguration.get().seed = seed;
@@ -149,7 +150,7 @@ public class SimulatedExperimentRunner extends SimulatedExperiment {
     DreamConfiguration.get().seed = seed;
     for (final int i : protocols) {
       DreamConfiguration.get().consistencyType = i;
-      for (int share = 0; share <= 80; share += 10) {
+      for (int share = 0; share <= 100; share += 10) {
         final float shareFloat = (float) share / 100;
         DreamConfiguration.get().graphNodeShareProbability = shareFloat;
         runExperiment("graphShare", String.valueOf(seed), String.valueOf(shareFloat), getProtocolName(i));

@@ -213,14 +213,14 @@ def avgDelay(filename, suffix, numRepetitions):
                      "\t" + str(deltaDelay) + \
                      "\n")
 
-def prepareDefault():
-    causal = open("../resultsAvg/default_causal_TrafficByte", "r").readlines()[0].split("\t")
-    single = open("../resultsAvg/default_single_glitch_free_TrafficByte", "r").readlines()[0].split("\t")
-    complete = open("../resultsAvg/default_complete_glitch_free_TrafficByte", "r").readlines()[0].split("\t")
-    atomic = open("../resultsAvg/default_atomic_TrafficByte", "r").readlines()[0].split("\t")
-    sidup = open("../resultsAvg/default_sid_up_TrafficByte", "r").readlines()[0].split("\t")
+def prepareDefaultTraffic():
+    causal = open("../resultsAvg/default_causal_TrafficByte", "r").readlines()[0].replace("\n", "").split("\t")
+    single = open("../resultsAvg/default_single_glitch_free_TrafficByte", "r").readlines()[0].replace("\n", "").split("\t")
+    complete = open("../resultsAvg/default_complete_glitch_free_TrafficByte", "r").readlines()[0].replace("\n", "").split("\t")
+    atomic = open("../resultsAvg/default_atomic_TrafficByte", "r").readlines()[0].replace("\n", "").split("\t")
+    sidup = open("../resultsAvg/default_sid_up_TrafficByte", "r").readlines()[0].replace("\n", "").split("\t")
 
-    result = open("../resultsAvg/default", "w")
+    result = open("../resultsAvg/defaultTraffic", "w")
 
     result.write("Events\t" + causal[1] + "\t" + single[1] + "\t" + complete[1] + "\t" + atomic[1] + "\t" + sidup[1] + "\n")
     result.write("Adv.\t" + causal[3] + "\t" + single[3] + "\t" + complete[3] + "\t" + atomic[3] + "\t" + sidup[3] + "\n")
@@ -228,6 +228,21 @@ def prepareDefault():
     result.write("Req.\t" + causal[5] + "\t" + single[5] + "\t" + complete[5] + "\t" + atomic[5] + "\t" + sidup[5] + "\n")
     result.write("Grant\t" + causal[6] + "\t" + single[6] + "\t" + complete[6] + "\t" + atomic[6] + "\t" + sidup[6] + "\n")        
     result.write("Rel.\t" + causal[4] + "\t" + single[4] + "\t" + complete[4] + "\t" + atomic[4] + "\t" + sidup[4] + "\n")
+
+def prepareDefaultDelay():
+    causal = open("../resultsAvg/default_causal_DelayAvg", "r").readlines()[0].replace("\n", "").split("\t")
+    single = open("../resultsAvg/default_single_glitch_free_DelayAvg", "r").readlines()[0].replace("\n", "").split("\t")
+    complete = open("../resultsAvg/default_complete_glitch_free_DelayAvg", "r").readlines()[0].replace("\n", "").split("\t")
+    atomic = open("../resultsAvg/default_atomic_DelayAvg", "r").readlines()[0].replace("\n", "").split("\t")
+    sidup = open("../resultsAvg/default_sid_up_DelayAvg", "r").readlines()[0].replace("\n", "").split("\t")
+
+    result = open("../resultsAvg/defaultDelay", "w")
+
+    result.write("Causal\t" + causal[1] + "\t" + causal[2] + "\n")
+    result.write("Single\t" + single[1] + "\t" + single[2] + "\n")
+    result.write("Complete\t" + complete[1] + "\t" + complete[2] + "\n")
+    result.write("Atomic \t" + atomic[1] + "\t" + atomic[2] + "\n")
+    result.write("Sid Up\t" + sidup[1] + "\t" + sidup[2] + "\n")
 
 def avgAll(filename, values):
     global numSeeds
@@ -273,4 +288,5 @@ avgAll("graphShare", graphShare)
 avgAll("timeBetweenEvents", timeBetweenEvents)
 avgAll("timeBetweenReads", timeBetweenReads)
 
-prepareDefault()
+prepareDefaultTraffic()
+prepareDefaultDelay()

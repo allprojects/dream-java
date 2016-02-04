@@ -8,6 +8,7 @@ import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.locking.LockGrantPacket;
+import dream.common.utils.LocalityDetector;
 import dream.experiments.DreamConfiguration;
 import protopeer.Peer;
 
@@ -43,11 +44,10 @@ public class Var implements LockApplicant {
       final EventPacket packet = pendingEvents.peek();
       // In the case of complete glitch freedom or atomic consistency, we
       // possibly need to acquire a lock before processing the update
-      if (conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
-          conf.consistencyType == DreamConfiguration.ATOMIC || //
+      if (conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE && LocalityDetector.instance.sourceRequiresLock(object + "@" + host) || //
+          conf.consistencyType == DreamConfiguration.ATOMIC && LocalityDetector.instance.sourceRequiresLock(object + "@" + host) || //
           conf.consistencyType == DreamConfiguration.SIDUP || //
-          conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED && //
-              packet.getLockRequestingNode().equals(object + "@" + host)) {
+          conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED && packet.getLockRequestingNode().equals(object + "@" + host)) {
         final boolean lockRequired = forwarder.sendReadWriteLockRequest(packet.getSource(), packet.getId(), this);
         if (!lockRequired) {
           sendNextEventPacket();

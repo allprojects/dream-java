@@ -16,6 +16,7 @@ import dream.common.utils.CompleteGlitchFreeDependencyDetector;
 import dream.common.utils.DependencyGraph;
 import dream.common.utils.FinalNodesDetector;
 import dream.common.utils.IntraSourceDependencyDetector;
+import dream.common.utils.LocalityDetector;
 import dream.experiments.DreamConfiguration;
 
 public class GraphGenerator {
@@ -72,6 +73,7 @@ public class GraphGenerator {
       CompleteGlitchFreeDependencyDetector.instance.consolidate();
       AtomicDependencyDetector.instance.consolidate();
       FinalNodesDetector.instance.consolidate();
+      LocalityDetector.instance.consolidate();
 
       depGraph.getSources().forEach(s -> {
         final String hostId = s.split("@")[1];

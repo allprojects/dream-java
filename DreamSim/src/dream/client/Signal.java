@@ -12,6 +12,7 @@ import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.content.Subscription;
 import dream.common.packets.locking.LockGrantPacket;
+import dream.common.utils.LocalityDetector;
 import dream.experiments.DreamConfiguration;
 import dream.measurement.MeasurementLogger;
 import protopeer.Peer;
@@ -112,7 +113,9 @@ public class Signal implements LockApplicant, Subscriber {
   }
 
   public void atomicRead() {
-    acquireReadLock();
+    if (LocalityDetector.instance.nodesRequiredReadLock(object + "@" + host)) {
+      acquireReadLock();
+    }
   }
 
   private final synchronized void acquireReadLock() {

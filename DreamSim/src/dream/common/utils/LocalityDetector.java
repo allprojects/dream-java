@@ -32,8 +32,8 @@ public enum LocalityDetector {
     return sourcesToLock.contains(source);
   }
 
-  public final synchronized boolean nodesRequiredReadLock(String source) {
-    return nodesToLockOnRead.contains(source);
+  public final synchronized boolean nodeRequiresReadLock(String node) {
+    return nodesToLockOnRead.contains(node);
   }
 
   /**
@@ -74,7 +74,7 @@ public enum LocalityDetector {
     dependencyClosure.entrySet().stream() //
         .filter(e -> e.getKey().equals(node)) //
         .filter(e -> e.getValue().contains(node)) //
-        .anyMatch(e -> e.getKey().split("@")[1].equals(node.split("@")[1]));
+        .anyMatch(e -> !e.getKey().split("@")[1].equals(node.split("@")[1]));
 
     depGraph.getGraph().keySet().stream() //
         .filter(aDependentNodeIsRemote.or(dependsOnRemoteNode)) //

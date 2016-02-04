@@ -71,11 +71,11 @@ public class Signal implements LockApplicant, Subscriber {
       }
 
       // Release locks, if needed
-      if ((conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE || //
-          conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED || //
-          conf.consistencyType == DreamConfiguration.ATOMIC || //
-          conf.consistencyType == DreamConfiguration.SIDUP) && //
-          anyPkt.getLockReleaseNodes().contains(object + "@" + host)) {
+      if (anyPkt.getLockReleaseNodes().contains(object + "@" + host) //
+          && (conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE && LocalityDetector.instance.sourceRequiresLock(anyPkt.getSource()) || //
+              conf.consistencyType == DreamConfiguration.COMPLETE_GLITCH_FREE_OPTIMIZED && LocalityDetector.instance.sourceRequiresLock(anyPkt.getSource()) || //
+              conf.consistencyType == DreamConfiguration.ATOMIC && LocalityDetector.instance.sourceRequiresLock(anyPkt.getSource()) || //
+              conf.consistencyType == DreamConfiguration.SIDUP)) {
         forwarder.sendLockRelease(anyPkt.getId());
       }
 
@@ -113,7 +113,7 @@ public class Signal implements LockApplicant, Subscriber {
   }
 
   public void atomicRead() {
-    if (LocalityDetector.instance.nodesRequiredReadLock(object + "@" + host)) {
+    if (LocalityDetector.instance.nodeRequiresReadLock(object + "@" + host)) {
       acquireReadLock();
     }
   }

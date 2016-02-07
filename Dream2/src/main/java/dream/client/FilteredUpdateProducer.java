@@ -7,9 +7,9 @@ import dream.common.SerializablePredicate;
 class FilteredUpdateProducer<T> implements UpdateProducer<T> {
 
   private final UpdateProducer<T> producer;
-  private final List<SerializablePredicate> constraints;
+  private final List<SerializablePredicate<T>> constraints;
 
-  public FilteredUpdateProducer(UpdateProducer<T> producer, List<SerializablePredicate> constraints) {
+  public FilteredUpdateProducer(UpdateProducer<T> producer, List<SerializablePredicate<T>> constraints) {
     super();
     this.producer = producer;
     this.constraints = constraints;
@@ -21,7 +21,7 @@ class FilteredUpdateProducer<T> implements UpdateProducer<T> {
   }
 
   @Override
-  public void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate> constraints) {
+  public void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate<T>> constraints) {
     producer.registerUpdateConsumer(consumer, constraints);
   }
 
@@ -47,7 +47,7 @@ class FilteredUpdateProducer<T> implements UpdateProducer<T> {
   }
 
   @Override
-  public List<SerializablePredicate> getConstraints() {
+  public List<SerializablePredicate<T>> getConstraints() {
     return constraints;
   }
 

@@ -14,7 +14,7 @@ public class EventPacket implements Serializable {
   private static final long serialVersionUID = 8208653909787190211L;
   public static final String subject = "__DREAM_PUBLICATION_PACKET_SUBJECT";
 
-  private final Event event;
+  private final Event<?> event;
 
   // Uniquely identifies a propagation. In the case of complete glitch free and
   // atomic consistency, it is identical to the id of the read lock associated
@@ -27,13 +27,13 @@ public class EventPacket implements Serializable {
   // Nodes that should release the lock for the propagation, if any
   private final Set<String> lockReleaseNodes = new HashSet<>();
 
-  public EventPacket(Event event, UUID id, String source) {
+  public EventPacket(Event<?> event, UUID id, String source) {
     this.event = event;
     this.id = id;
     this.source = source;
   }
 
-  public final Event getEvent() {
+  public final Event<?> getEvent() {
     return event;
   }
 

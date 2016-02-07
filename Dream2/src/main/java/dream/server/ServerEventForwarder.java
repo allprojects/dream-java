@@ -75,14 +75,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
     sendTo(EventPacket.subject, packet, outbox, matchingBrokers.keySet());
   }
 
-  private final int getSubscribersCount(Map<NodeDescriptor, Integer> clients) {
-    int count = 0;
-    for (final Integer val : clients.values()) {
-      count += val;
-    }
-    return count;
-  }
-
   private final void processAdvertisement(NodeDescriptor sender, AdvertisementPacket packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
     if (packet.isPublic()) {
       switch (packet.getAdvType()) {
@@ -98,12 +90,6 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
   }
 
   private final void sendTo(String subject, Serializable packet, Outbox box, Collection<NodeDescriptor> recipients) {
-    box.add(subject, packet, recipients);
-  }
-
-  private final void sendTo(String subject, Serializable packet, Outbox box, NodeDescriptor recipient) {
-    final Collection<NodeDescriptor> recipients = new ArrayList<NodeDescriptor>(1);
-    recipients.add(recipient);
     box.add(subject, packet, recipients);
   }
 

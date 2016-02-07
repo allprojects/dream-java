@@ -10,8 +10,6 @@ import org.junit.Test;
 
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Subscription;
-import dream.common.utils.AtomicDependencyDetector;
-import dream.common.utils.DependencyGraph;
 
 public class AtomicDependencyDetectorTest {
 
@@ -26,16 +24,16 @@ public class AtomicDependencyDetectorTest {
     assertEquals(1, depDetector.getNodesToLockFor("A@host").size());
     assertTrue(depDetector.getNodesToLockFor("A@host").contains("A@host"));
 
-    final Set<Subscription> subsB = new HashSet<>();
-    subsB.add(new Subscription("host", "A"));
+    final Set<Subscription<?>> subsB = new HashSet<>();
+    subsB.add(new Subscription<>("host", "A"));
     graph.processAdv(new Advertisement("host", "B"), subsB);
     depDetector.consolidate();
     assertEquals(2, depDetector.getNodesToLockFor("A@host").size());
     assertTrue(depDetector.getNodesToLockFor("A@host").contains("A@host"));
     assertTrue(depDetector.getNodesToLockFor("A@host").contains("B@host"));
 
-    final Set<Subscription> subsC = new HashSet<>();
-    subsC.add(new Subscription("host", "A"));
+    final Set<Subscription<?>> subsC = new HashSet<>();
+    subsC.add(new Subscription<>("host", "A"));
     graph.processAdv(new Advertisement("host", "C"), subsC);
     depDetector.consolidate();
     assertEquals(3, depDetector.getNodesToLockFor("A@host").size());
@@ -43,9 +41,9 @@ public class AtomicDependencyDetectorTest {
     assertTrue(depDetector.getNodesToLockFor("A@host").contains("B@host"));
     assertTrue(depDetector.getNodesToLockFor("A@host").contains("C@host"));
 
-    final Set<Subscription> subsD = new HashSet<>();
-    subsD.add(new Subscription("host", "B"));
-    subsD.add(new Subscription("host", "C"));
+    final Set<Subscription<?>> subsD = new HashSet<>();
+    subsD.add(new Subscription<>("host", "B"));
+    subsD.add(new Subscription<>("host", "C"));
     graph.processAdv(new Advertisement("host", "D"), subsD);
     depDetector.consolidate();
     assertEquals(4, depDetector.getNodesToLockFor("A@host").size());
@@ -69,9 +67,9 @@ public class AtomicDependencyDetectorTest {
     assertTrue(depDetector.getNodesToLockFor("A1@host").contains("A1@host"));
     assertTrue(depDetector.getNodesToLockFor("A2@host").contains("A2@host"));
 
-    final Set<Subscription> subsB = new HashSet<>();
-    subsB.add(new Subscription("host", "A1"));
-    subsB.add(new Subscription("host", "A2"));
+    final Set<Subscription<?>> subsB = new HashSet<>();
+    subsB.add(new Subscription<>("host", "A1"));
+    subsB.add(new Subscription<>("host", "A2"));
     graph.processAdv(new Advertisement("host", "B"), subsB);
     depDetector.consolidate();
     assertEquals(2, depDetector.getNodesToLockFor("A1@host").size());
@@ -81,8 +79,8 @@ public class AtomicDependencyDetectorTest {
     assertTrue(depDetector.getNodesToLockFor("A1@host").contains("B@host"));
     assertTrue(depDetector.getNodesToLockFor("A2@host").contains("B@host"));
 
-    final Set<Subscription> subsC = new HashSet<>();
-    subsC.add(new Subscription("host", "A1"));
+    final Set<Subscription<?>> subsC = new HashSet<>();
+    subsC.add(new Subscription<>("host", "A1"));
     graph.processAdv(new Advertisement("host", "C"), subsC);
     depDetector.consolidate();
     assertEquals(3, depDetector.getNodesToLockFor("A1@host").size());
@@ -93,9 +91,9 @@ public class AtomicDependencyDetectorTest {
     assertTrue(depDetector.getNodesToLockFor("A2@host").contains("B@host"));
     assertTrue(depDetector.getNodesToLockFor("A1@host").contains("C@host"));
 
-    final Set<Subscription> subsD = new HashSet<>();
-    subsD.add(new Subscription("host", "B"));
-    subsD.add(new Subscription("host", "C"));
+    final Set<Subscription<?>> subsD = new HashSet<>();
+    subsD.add(new Subscription<>("host", "B"));
+    subsD.add(new Subscription<>("host", "C"));
     graph.processAdv(new Advertisement("host", "D"), subsD);
     depDetector.consolidate();
     assertEquals(4, depDetector.getNodesToLockFor("A1@host").size());

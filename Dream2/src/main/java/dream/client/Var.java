@@ -26,9 +26,9 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 
   private final String host;
   private final String object;
-  private final List<SerializablePredicate> constraints = new ArrayList<SerializablePredicate>();
+  private final List<SerializablePredicate<T>> constraints = new ArrayList<>();
 
-  private final Map<UpdateConsumer, List<SerializablePredicate>> consumers = new HashMap<>();
+  private final Map<UpdateConsumer, List<SerializablePredicate<T>>> consumers = new HashMap<>();
   private final Queue<Object> waitingModifications = new ArrayDeque<>();
   private int pendingAcks = 0;
 
@@ -84,21 +84,23 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
     final Object mod = waitingModifications.poll();
     // Apply modification
     if (mod instanceof Consumer) {
+      @SuppressWarnings("unchecked")
       final Consumer<T> consumer = (Consumer<T>) mod;
       consumer.accept(val);
     } else if (mod instanceof Supplier) {
+      @SuppressWarnings("unchecked")
       final Supplier<T> supplier = (Supplier<T>) mod;
       val = supplier.get();
     }
 
     // Propagate modification to local and remote subscribers
-    final Event<? extends Serializable> ev = new Event(Consts.hostName, object, val);
+    final Event<? extends Serializable> ev = new Event<>(Consts.hostName, object, val);
     final String source = ev.getSignature();
     final EventPacket packet = new EventPacket(ev, eventId, source);
     packet.setLockReleaseNodes(forwarder.getLockReleaseNodesFor(source));
 
     final Set<UpdateConsumer> satConsumers = //
-    consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> ((SerializablePredicate<T>) constr).test(val)))//
+    consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> constr.test(val)))//
         .map(e -> e.getKey())//
         .collect(Collectors.toSet());
 
@@ -110,9 +112,9 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 
   @Override
   public UpdateProducer<T> filter(SerializablePredicate<T> constraint) {
-    final List<SerializablePredicate> constrList = new ArrayList<>();
+    final List<SerializablePredicate<T>> constrList = new ArrayList<>();
     constrList.add(constraint);
-    return new FilteredUpdateProducer<>(this, constrList);
+    return new FilteredUpdateProducer<T>(this, constrList);
   }
 
   @Override
@@ -122,7 +124,7 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
   }
 
   @Override
-  public void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate> constraints) {
+  public void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate<T>> constraints) {
     consumers.put(consumer, constraints);
   }
 
@@ -142,7 +144,7 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
   }
 
   @Override
-  public List<SerializablePredicate> getConstraints() {
+  public List<SerializablePredicate<T>> getConstraints() {
     return constraints;
   }
 

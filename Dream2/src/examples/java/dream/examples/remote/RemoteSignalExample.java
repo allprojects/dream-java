@@ -43,9 +43,9 @@ public class RemoteSignalExample {
 		final Signal<Integer> signal4 = new Signal<Integer>("signal4",
 				() -> remoteString1.get().length() + remoteList.get().size(), remoteString1, remoteList);
 
-		signal1.addValueChangeListener(val -> System.out.println("Signal1: " + val));
-		signal2.addValueChangeListener(val -> System.out.println("Signal2: " + val));
-		signal3.addValueChangeListener(val -> System.out.println("Signal3: " + val));
-		signal4.addValueChangeListener(val -> System.out.println("Signal4: " + val));
+		signal1.change().addHandler((oldVal, val) -> System.out.println("Signal1: " + val));
+		signal2.change().addHandler((oldVal, val) -> System.out.println("Signal2: " + val));
+		signal3.change().addHandler((oldVal, val) -> System.out.println("Signal3: " + val));
+		signal4.change().addHandler((oldVal, val) -> System.out.println("Signal4: " + val));
 	}
 }

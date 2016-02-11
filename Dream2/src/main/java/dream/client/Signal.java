@@ -25,7 +25,6 @@ import dream.common.packets.locking.LockGrantPacket;
 
 public class Signal<T extends Serializable>
 		implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer, LockApplicant {
-	private final Set<ValueChangeListener<T>> valueChangeListeners = new HashSet<>();
 
 	// Management of local subscribers
 	private final Map<UpdateConsumer, List<SerializablePredicate>> consumers = new HashMap<>();
@@ -104,10 +103,6 @@ public class Signal<T extends Serializable>
 				return;
 			}
 
-			// Notify value change listeners
-			logger.finest("Notifying registered listeners of the change.");
-			valueChangeListeners.forEach(l -> l.notifyValueChanged(val));
-
 			// Notify local and remote dependent objects
 			logger.finest("Sending event to dependent objects.");
 			final Event<T> event = new Event<T>(Consts.hostName, object, val);
@@ -143,16 +138,6 @@ public class Signal<T extends Serializable>
 		} else {
 			logger.finest(object + ": update call but waiting: " + update);
 		}
-	}
-
-	@Override
-	public void addValueChangeListener(ValueChangeListener<T> listener) {
-		valueChangeListeners.add(listener);
-	}
-
-	@Override
-	public void removeValueChangeListener(ValueChangeListener<T> listener) {
-		valueChangeListeners.remove(listener);
 	}
 
 	@Override
@@ -248,6 +233,11 @@ public class Signal<T extends Serializable>
 	public final synchronized void notifyLockGranted(LockGrantPacket lockGrant) {
 		lockID = lockGrant.getLockID();
 		notifyAll();
+	}
+
+	@Override
+	public ChangeEvent<T> change() {
+		return new ChangeEvent<T>(this);
 	}
 
 }

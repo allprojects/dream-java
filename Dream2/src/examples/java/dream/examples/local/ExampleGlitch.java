@@ -17,7 +17,7 @@ public class ExampleGlitch {
 		final Signal<Double> mid2 = new Signal<>("mid2", () -> var.get() * 3, var);
 
 		final Signal<Double> finalResult = new Signal<>("final", () -> mid1.get() + mid2.get(), mid1, mid2);
-		finalResult.addValueChangeListener(System.out::println);
+		finalResult.change().addHandler((oldVal, val) -> System.out.println(val));
 
 		try {
 			Thread.sleep(500);

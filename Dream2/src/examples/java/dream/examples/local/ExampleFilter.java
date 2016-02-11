@@ -12,8 +12,8 @@ public class ExampleFilter {
 		final Signal<Integer> signalInt2 = new Signal<>("signalInt2", () -> signalInt.get() + 1,
 				signalInt.filter(val -> val > 20));
 
-		signalInt.addValueChangeListener(val -> System.out.println("SignalInt: " + val));
-		signalInt2.addValueChangeListener(val -> System.out.println("SignalInt2: " + val));
+		signalInt.change().addHandler((oldVal, val) -> System.out.println("SignalInt: " + val));
+		signalInt2.change().addHandler((oldVal, val) -> System.out.println("SignalInt2: " + val));
 
 		try {
 			Thread.sleep(500);

@@ -18,19 +18,11 @@ interface TimeChangingValue<T> {
 	public T evaluate();
 
 	/**
-	 * Register a new ValueChangeListener.
-	 *
-	 * @param listener
-	 *            the listener to add.
+	 * Create an event that fires every time the TimeChangingValue changes. It
+	 * fires the tuple (oldVal, newVal) for the change. The first tuple is
+	 * (null, newVal)
+	 * 
+	 * @return a new ChangeEvent
 	 */
-	public void addValueChangeListener(ValueChangeListener<T> listener);
-
-	/**
-	 * Unregister a ValueChangeListener.
-	 *
-	 * @param listener
-	 *            the listener to remove.
-	 */
-	public void removeValueChangeListener(ValueChangeListener<T> listener);
-
+	public ChangeEvent<T> change();
 }

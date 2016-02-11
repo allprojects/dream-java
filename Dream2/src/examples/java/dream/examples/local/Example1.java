@@ -20,12 +20,14 @@ public class Example1 {
 		final Signal<String> signalString = new Signal<String>("signalString",
 				() -> varString1.get() + varString2.get(), varString1, varString2);
 
-		signalInt.addValueChangeListener(val -> System.out.println("signalInt: " + val + " (correct value: 158)"));
-		signalDouble
-				.addValueChangeListener(val -> System.out.println("signalDouble: " + val + " (correct value: 4.8)"));
-		signalBool.addValueChangeListener(val -> System.out.println("signalBool: " + val + " (correct value: false)"));
-		signalString.addValueChangeListener(
-				val -> System.out.println("signalString: " + val + " (correct value: Hello World!)"));
+		signalInt.change()
+				.addHandler((oldVal, val) -> System.out.println("signalInt: " + val + " (correct value: 158)"));
+		signalDouble.change()
+				.addHandler((oldVal, val) -> System.out.println("signalDouble: " + val + " (correct value: 4.8)"));
+		signalBool.change()
+				.addHandler((oldVal, val) -> System.out.println("signalBool: " + val + " (correct value: false)"));
+		signalString.change().addHandler(
+				(oldVal, val) -> System.out.println("signalString: " + val + " (correct value: Hello World!)"));
 
 		try {
 			Thread.sleep(500);

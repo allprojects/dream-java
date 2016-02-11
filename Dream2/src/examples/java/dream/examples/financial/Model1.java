@@ -2,11 +2,9 @@ package dream.examples.financial;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.client.ValueChangeListener;
-import dream.client.Var;
 import dream.common.Consts;
 
-public class Model1 implements ValueChangeListener<Integer> {
+public class Model1 {
 	public void start() {
 		Consts.hostName = "Model1";
 
@@ -21,12 +19,7 @@ public class Model1 implements ValueChangeListener<Integer> {
 			}
 		} , marketIndex, stockOpts);
 
-		f1.addValueChangeListener(this);
-	}
-
-	@Override
-	public void notifyValueChanged(Integer newValue) {
-		System.out.println("New value for f1: " + newValue);
+		f1.change().addHandler((oldVal, newVal) -> System.out.println("New value for f1: " + newVal));
 	}
 
 	public static void main(String[] args) {

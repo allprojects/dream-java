@@ -1,5 +1,24 @@
+- Filters not tested and working only with causal consistency
+
+- Currently, atomic consistency requires accessing a time changing 
+  variable using a separate atomic get method. This is necessary to
+  avoid deadlocks when the computation of a signal invokes the get()
+  method of a variable it depends on
+
+- Currently, a lock is acquired at a source and released only
+  when a propagation terminated. This can be improved to
+  enable parallel propagation.
+  -> In the case of complete glitch freedom, locks can be acquired
+     from the last nodes from which all shared nodes depend.
+  -> In the case of complete glitch freedom, locks can be released
+     after the shared nodes have been updated.
+     
 - Can we create a proxy to a method (not to an object)?
-	- If not, we can get rid of AspectJ and obtain a pure Java project
+
+- Can we consider methods with parameters?
+
 - Can we define constraints on the return values of methods?
-- Can we get rid of the non empty constructor for reactive objects?
-	- If so, we can use Lambda in Java 8!
+
+- Currently, clients only receive advertisements sent after they
+  connected to the network of brokers. We should implement a setup
+  phase used by the clients to download the current advertisements.

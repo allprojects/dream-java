@@ -11,7 +11,7 @@ public class ExampleList {
 		final Var<ArrayList<Integer>> varList = new Var<>("varList", new ArrayList<Integer>());
 		final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 1000 + varList.get().size(), varList);
 
-		signalInt.addValueChangeListener(System.out::println);
+		signalInt.change().addHandler((oldVal, val) -> System.out.println(val));
 
 		System.out.println("Expected results: ");
 		System.out.println(1001);

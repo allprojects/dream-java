@@ -8,12 +8,12 @@ import dream.common.packets.EventPacket;
  */
 public interface Subscriber {
 
-  /**
-   * Notifies the subscriber that the given event has occurred.
-   *
-   * @param event
-   *          the occurred event.
-   */
-  public void notifyEventReceived(EventPacket event);
+	/**
+	 * Notifies the subscriber that the given event has occurred.
+	 *
+	 * @param event
+	 *            the occurred event.
+	 */
+	public void notifyEventReceived(EventPacket event);
 
 }

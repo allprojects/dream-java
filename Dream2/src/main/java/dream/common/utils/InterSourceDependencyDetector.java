@@ -15,25 +15,25 @@ import java.util.Set;
  * guarantees.
  */
 public abstract class InterSourceDependencyDetector {
-  protected final DependencyGraph graph = DependencyGraph.instance;
+	protected final DependencyGraph graph = DependencyGraph.instance;
 
-  protected Map<String, Set<String>> dependencyClosure = new HashMap<>();
+	protected Map<String, Set<String>> dependencyClosure = new HashMap<>();
 
-  public final synchronized void consolidate() {
-    dependencyClosure = DependencyGraphUtils.computeDependencyClosure();
-    computeDataStructs();
-  }
+	public final synchronized void consolidate() {
+		dependencyClosure = DependencyGraphUtils.computeDependencyClosure();
+		computeDataStructs();
+	}
 
-  protected abstract void computeDataStructs();
+	protected abstract void computeDataStructs();
 
-  /**
-   * Returns the nodes that require to be locked during the propagation of an
-   * update originated at the given source.
-   *
-   * @param source
-   *          the source.
-   * @return the nodes that need to be locked during the propagation.
-   */
-  public abstract Set<String> getNodesToLockFor(String source);
+	/**
+	 * Returns the nodes that require to be locked during the propagation of an
+	 * update originated at the given source.
+	 *
+	 * @param source
+	 *            the source.
+	 * @return the nodes that need to be locked during the propagation.
+	 */
+	public abstract Set<String> getNodesToLockFor(String source);
 
 }

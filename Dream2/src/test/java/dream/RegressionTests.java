@@ -12,13 +12,13 @@ import dream.locking.LockManagerTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ //
-    IntraSourceDependencyDetectorTest.class, //
-    DependencyGraphUtilsTest.class, //
-    CompleteGlitchFreeDependencyDetectorTest.class, //
-    AtomicDependencyDetectorTest.class, //
-    FinalNodesDetectorTest.class, //
-    LockManagerTest.class, //
-    LocalTest.class })
+		IntraSourceDependencyDetectorTest.class, //
+		DependencyGraphUtilsTest.class, //
+		CompleteGlitchFreeDependencyDetectorTest.class, //
+		AtomicDependencyDetectorTest.class, //
+		FinalNodesDetectorTest.class, //
+		LockManagerTest.class, //
+		LocalTest.class })
 
 public class RegressionTests {
 

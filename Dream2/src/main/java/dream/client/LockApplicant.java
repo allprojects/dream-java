@@ -7,12 +7,12 @@ import dream.common.packets.locking.LockGrantPacket;
  */
 interface LockApplicant {
 
-  /**
-   * Method invoked when a lock is granted.
-   *
-   * @param lockGrant
-   *          the granted lock.
-   */
-  void notifyLockGranted(LockGrantPacket lockGrant);
+	/**
+	 * Method invoked when a lock is granted.
+	 *
+	 * @param lockGrant
+	 *            the granted lock.
+	 */
+	void notifyLockGranted(LockGrantPacket lockGrant);
 
 }

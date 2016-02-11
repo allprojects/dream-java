@@ -11,26 +11,26 @@ package dream.client;
  */
 interface TimeChangingValue<T> {
 
-  /**
-   * The evaluate method is automatically invoked whenever one of the values
-   * this object depends on changes.
-   */
-  public T evaluate();
+	/**
+	 * The evaluate method is automatically invoked whenever one of the values
+	 * this object depends on changes.
+	 */
+	public T evaluate();
 
-  /**
-   * Register a new ValueChangeListener.
-   *
-   * @param listener
-   *          the listener to add.
-   */
-  public void addValueChangeListener(ValueChangeListener<T> listener);
+	/**
+	 * Register a new ValueChangeListener.
+	 *
+	 * @param listener
+	 *            the listener to add.
+	 */
+	public void addValueChangeListener(ValueChangeListener<T> listener);
 
-  /**
-   * Unregister a ValueChangeListener.
-   *
-   * @param listener
-   *          the listener to remove.
-   */
-  public void removeValueChangeListener(ValueChangeListener<T> listener);
+	/**
+	 * Unregister a ValueChangeListener.
+	 *
+	 * @param listener
+	 *            the listener to remove.
+	 */
+	public void removeValueChangeListener(ValueChangeListener<T> listener);
 
 }

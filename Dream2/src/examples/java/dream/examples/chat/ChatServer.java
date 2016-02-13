@@ -4,21 +4,21 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
 import dream.common.Consts;
 import dream.locking.LockManagerLauncher;
 import dream.server.ServerLauncher;
+import javafx.util.Pair;
 
 public class ChatServer {
-	public static final String NEW_ID = "NewSessionID";
-	public static final String NEW_VAR = "NewSessionVAR";
 	public static final String NAME = "ChatServer";
 
 	private boolean serverStarted = false;
@@ -27,10 +27,10 @@ public class ChatServer {
 	private Map<String, Var<String>> clientVars;
 	private Var<ArrayList<String>> clients;
 
-	private Var<String> newSessionVAR;
 	private static SecureRandom r = new SecureRandom();
 
-	private List<String> processedIDs = new ArrayList<String>();
+	public static final String SERVER_PREFIX = "server_";
+	public static final String SERVER_REGISTERED_CLIENTS = SERVER_PREFIX + "RegisteredClients";
 
 	public static void main(String[] args) {
 		new ChatServer().start();
@@ -39,53 +39,27 @@ public class ChatServer {
 	private void initServer() {
 		Consts.hostName = NAME;
 
-		clients = new Var<ArrayList<String>>("RegisteredClients", new ArrayList<String>());
+		clients = new Var<ArrayList<String>>(SERVER_REGISTERED_CLIENTS, new ArrayList<String>());
 		clientVars = new HashMap<String, Var<String>>();
-		newSessionVAR = new Var<String>(NEW_VAR, "");
-		changeNewSession();
+		detectNewSession();
 	}
 
 	/**
-	 * Provide new Host ID and Variable name and listen to it for a new client
+	 * Look for new clients every 5 seconds
 	 */
-	private void changeNewSession() {
-		String var = getRandom();
-		RemoteVar<String> listener = new RemoteVar<String>("*", var);
-		Signal<String> listenerSignal = new Signal<String>("listener", () -> {
-			if (listener.get() == null)
-				return "";
-			else
-				return listener.get();
-		} , listener);
-		listenerSignal.change().addHandler((o, msg) -> {
-			System.out.println("new session handler");
-			changeNewSession();
-			processNewSession(var, msg);
-		});
+	private void detectNewSession() {
+		Set<String> vars = DreamClient.instance.listVariables();
+		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0])).// Pair(Host,Var)
+				filter(x -> !clientVars.keySet().contains(x.getKey()) && x.getValue().startsWith("chat_")).//
+				forEach(x -> createNewSessionFor(x.getKey(), x.getValue()));
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		newSessionVAR.set(var);
 
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		processedIDs.add(var);
-		changeNewSession();
-	}
+		detectNewSession();
 
-	private void processNewSession(String var, String msg) {
-		if (!processedIDs.contains(var)) {
-			processedIDs.add(var);
-			// variable@name@serverVar
-			String[] temp = msg.split("@", 3);
-			registerClient(temp[1], temp[0], temp[2]);
-		} else
-			System.out.println("New message(\"" + msg + "\") on already discarded channel *@" + var);
 	}
 
 	/**
@@ -96,14 +70,11 @@ public class ChatServer {
 	 *            the name of the client
 	 * @param clientVar
 	 *            the name of the variable, must be of type String
-	 * @param serverVar
-	 * @return the name of the variable on which the server will provide
-	 *         messages to the client
 	 */
-	public void registerClient(String clientName, String clientVar, String serverVar) {
-		System.out.println("Register: " + clientName + "(" + clientVar + ") -> " + serverVar);
+	private void createNewSessionFor(String clientName, String clientVar) {
+		// x = "chat_xxx"
 		RemoteVar<String> remote = new RemoteVar<String>(clientName, clientVar);
-		Signal<String> listen = new Signal<String>(serverVar + "listen", () -> {
+		Signal<String> listen = new Signal<String>(SERVER_PREFIX + "listen", () -> {
 			if (remote.get() == null)
 				return "";
 			else
@@ -114,10 +85,12 @@ public class ChatServer {
 		listen.change().addHandler((oldValue, newValue) -> clientWrote(clientName, newValue));
 
 		// create new var for sending messages to this client
-		clientVars.put(clientName, new Var<String>(serverVar, ""));
+		String reply = getRandom();
+		Var<String> replyChannel = new Var<String>(reply + clientName, clientName);
 
 		// add client as registered
 		clients.modify((old) -> old.add(clientName));
+		clientVars.put(clientName, replyChannel);
 	}
 
 	/**

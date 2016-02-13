@@ -1,11 +1,15 @@
 package dream.examples.chat;
 
 import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.Set;
 
+import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
 import dream.common.Consts;
+import javafx.util.Pair;
 
 public class Chat {
 
@@ -19,39 +23,33 @@ public class Chat {
 
 		Consts.hostName = userName;
 		// Establish new session with server
-		RemoteVar<String> var = new RemoteVar<String>(ChatServer.NAME, ChatServer.NEW_VAR);
-		Signal<String> setup = new Signal<String>("setup", () -> {
+		RemoteVar<ArrayList<String>> var = new RemoteVar<ArrayList<String>>(ChatServer.NAME,
+				ChatServer.SERVER_REGISTERED_CLIENTS);
+		Signal<ArrayList<String>> setup = new Signal<ArrayList<String>>("setup", () -> {
 			if (var.get() == null)
-				return "";
+				return new ArrayList<String>();
 			else
 				return var.get();
 		} , var);
 		setup.change().addHandler((o, n) -> {
-			if (!n.equals("")) {
-				setup(n);
-			}
+			if (n.contains(username))
+				setup();
+			System.out.println("reg clients: " + n);
 		});
-		System.out.println("Setup: Waiting for Setup information from Server ...");
+
+		myMessages = new Var<String>("chat_message", "");
+
+		System.out.println("Setup: Waiting for Information from Server ...");
 	}
 
-	private void setup(String setup_var) {
-		System.out.println("Setup: Setup information received!");
-		System.out.println("Setup: VAR: " + setup_var);
-		String serverVar = ChatServer.getRandom();
-		// Consts.hostName = setup_id;
-		Var<String> init = new Var<String>(setup_var, "message@" + userName + "@" + serverVar);
-
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		// should have correct value now
-		System.out.println("init: " + init.get());
-		Consts.hostName = userName;
-		myMessages = new Var<String>("message", "");
-
-		remoteMessages = new RemoteVar<String>(serverVar + "@" + ChatServer.NAME);
+	private void setup() {
+		if (gui != null)
+			return;
+		Set<String> vars = DreamClient.instance.listVariables();
+		String serverVar = vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0])).// Pair(Host,Var)
+				filter(x -> x.getKey().equals(ChatServer.NAME) && x.getValue().contains(userName)).//
+				reduce(null, (a, b) -> b).getValue();
+		remoteMessages = new RemoteVar<String>(ChatServer.NAME, serverVar);
 
 		Signal<String> display = new Signal<String>("display", () -> {
 			if (remoteMessages.get() != null)
@@ -69,15 +67,17 @@ public class Chat {
 	}
 
 	protected void sendMessage() {
-		myMessages.set(userName + ":" + gui.getTypedText());
+		myMessages.set(gui.getTypedText());
 		gui.displayMessage("You: " + gui.getTypedText());
 		gui.resetTypedText();
 	}
 
 	public static void main(String[] args) {
 		try {
-			if (args.length < 1)
+			if (args.length < 1) {
 				System.out.println("username missing");
+				return;
+			}
 			// Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).setLevel(Level.ALL);
 			EventQueue.invokeLater(new Runnable() {
 

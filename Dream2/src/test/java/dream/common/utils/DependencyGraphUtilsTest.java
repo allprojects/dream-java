@@ -11,8 +11,6 @@ import org.junit.Test;
 
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Subscription;
-import dream.common.utils.DependencyGraph;
-import dream.common.utils.DependencyGraphUtils;
 
 public class DependencyGraphUtilsTest {
 
@@ -37,8 +35,8 @@ public class DependencyGraphUtilsTest {
     assertEquals(1, dependencyClosure.get("A@host").size());
     assertTrue(dependencyClosure.get("A@host").contains("A@host"));
 
-    final Set<Subscription> subsB = new HashSet<>();
-    subsB.add(new Subscription("host", "A"));
+    final Set<Subscription<?>> subsB = new HashSet<>();
+    subsB.add(new Subscription<>("host", "A"));
     graph.processAdv(new Advertisement("host", "B"), subsB);
 
     relevantSources = DependencyGraphUtils.computeRelevantSources();
@@ -57,8 +55,8 @@ public class DependencyGraphUtilsTest {
     assertTrue(dependencyClosure.get("A@host").contains("A@host"));
     assertTrue(dependencyClosure.get("A@host").contains("B@host"));
 
-    final Set<Subscription> subsC = new HashSet<>();
-    subsC.add(new Subscription("host", "A"));
+    final Set<Subscription<?>> subsC = new HashSet<>();
+    subsC.add(new Subscription<>("host", "A"));
     graph.processAdv(new Advertisement("host", "C"), subsC);
 
     relevantSources = DependencyGraphUtils.computeRelevantSources();
@@ -80,9 +78,9 @@ public class DependencyGraphUtilsTest {
     assertTrue(dependencyClosure.get("A@host").contains("B@host"));
     assertTrue(dependencyClosure.get("A@host").contains("C@host"));
 
-    final Set<Subscription> subsD = new HashSet<>();
-    subsD.add(new Subscription("host", "B"));
-    subsD.add(new Subscription("host", "C"));
+    final Set<Subscription<?>> subsD = new HashSet<>();
+    subsD.add(new Subscription<>("host", "B"));
+    subsD.add(new Subscription<>("host", "C"));
     graph.processAdv(new Advertisement("host", "D"), subsD);
 
     relevantSources = DependencyGraphUtils.computeRelevantSources();
@@ -138,9 +136,9 @@ public class DependencyGraphUtilsTest {
     assertEquals(1, dependencyClosure.get("A2@host").size());
     assertTrue(dependencyClosure.get("A2@host").contains("A2@host"));
 
-    final Set<Subscription> subsB = new HashSet<>();
-    subsB.add(new Subscription("host", "A1"));
-    subsB.add(new Subscription("host", "A2"));
+    final Set<Subscription<?>> subsB = new HashSet<>();
+    subsB.add(new Subscription<>("host", "A1"));
+    subsB.add(new Subscription<>("host", "A2"));
     graph.processAdv(new Advertisement("host", "B"), subsB);
 
     relevantSources = DependencyGraphUtils.computeRelevantSources();
@@ -167,8 +165,8 @@ public class DependencyGraphUtilsTest {
     assertTrue(dependencyClosure.get("A2@host").contains("A2@host"));
     assertTrue(dependencyClosure.get("A2@host").contains("B@host"));
 
-    final Set<Subscription> subsC = new HashSet<>();
-    subsC.add(new Subscription("host", "A1"));
+    final Set<Subscription<?>> subsC = new HashSet<>();
+    subsC.add(new Subscription<>("host", "A1"));
     graph.processAdv(new Advertisement("host", "C"), subsC);
 
     relevantSources = DependencyGraphUtils.computeRelevantSources();
@@ -197,9 +195,9 @@ public class DependencyGraphUtilsTest {
     assertTrue(dependencyClosure.get("A2@host").contains("A2@host"));
     assertTrue(dependencyClosure.get("A2@host").contains("B@host"));
 
-    final Set<Subscription> subsD = new HashSet<>();
-    subsD.add(new Subscription("host", "B"));
-    subsD.add(new Subscription("host", "C"));
+    final Set<Subscription<?>> subsD = new HashSet<>();
+    subsD.add(new Subscription<>("host", "B"));
+    subsD.add(new Subscription<>("host", "C"));
     graph.processAdv(new Advertisement("host", "D"), subsD);
 
     relevantSources = DependencyGraphUtils.computeRelevantSources();

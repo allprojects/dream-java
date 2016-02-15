@@ -10,31 +10,33 @@ import dream.common.packets.content.Subscription;
 import polimi.reds.NodeDescriptor;
 
 final class SubscriptionTable {
-  private final Map<NodeDescriptor, Collection<Subscription>> subs = new HashMap<NodeDescriptor, Collection<Subscription>>();
+  private final Map<NodeDescriptor, Collection<Subscription<?>>> subs = new HashMap<>();
 
-  final void addSubscription(NodeDescriptor node, Subscription sub) {
-    Collection<Subscription> subsList = subs.get(node);
+  final void addSubscription(NodeDescriptor node, Subscription<?> sub) {
+    Collection<Subscription<?>> subsList = subs.get(node);
     if (subsList == null) {
-      subsList = new ArrayList<Subscription>();
+      subsList = new ArrayList<Subscription<?>>();
       subs.put(node, subsList);
     }
     subsList.add(sub);
   }
 
-  final void removeSubscription(NodeDescriptor node, Subscription sub) {
-    Collection<Subscription> subsList = subs.get(node);
-    if (subsList == null) return;
+  final void removeSubscription(NodeDescriptor node, Subscription<?> sub) {
+    final Collection<Subscription<?>> subsList = subs.get(node);
+    if (subsList == null) {
+      return;
+    }
     subsList.remove(sub);
     if (subsList.isEmpty()) {
       subs.remove(node);
     }
   }
 
-  final Map<NodeDescriptor, Integer> getMatchingNodes(Event ev) {
-    Map<NodeDescriptor, Integer> result = new HashMap<NodeDescriptor, Integer>();
-    for (NodeDescriptor node : subs.keySet()) {
+  final Map<NodeDescriptor, Integer> getMatchingNodes(Event<?> ev) {
+    final Map<NodeDescriptor, Integer> result = new HashMap<NodeDescriptor, Integer>();
+    for (final NodeDescriptor node : subs.keySet()) {
       int count = 0;
-      for (Subscription sub : subs.get(node)) {
+      for (final Subscription<?> sub : subs.get(node)) {
         if (sub.isSatisfiedBy(ev)) {
           count++;
         }

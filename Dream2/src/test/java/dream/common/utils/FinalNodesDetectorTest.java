@@ -255,9 +255,9 @@ public class FinalNodesDetectorTest {
 
   private final void generateAdvertisementPacket(FinalNodesDetector finalNodesDetector, String name, String... subsNames) {
     final Advertisement adv = new Advertisement(hostId, name);
-    final Set<Subscription> subs = new HashSet<Subscription>();
+    final Set<Subscription<?>> subs = new HashSet<>();
     for (final String subName : subsNames) {
-      final Subscription sub = new Subscription(hostId, subName);
+      final Subscription<?> sub = new Subscription<>(hostId, subName);
       subs.add(sub);
     }
     if (subs.isEmpty()) {

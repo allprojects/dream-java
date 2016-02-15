@@ -13,10 +13,13 @@ public class Model2 implements ValueChangeListener<Integer> {
 		RemoteVar<Integer> stockOpts = new RemoteVar<>("InputModel", "stockOpts");
 
 		Signal<Integer> f2 = new Signal<>("f2", () -> {
-			if (marketIndex.get() == null || stockOpts.get() == null) { return null; }
-			else { return marketIndex.get() + stockOpts.get() * 2; }
-		}, marketIndex, stockOpts);
-		
+			if (marketIndex.get() == null || stockOpts.get() == null) {
+				return null;
+			} else {
+				return marketIndex.get() + stockOpts.get() * 2;
+			}
+		} , marketIndex, stockOpts);
+
 		f2.addValueChangeListener(this);
 	}
 
@@ -24,7 +27,7 @@ public class Model2 implements ValueChangeListener<Integer> {
 	public void notifyValueChanged(Integer newValue) {
 		System.out.println("New value for f2: " + newValue);
 	}
-	
+
 	public static void main(String[] args) {
 		new Model2().start();
 	}

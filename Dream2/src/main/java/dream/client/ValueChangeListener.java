@@ -6,6 +6,6 @@ package dream.client;
  */
 public interface ValueChangeListener<T> {
 
-  public void notifyValueChanged(T newValue);
+	public void notifyValueChanged(T newValue);
 
 }

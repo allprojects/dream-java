@@ -10,19 +10,19 @@ import dream.common.utils.DependencyGraph;
  * to obtain information about the dependency graph.
  */
 public enum DreamClient {
-  instance;
+	instance;
 
-  private final DependencyGraph depGraph = DependencyGraph.instance;
+	private final DependencyGraph depGraph = DependencyGraph.instance;
 
-  public final void connect() {
-    ClientEventForwarder.get();
-  }
+	public final void connect() {
+		ClientEventForwarder.get();
+	}
 
-  public final Set<String> listVariables() {
-    final Set<String> result = new HashSet<>();
-    result.addAll(depGraph.getGraph().keySet());
-    result.addAll(depGraph.getSources());
-    return result;
-  }
+	public final Set<String> listVariables() {
+		final Set<String> result = new HashSet<>();
+		result.addAll(depGraph.getGraph().keySet());
+		result.addAll(depGraph.getSources());
+		return result;
+	}
 
 }

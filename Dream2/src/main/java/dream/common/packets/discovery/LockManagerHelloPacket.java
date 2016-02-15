@@ -7,7 +7,7 @@ import java.io.Serializable;
  * connects to it.
  */
 public class LockManagerHelloPacket implements Serializable {
-  private static final long serialVersionUID = -7563002622651694641L;
+	private static final long serialVersionUID = -7563002622651694641L;
 
-  public static final String subject = "__DREAM_LOCK_MANAGER_HELLO_PACKET_SUBJECT";
+	public static final String subject = "__DREAM_LOCK_MANAGER_HELLO_PACKET_SUBJECT";
 }

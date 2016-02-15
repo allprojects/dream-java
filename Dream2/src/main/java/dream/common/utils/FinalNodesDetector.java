@@ -11,40 +11,40 @@ import java.util.Set;
  * given source and do not have any other node that deoends on them.
  */
 public final class FinalNodesDetector {
-  DependencyGraph depGraph = DependencyGraph.instance;
+	DependencyGraph depGraph = DependencyGraph.instance;
 
-  // Source -> set of final nodes
-  private final Map<String, Set<String>> finalNodes = new HashMap<>();
+	// Source -> set of final nodes
+	private final Map<String, Set<String>> finalNodes = new HashMap<>();
 
-  public final synchronized void consolidate() {
-    computeFinalNodes();
-  }
+	public final synchronized void consolidate() {
+		computeFinalNodes();
+	}
 
-  /**
-   * Return the set of final nodes for the given source.
-   *
-   * @param source
-   *          the source.
-   * @return the set of final nodes for source.
-   */
-  public final synchronized Set<String> getFinalNodesFor(String source) {
-    return finalNodes.get(source);
-  }
+	/**
+	 * Return the set of final nodes for the given source.
+	 *
+	 * @param source
+	 *            the source.
+	 * @return the set of final nodes for source.
+	 */
+	public final synchronized Set<String> getFinalNodesFor(String source) {
+		return finalNodes.get(source);
+	}
 
-  private final void computeFinalNodes() {
-    finalNodes.clear();
-    final Map<String, Set<String>> closure = DependencyGraphUtils.computeDependencyClosure();
-    final Set<String> finalNodesSet = DependencyGraphUtils.computeFinalNodes();
+	private final void computeFinalNodes() {
+		finalNodes.clear();
+		final Map<String, Set<String>> closure = DependencyGraphUtils.computeDependencyClosure();
+		final Set<String> finalNodesSet = DependencyGraphUtils.computeFinalNodes();
 
-    closure.entrySet().forEach(e -> {
-      finalNodes.put(e.getKey(), intersect(finalNodesSet, e.getValue()));
-    });
-  }
+		closure.entrySet().forEach(e -> {
+			finalNodes.put(e.getKey(), intersect(finalNodesSet, e.getValue()));
+		});
+	}
 
-  private final Set<String> intersect(Set<String> set1, Set<String> set2) {
-    final Set<String> result = new HashSet<>(set1);
-    result.retainAll(set2);
-    return result;
-  }
+	private final Set<String> intersect(Set<String> set1, Set<String> set2) {
+		final Set<String> result = new HashSet<>(set1);
+		result.retainAll(set2);
+		return result;
+	}
 
 }

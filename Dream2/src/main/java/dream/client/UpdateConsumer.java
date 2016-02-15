@@ -7,13 +7,13 @@ import dream.common.packets.EventPacket;
  */
 public interface UpdateConsumer {
 
-  /**
-   * Notifies a local update coming from the given signal.
-   *
-   * @param packet
-   *          the packet containing the update.
-   * @param producer
-   *          the producer that generated the update.
-   */
-  void updateFromProducer(EventPacket packet, UpdateProducer<?> producer);
+	/**
+	 * Notifies a local update coming from the given signal.
+	 *
+	 * @param packet
+	 *            the packet containing the update.
+	 * @param producer
+	 *            the producer that generated the update.
+	 */
+	void updateFromProducer(EventPacket packet, UpdateProducer<?> producer);
 }

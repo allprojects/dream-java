@@ -4,8 +4,8 @@ import dream.server.ServerLauncher;
 
 public class StartServer {
 
-  public static void main(String[] args) {
-    ServerLauncher.start();
-  }
+	public static void main(String[] args) {
+		ServerLauncher.start();
+	}
 
 }

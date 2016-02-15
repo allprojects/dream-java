@@ -6,29 +6,29 @@ import dream.client.ValueChangeListener;
 import dream.common.Consts;
 
 public class Model1 implements ValueChangeListener<Integer> {
-  public void start() {
-    Consts.hostName = "Model1";
+	public void start() {
+		Consts.hostName = "Model1";
 
-    final RemoteVar<Integer> marketIndex = new RemoteVar<>("InputModel", "marketIndex");
-    final RemoteVar<Integer> stockOpts = new RemoteVar<>("InputModel", "stockOpts");
+		final RemoteVar<Integer> marketIndex = new RemoteVar<>("InputModel", "marketIndex");
+		final RemoteVar<Integer> stockOpts = new RemoteVar<>("InputModel", "stockOpts");
 
-    final Signal<Integer> f1 = new Signal<>("f1", () -> {
-      if (marketIndex.get() == null || stockOpts.get() == null) {
-        return null;
-      } else {
-        return marketIndex.get() * 2 + stockOpts.get();
-      }
-    } , marketIndex, stockOpts);
+		final Signal<Integer> f1 = new Signal<>("f1", () -> {
+			if (marketIndex.get() == null || stockOpts.get() == null) {
+				return null;
+			} else {
+				return marketIndex.get() * 2 + stockOpts.get();
+			}
+		} , marketIndex, stockOpts);
 
-    f1.addValueChangeListener(this);
-  }
+		f1.addValueChangeListener(this);
+	}
 
-  @Override
-  public void notifyValueChanged(Integer newValue) {
-    System.out.println("New value for f1: " + newValue);
-  }
+	@Override
+	public void notifyValueChanged(Integer newValue) {
+		System.out.println("New value for f1: " + newValue);
+	}
 
-  public static void main(String[] args) {
-    new Model1().start();
-  }
+	public static void main(String[] args) {
+		new Model1().start();
+	}
 }

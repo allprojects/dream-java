@@ -19,54 +19,54 @@ import polimi.reds.broker.overlay.Transport;
 import polimi.reds.broker.routing.GenericRouter;
 
 public class LockManagerLauncher implements NeighborhoodChangeListener {
-  private static LockManagerLauncher launcher;
+	private static LockManagerLauncher launcher;
 
-  private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-  private final Overlay overlay;
+	private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private final Overlay overlay;
 
-  private LockManagerLauncher() {
-    final Transport tr = new TCPTransport(Consts.lockManagerPort);
-    final TopologyManager tm = new SimpleTopologyManager();
-    overlay = new GenericOverlay(tm, tr);
-    final GenericRouter router = new GenericRouter(overlay);
-    final LockManagerForwarder forwarder = new LockManagerForwarder();
-    router.setPacketForwarder(LockRequestPacket.subject, forwarder);
-    router.setPacketForwarder(LockReleasePacket.subject, forwarder);
-    overlay.addNeighborhoodChangeListener(this);
-  }
+	private LockManagerLauncher() {
+		final Transport tr = new TCPTransport(Consts.lockManagerPort);
+		final TopologyManager tm = new SimpleTopologyManager();
+		overlay = new GenericOverlay(tm, tr);
+		final GenericRouter router = new GenericRouter(overlay);
+		final LockManagerForwarder forwarder = new LockManagerForwarder();
+		router.setPacketForwarder(LockRequestPacket.subject, forwarder);
+		router.setPacketForwarder(LockReleasePacket.subject, forwarder);
+		overlay.addNeighborhoodChangeListener(this);
+	}
 
-  public static final void start() {
-    if (launcher == null) {
-      launcher = new LockManagerLauncher();
-    }
-    launcher.logger.info("Starting lock manager");
-    launcher.overlay.start();
-  }
+	public static final void start() {
+		if (launcher == null) {
+			launcher = new LockManagerLauncher();
+		}
+		launcher.logger.info("Starting lock manager");
+		launcher.overlay.start();
+	}
 
-  public static final void stop() {
-    if (launcher != null) {
-      launcher.logger.info("Stopping lock manager");
-      launcher.overlay.stop();
-    }
-  }
+	public static final void stop() {
+		if (launcher != null) {
+			launcher.logger.info("Stopping lock manager");
+			launcher.overlay.stop();
+		}
+	}
 
-  @Override
-  public void notifyNeighborAdded(NodeDescriptor sender) {
-    try {
-      overlay.send(LockManagerHelloPacket.subject, new LockManagerHelloPacket(), sender);
-    } catch (IOException | NotRunningException e) {
-      e.printStackTrace();
-    }
-  }
+	@Override
+	public void notifyNeighborAdded(NodeDescriptor sender) {
+		try {
+			overlay.send(LockManagerHelloPacket.subject, new LockManagerHelloPacket(), sender);
+		} catch (IOException | NotRunningException e) {
+			e.printStackTrace();
+		}
+	}
 
-  @Override
-  public void notifyNeighborDead(NodeDescriptor sender) {
-    // Nothing to do
-  }
+	@Override
+	public void notifyNeighborDead(NodeDescriptor sender) {
+		// Nothing to do
+	}
 
-  @Override
-  public void notifyNeighborRemoved(NodeDescriptor sender) {
-    // Nothing to do
-  }
+	@Override
+	public void notifyNeighborRemoved(NodeDescriptor sender) {
+		// Nothing to do
+	}
 
 }

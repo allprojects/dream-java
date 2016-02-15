@@ -9,10 +9,10 @@ package dream.common.utils;
  */
 public interface DependencyDetector {
 
-  /**
-   * Compute the accessory data structures required to speed-up the query
-   * process. It needs to be invoked when the dependency graph changes.
-   */
-  public void consolidate();
+	/**
+	 * Compute the accessory data structures required to speed-up the query
+	 * process. It needs to be invoked when the dependency graph changes.
+	 */
+	public void consolidate();
 
 }

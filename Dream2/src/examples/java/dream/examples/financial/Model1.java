@@ -2,7 +2,6 @@ package dream.examples.financial;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.client.ValueChangeListener;
 import dream.common.Consts;
 
 public class Model1 {

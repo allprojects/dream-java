@@ -23,32 +23,35 @@ public class Chat {
 
 		Consts.hostName = userName;
 		// Establish new session with server
-		RemoteVar<ArrayList<String>> var = new RemoteVar<ArrayList<String>>(ChatServer.NAME,
+		RemoteVar<ArrayList<String>> registeredClients = new RemoteVar<ArrayList<String>>(ChatServer.NAME,
 				ChatServer.SERVER_REGISTERED_CLIENTS);
-		Signal<ArrayList<String>> setup = new Signal<ArrayList<String>>("setup", () -> {
-			if (var.get() == null)
+		Signal<ArrayList<String>> onlineList = new Signal<ArrayList<String>>("setup", () -> {
+			if (registeredClients.get() == null)
 				return new ArrayList<String>();
 			else
-				return var.get();
-		} , var);
-		setup.change().addHandler((o, n) -> {
-			if (n.contains(username))
-				setup();
-			System.out.println("reg clients: " + n);
+				return registeredClients.get();
+		} , registeredClients);
+		onlineList.change().addHandler((o, n) -> {
+			if (n.contains(username) && gui == null) {
+				System.out.println("Setup: Server Registration done!");
+				setup(n);
+			} else
+				gui.setOnline(n);
 		});
 
 		myMessages = new Var<String>("chat_message", "");
 
-		System.out.println("Setup: Waiting for Information from Server ...");
+		System.out.println("Setup: Waiting for Registration to Server ...");
 	}
 
-	private void setup() {
+	private void setup(ArrayList<String> online) {
 		if (gui != null)
 			return;
 		Set<String> vars = DreamClient.instance.listVariables();
 		String serverVar = vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0])).// Pair(Host,Var)
 				filter(x -> x.getKey().equals(ChatServer.NAME) && x.getValue().contains(userName)).//
 				reduce(null, (a, b) -> b).getValue();
+		System.out.println("Setup: Listening to Main Chat provided by Server");
 		remoteMessages = new RemoteVar<String>(ChatServer.NAME, serverVar);
 
 		Signal<String> display = new Signal<String>("display", () -> {
@@ -58,18 +61,19 @@ public class Chat {
 				return "";
 		} , remoteMessages);
 
+		System.out.println("Setup: Starting GUI");
 		gui = new ChatGUI(userName);
 		gui.setListener(this);
 
+		System.out.println("Setup: Initializing Online-List");
+		gui.setOnline(online);
 		display.change().addHandler((oldValue, newValue) -> {
 			gui.displayMessage(newValue);
 		});
 	}
 
-	protected void sendMessage() {
-		myMessages.set(gui.getTypedText());
-		gui.displayMessage("You: " + gui.getTypedText());
-		gui.resetTypedText();
+	protected void sendMessage(String text) {
+		myMessages.set(text);
 	}
 
 	public static void main(String[] args) {
@@ -78,7 +82,6 @@ public class Chat {
 				System.out.println("username missing");
 				return;
 			}
-			// Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).setLevel(Level.ALL);
 			EventQueue.invokeLater(new Runnable() {
 
 				@Override

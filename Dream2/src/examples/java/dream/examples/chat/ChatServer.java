@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
@@ -100,12 +98,23 @@ public class ChatServer {
 	 * @param text
 	 */
 	private void clientWrote(String name, String text) {
-		System.out.println("Server: " + name + " -> " + text);
 		// TODO propagate to correct clients (chat rooms etc.)
-		clientVars.forEach((client, var) -> {
-			if (client != name)
-				var.set(name + ": " + text);
-		});
+		if (text.startsWith("/")) {
+			// special commands
+			String[] temp = text.split(" ", 2);
+			String command = temp[0].substring(1, temp[0].length());
+			String rest = temp.length > 1 ? temp[1] : "";
+			if (command.equals("quit")) {
+				clients.modify((old) -> old.remove(name));
+			}
+			System.out.println("Server: " + name + " USED " + command);
+		} else {
+			System.out.println("Server: " + name + " -> " + text);
+			clientVars.forEach((client, var) -> {
+				if (client != name)
+					var.set(name + ": " + text);
+			});
+		}
 	}
 
 	/**
@@ -119,7 +128,7 @@ public class ChatServer {
 		startServerIfNeeded();
 		startLockManagerIfNeeded();
 
-		Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).setLevel(Level.ALL);
+		// Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).setLevel(Level.ALL);
 		initServer();
 
 		while (true) {

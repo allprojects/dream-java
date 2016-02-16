@@ -20,10 +20,10 @@ public class AdvertisementPacket implements Serializable {
 
 	private final Advertisement advertisement;
 	private final AdvType advType;
-	private final Set<Subscription> subscriptions = new HashSet<>();
+	private final Set<Subscription<?>> subscriptions = new HashSet<>();
 	private final boolean isPublic;
 
-	public AdvertisementPacket(Advertisement advertisement, AdvType advType, Set<Subscription> subscriptions,
+	public AdvertisementPacket(Advertisement advertisement, AdvType advType, Set<Subscription<?>> subscriptions,
 			boolean isPublic) {
 		this(advertisement, advType, isPublic);
 		this.subscriptions.addAll(subscriptions);
@@ -43,7 +43,7 @@ public class AdvertisementPacket implements Serializable {
 		return advType;
 	}
 
-	public final Set<Subscription> getSubscriptions() {
+	public final Set<Subscription<?>> getSubscriptions() {
 		return subscriptions;
 	}
 

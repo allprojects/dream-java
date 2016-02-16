@@ -2,16 +2,17 @@ package dream.examples.financial;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
+import dream.client.ValueChangeListener;
 import dream.common.Consts;
 
 public class Model1 {
 	public void start() {
 		Consts.hostName = "Model1";
 
-		RemoteVar<Integer> marketIndex = new RemoteVar<>("InputModel", "marketIndex");
-		RemoteVar<Integer> stockOpts = new RemoteVar<>("InputModel", "stockOpts");
+		final RemoteVar<Integer> marketIndex = new RemoteVar<>("InputModel", "marketIndex");
+		final RemoteVar<Integer> stockOpts = new RemoteVar<>("InputModel", "stockOpts");
 
-		Signal<Integer> f1 = new Signal<>("f1", () -> {
+		final Signal<Integer> f1 = new Signal<>("f1", () -> {
 			if (marketIndex.get() == null || stockOpts.get() == null) {
 				return null;
 			} else {

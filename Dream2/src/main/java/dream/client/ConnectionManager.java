@@ -85,12 +85,12 @@ class ConnectionManager implements PacketForwarder {
 		sendToServer(EventPacket.subject, pkt);
 	}
 
-	final void sendSubscription(Subscription sub) {
+	final void sendSubscription(Subscription<?> sub) {
 		final SubscriptionPacket pkt = new SubscriptionPacket(sub, SubType.SUB);
 		sendToServer(SubscriptionPacket.subject, pkt);
 	}
 
-	final void sendUnsubscription(Subscription sub) {
+	final void sendUnsubscription(Subscription<?> sub) {
 		final SubscriptionPacket pkt = new SubscriptionPacket(sub, SubType.UNSUB);
 		sendToServer(SubscriptionPacket.subject, pkt);
 	}
@@ -99,7 +99,7 @@ class ConnectionManager implements PacketForwarder {
 		sendAdvertisement(adv, AdvType.ADV, null, isPublic);
 	}
 
-	final void sendAdvertisement(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
+	final void sendAdvertisement(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
 		sendAdvertisement(adv, AdvType.ADV, subs, isPublic);
 	}
 
@@ -107,7 +107,7 @@ class ConnectionManager implements PacketForwarder {
 		sendAdvertisement(adv, AdvType.UNADV, null, isPublic);
 	}
 
-	final void sendUnadvertisement(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
+	final void sendUnadvertisement(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
 		sendAdvertisement(adv, AdvType.UNADV, subs, isPublic);
 	}
 
@@ -119,7 +119,8 @@ class ConnectionManager implements PacketForwarder {
 		sendToLockManager(LockReleasePacket.subject, rel);
 	}
 
-	private final void sendAdvertisement(Advertisement adv, AdvType advType, Set<Subscription> subs, boolean isPublic) {
+	private final void sendAdvertisement(Advertisement adv, AdvType advType, Set<Subscription<?>> subs,
+			boolean isPublic) {
 		final AdvertisementPacket pkt = subs != null ? new AdvertisementPacket(adv, advType, subs, isPublic)
 				: new AdvertisementPacket(adv, advType, isPublic);
 		sendToServer(AdvertisementPacket.subject, pkt);

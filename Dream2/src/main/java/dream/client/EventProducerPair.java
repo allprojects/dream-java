@@ -4,9 +4,9 @@ import dream.common.packets.EventPacket;
 
 public class EventProducerPair {
 	private final EventPacket eventPacket;
-	private final UpdateProducer producer;
+	private final UpdateProducer<?> producer;
 
-	public EventProducerPair(EventPacket eventPacket, UpdateProducer producer) {
+	public EventProducerPair(EventPacket eventPacket, UpdateProducer<?> producer) {
 		super();
 		this.eventPacket = eventPacket;
 		this.producer = producer;
@@ -16,7 +16,7 @@ public class EventProducerPair {
 		return eventPacket;
 	}
 
-	public final UpdateProducer getUpdateProducer() {
+	public final UpdateProducer<?> getUpdateProducer() {
 		return producer;
 	}
 

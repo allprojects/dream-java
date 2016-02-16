@@ -27,17 +27,17 @@ public class Signal<T extends Serializable>
 		implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer, LockApplicant {
 
 	// Management of local subscribers
-	private final Map<UpdateConsumer, List<SerializablePredicate>> consumers = new HashMap<>();
+	private final Map<UpdateConsumer, List<SerializablePredicate<T>>> consumers = new HashMap<>();
 	private final Queue<EventProducerPair> eventQueue = new ArrayDeque<>();
 	private int pendingAcks = 0;
-	private final Set<UpdateProducer> waitingProducers = new HashSet<>();
+	private final Set<UpdateProducer<?>> waitingProducers = new HashSet<>();
 
 	private final ClientEventForwarder clientEventForwarder;
 	private final QueueManager queueManager = new QueueManager();
 
 	private final String host;
 	private final String object;
-	private final List<SerializablePredicate> constraints = new ArrayList<>();
+	private final List<SerializablePredicate<T>> constraints = new ArrayList<>();
 
 	private final Supplier<T> evaluation;
 
@@ -47,12 +47,13 @@ public class Signal<T extends Serializable>
 
 	private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-	public Signal(String object, Supplier<T> evaluation, UpdateProducer... prods) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Signal(String object, Supplier<T> evaluation, UpdateProducer<?>... prods) {
 		this.host = Consts.hostName;
 		this.object = object;
 		this.evaluation = evaluation;
 
-		final Set<Subscription> subs = new HashSet<>();
+		final Set<Subscription<?>> subs = new HashSet<>();
 		for (final UpdateProducer prod : prods) {
 			prod.registerUpdateConsumer(this, prod.getConstraints());
 			subs.add(new Subscription(prod.getHost(), prod.getObject(), prod.getConstraints()));
@@ -110,9 +111,7 @@ public class Signal<T extends Serializable>
 			clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getSource());
 
 			final Set<UpdateConsumer> satConsumers = //
-			consumers.entrySet().stream()
-					.filter(e -> e.getValue().stream()
-							.allMatch(constr -> ((SerializablePredicate<T>) constr).test(val)))//
+			consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> constr.test(val)))//
 					.map(e -> e.getKey())//
 					.collect(Collectors.toSet());
 			// Notify local subscribers
@@ -181,13 +180,13 @@ public class Signal<T extends Serializable>
 
 	@Override
 	public UpdateProducer<T> filter(SerializablePredicate<T> constraint) {
-		final List<SerializablePredicate> constrList = new ArrayList<>();
+		final List<SerializablePredicate<T>> constrList = new ArrayList<>();
 		constrList.add(constraint);
 		return new FilteredUpdateProducer<>(this, constrList);
 	}
 
 	@Override
-	public final synchronized void updateFromProducer(EventPacket packet, UpdateProducer producer) {
+	public final synchronized void updateFromProducer(EventPacket packet, UpdateProducer<?> producer) {
 		final EventProducerPair pair = new EventProducerPair(packet, producer);
 		eventQueue.add(pair);
 		logger.finest("Method update called for event " + pair + ". Added to the queue.");
@@ -195,7 +194,6 @@ public class Signal<T extends Serializable>
 			logger.finest("The element is the only one in the queue. Let's process it.");
 			processNextUpdate();
 		}
-
 	}
 
 	@Override
@@ -205,7 +203,7 @@ public class Signal<T extends Serializable>
 	}
 
 	@Override
-	public void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate> constraints) {
+	public void registerUpdateConsumer(UpdateConsumer consumer, List<SerializablePredicate<T>> constraints) {
 		consumers.put(consumer, constraints);
 	}
 
@@ -225,7 +223,7 @@ public class Signal<T extends Serializable>
 	}
 
 	@Override
-	public List<SerializablePredicate> getConstraints() {
+	public List<SerializablePredicate<T>> getConstraints() {
 		return constraints;
 	}
 

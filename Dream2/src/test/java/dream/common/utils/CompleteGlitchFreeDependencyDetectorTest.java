@@ -10,8 +10,6 @@ import org.junit.Test;
 
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Subscription;
-import dream.common.utils.CompleteGlitchFreeDependencyDetector;
-import dream.common.utils.DependencyGraph;
 
 public class CompleteGlitchFreeDependencyDetectorTest {
 
@@ -25,24 +23,24 @@ public class CompleteGlitchFreeDependencyDetectorTest {
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("A@host").isEmpty());
 
-		final Set<Subscription> subsB = new HashSet<>();
-		subsB.add(new Subscription("host", "A"));
+		final Set<Subscription<?>> subsB = new HashSet<>();
+		subsB.add(new Subscription<>("host", "A"));
 		graph.processAdv(new Advertisement("host", "B"), subsB);
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("A@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("B@host").isEmpty());
 
-		final Set<Subscription> subsC = new HashSet<>();
-		subsC.add(new Subscription("host", "A"));
+		final Set<Subscription<?>> subsC = new HashSet<>();
+		subsC.add(new Subscription<>("host", "A"));
 		graph.processAdv(new Advertisement("host", "C"), subsC);
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("A@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("B@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("C@host").isEmpty());
 
-		final Set<Subscription> subsD = new HashSet<>();
-		subsD.add(new Subscription("host", "B"));
-		subsD.add(new Subscription("host", "C"));
+		final Set<Subscription<?>> subsD = new HashSet<>();
+		subsD.add(new Subscription<>("host", "B"));
+		subsD.add(new Subscription<>("host", "C"));
 		graph.processAdv(new Advertisement("host", "D"), subsD);
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("A@host").isEmpty());
@@ -63,17 +61,17 @@ public class CompleteGlitchFreeDependencyDetectorTest {
 		assertTrue(depDetector.getNodesToLockFor("A1@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("A2@host").isEmpty());
 
-		final Set<Subscription> subsB = new HashSet<>();
-		subsB.add(new Subscription("host", "A1"));
-		subsB.add(new Subscription("host", "A2"));
+		final Set<Subscription<?>> subsB = new HashSet<>();
+		subsB.add(new Subscription<>("host", "A1"));
+		subsB.add(new Subscription<>("host", "A2"));
 		graph.processAdv(new Advertisement("host", "B"), subsB);
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("A1@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("A2@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("B@host").isEmpty());
 
-		final Set<Subscription> subsC = new HashSet<>();
-		subsC.add(new Subscription("host", "A1"));
+		final Set<Subscription<?>> subsC = new HashSet<>();
+		subsC.add(new Subscription<>("host", "A1"));
 		graph.processAdv(new Advertisement("host", "C"), subsC);
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("A1@host").isEmpty());
@@ -81,9 +79,9 @@ public class CompleteGlitchFreeDependencyDetectorTest {
 		assertTrue(depDetector.getNodesToLockFor("B@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("C@host").isEmpty());
 
-		final Set<Subscription> subsD = new HashSet<>();
-		subsD.add(new Subscription("host", "B"));
-		subsD.add(new Subscription("host", "C"));
+		final Set<Subscription<?>> subsD = new HashSet<>();
+		subsD.add(new Subscription<>("host", "B"));
+		subsD.add(new Subscription<>("host", "C"));
 		graph.processAdv(new Advertisement("host", "D"), subsD);
 		depDetector.consolidate();
 		assertEquals(2, depDetector.getNodesToLockFor("A1@host").size());
@@ -109,18 +107,18 @@ public class CompleteGlitchFreeDependencyDetectorTest {
 		assertTrue(depDetector.getNodesToLockFor("A1@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("A2@host").isEmpty());
 
-		final Set<Subscription> subsB = new HashSet<>();
-		subsB.add(new Subscription("host", "A1"));
-		subsB.add(new Subscription("host", "A2"));
+		final Set<Subscription<?>> subsB = new HashSet<>();
+		subsB.add(new Subscription<>("host", "A1"));
+		subsB.add(new Subscription<>("host", "A2"));
 		graph.processAdv(new Advertisement("host", "B"), subsB);
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("A1@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("A2@host").isEmpty());
 		assertTrue(depDetector.getNodesToLockFor("B@host").isEmpty());
 
-		final Set<Subscription> subsC = new HashSet<>();
-		subsC.add(new Subscription("host", "A1"));
-		subsC.add(new Subscription("host", "A2"));
+		final Set<Subscription<?>> subsC = new HashSet<>();
+		subsC.add(new Subscription<>("host", "A1"));
+		subsC.add(new Subscription<>("host", "A2"));
 		graph.processAdv(new Advertisement("host", "C"), subsC);
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("B@host").isEmpty());
@@ -132,9 +130,9 @@ public class CompleteGlitchFreeDependencyDetectorTest {
 		assertTrue(depDetector.getNodesToLockFor("A2@host").contains("B@host"));
 		assertTrue(depDetector.getNodesToLockFor("A2@host").contains("C@host"));
 
-		final Set<Subscription> subsD = new HashSet<>();
-		subsD.add(new Subscription("host", "B"));
-		subsD.add(new Subscription("host", "C"));
+		final Set<Subscription<?>> subsD = new HashSet<>();
+		subsD.add(new Subscription<>("host", "B"));
+		subsD.add(new Subscription<>("host", "C"));
 		graph.processAdv(new Advertisement("host", "D"), subsD);
 		depDetector.consolidate();
 		assertTrue(depDetector.getNodesToLockFor("B@host").isEmpty());
@@ -148,7 +146,6 @@ public class CompleteGlitchFreeDependencyDetectorTest {
 		assertTrue(depDetector.getNodesToLockFor("A2@host").contains("B@host"));
 		assertTrue(depDetector.getNodesToLockFor("A2@host").contains("C@host"));
 		assertTrue(depDetector.getNodesToLockFor("A2@host").contains("D@host"));
-
 	}
 
 }

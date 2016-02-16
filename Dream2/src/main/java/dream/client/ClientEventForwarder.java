@@ -107,7 +107,7 @@ class ClientEventForwarder implements PacketForwarder {
 		return result;
 	}
 
-	final void sendEvent(UUID id, Event ev, String initialVar) {
+	final void sendEvent(UUID id, Event<?> ev, String initialVar) {
 		logger.finer("Sending an event " + ev);
 		Set<String> lockReleaseNodes;
 		switch (Consts.consistencyType) {
@@ -220,7 +220,7 @@ class ClientEventForwarder implements PacketForwarder {
 		connectionManager.sendUnadvertisement(adv, isPublic);
 	}
 
-	final void advertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
+	final void advertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
 		logger.fine("Sending advertisement " + adv + " with subscriptions " + subs);
 		if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
@@ -231,7 +231,7 @@ class ClientEventForwarder implements PacketForwarder {
 		connectionManager.sendAdvertisement(adv, subs, isPublic);
 	}
 
-	final void unadvertise(Advertisement adv, Set<Subscription> subs, boolean isPublic) {
+	final void unadvertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
 		logger.fine("Sending unadvertisement " + adv + " with subscriptions " + subs);
 		if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
@@ -280,7 +280,7 @@ class ClientEventForwarder implements PacketForwarder {
 		if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.ATOMIC) {
-			final Set<Subscription> subs = advPkt.getSubscriptions();
+			final Set<Subscription<?>> subs = advPkt.getSubscriptions();
 			switch (advPkt.getAdvType()) {
 			case ADV:
 				if (subs.isEmpty()) {

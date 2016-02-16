@@ -226,8 +226,8 @@ set xtics rotate by 35 offset -0.5,-2
 
 set output "../graphs/defaultTraffic.ps"
 
-plot "../resultsAvg/default" u 2:xticlabel(1) ls 1 title "Causal", \
-"../resultsAvg/default" u 3:xticlabel(1) ls 2 title "Single", \
-"../resultsAvg/default" u 4:xticlabel(1) ls 3 title "Complete", \
-"../resultsAvg/default" u 5:xticlabel(1) ls 4 title "Atomic", \
-"../resultsAvg/default" u 6:xticlabel(1) ls 5 title "Sid Up"
+plot "../resultsAvg/defaultTraffic" u 2:xticlabel(1) ls 1 title "Causal", \
+"../resultsAvg/defaultTraffic" u 3:xticlabel(1) ls 2 title "Single", \
+"../resultsAvg/defaultTraffic" u 4:xticlabel(1) ls 3 title "Complete", \
+"../resultsAvg/defaultTraffic" u 5:xticlabel(1) ls 4 title "Atomic", \
+"../resultsAvg/defaultTraffic" u 6:xticlabel(1) ls 5 title "Sid Up"

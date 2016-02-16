@@ -28,9 +28,9 @@ public enum DependencyGraph {
 		sources.add(advSignature);
 	}
 
-	public synchronized final void processAdv(Advertisement adv, Set<Subscription> subs) {
+	public synchronized final void processAdv(Advertisement adv, Set<Subscription<?>> subs) {
 		final String advSignature = adv.getSignature();
-		assert!subs.isEmpty();
+		assert !subs.isEmpty();
 		final Set<String> subSignatures = subs.stream().//
 				map(sub -> sub.getSignature()).//
 				collect(Collectors.toSet());
@@ -41,7 +41,7 @@ public enum DependencyGraph {
 		// TODO manage unadvertisements
 	}
 
-	public synchronized final void processUnAdv(Advertisement adv, Set<Subscription> subs) {
+	public synchronized final void processUnAdv(Advertisement adv, Set<Subscription<?>> subs) {
 		// TODO manage unadvertisements
 	}
 

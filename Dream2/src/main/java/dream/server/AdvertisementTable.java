@@ -35,7 +35,7 @@ final class AdvertisementTable {
 		}
 	}
 
-	final Set<NodeDescriptor> getMatchingNodes(Subscription sub) {
+	final Set<NodeDescriptor> getMatchingNodes(Subscription<?> sub) {
 		final Predicate<Advertisement> isAdvSat = adv -> adv.isSatisfiedBy(sub);
 		final Predicate<NodeDescriptor> hasAdvSat = node -> advs.get(node).stream().anyMatch(isAdvSat);
 		return advs.keySet().stream().//

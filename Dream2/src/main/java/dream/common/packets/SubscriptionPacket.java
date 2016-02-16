@@ -13,10 +13,10 @@ public class SubscriptionPacket implements Serializable {
 	private static final long serialVersionUID = -9026500933220636540L;
 	public static final String subject = "__DREAM_SUBSCRIPTION_PACKET_SUBJECT";
 
-	private final Subscription subscription;
+	private final Subscription<?> subscription;
 	private final SubType subType;
 
-	public SubscriptionPacket(Subscription subscription, SubType subType) {
+	public SubscriptionPacket(Subscription<?> subscription, SubType subType) {
 		this.subscription = subscription;
 		this.subType = subType;
 	}
@@ -25,7 +25,7 @@ public class SubscriptionPacket implements Serializable {
 		return subType;
 	}
 
-	public final Subscription getSubscription() {
+	public final Subscription<?> getSubscription() {
 		return subscription;
 	}
 

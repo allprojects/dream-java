@@ -32,12 +32,12 @@ public class IntraSourceDependencyDetectorTest {
 		final Advertisement advD = new Advertisement("Host", "D");
 
 		// Subscription to A (A generates B)
-		final Set<Subscription> subsB = new HashSet<>();
+		final Set<Subscription<?>> subsB = new HashSet<>();
 		subsB.add(subA);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to B and C (B, C generate D)
-		final Set<Subscription> subsD = new HashSet<>();
+		final Set<Subscription<?>> subsD = new HashSet<>();
 		subsD.add(subB);
 		subsD.add(subC);
 		graph.processAdv(advD, subsD);
@@ -81,12 +81,12 @@ public class IntraSourceDependencyDetectorTest {
 		final Advertisement advC = new Advertisement("Host", "C");
 
 		// Subscription to A (A generates B)
-		final Set<Subscription> subsB = new HashSet<>();
+		final Set<Subscription<?>> subsB = new HashSet<>();
 		subsB.add(subA);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to A, B (A, B generates C)
-		final Set<Subscription> subsC = new HashSet<>();
+		final Set<Subscription<?>> subsC = new HashSet<>();
 		subsC.add(subA);
 		subsC.add(subB);
 		graph.processAdv(advC, subsC);
@@ -142,17 +142,17 @@ public class IntraSourceDependencyDetectorTest {
 		final Advertisement advD = new Advertisement("Host", "D");
 
 		// Subscription to A (A generates B)
-		final Set<Subscription> subsB = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB = new HashSet<Subscription<?>>();
 		subsB.add(subA);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to A (A generates C)
-		final Set<Subscription> subsC = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC = new HashSet<Subscription<?>>();
 		subsC.add(subA);
 		graph.processAdv(advC, subsC);
 
 		// Subscription to B, C (B, C generate D)
-		final Set<Subscription> subsD = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsD = new HashSet<Subscription<?>>();
 		subsD.add(subB);
 		subsD.add(subC);
 		graph.processAdv(advD, subsD);
@@ -203,10 +203,10 @@ public class IntraSourceDependencyDetectorTest {
 		final IntraSourceDependencyDetector depDetector = IntraSourceDependencyDetector.instance;
 		graph.clear();
 
-		final Subscription subA = new Subscription("Host", "A");
-		final Subscription subB = new Subscription("Host", "B");
-		final Subscription subC = new Subscription("Host", "C");
-		final Subscription subD = new Subscription("Host", "D");
+		final Subscription<?> subA = new Subscription<>("Host", "A");
+		final Subscription<?> subB = new Subscription<>("Host", "B");
+		final Subscription<?> subC = new Subscription<>("Host", "C");
+		final Subscription<?> subD = new Subscription<>("Host", "D");
 
 		final Advertisement advA = new Advertisement("Host", "A");
 		final Advertisement advB = new Advertisement("Host", "B");
@@ -217,22 +217,22 @@ public class IntraSourceDependencyDetectorTest {
 		graph.processAdv(advA);
 
 		// Subscription to A (A generates B)
-		final Set<Subscription> subsB = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB = new HashSet<Subscription<?>>();
 		subsB.add(subA);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to A (A generates C)
-		final Set<Subscription> subsC = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC = new HashSet<Subscription<?>>();
 		subsC.add(subA);
 		graph.processAdv(advC, subsC);
 
 		// Subscription to C (C generate D)
-		final Set<Subscription> subsD = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsD = new HashSet<Subscription<?>>();
 		subsD.add(subC);
 		graph.processAdv(advD, subsD);
 
 		// Subscription to B, D (B, D generate E)
-		final Set<Subscription> subsE = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsE = new HashSet<Subscription<?>>();
 		subsE.add(subB);
 		subsE.add(subD);
 		graph.processAdv(advE, subsE);
@@ -286,9 +286,9 @@ public class IntraSourceDependencyDetectorTest {
 		final IntraSourceDependencyDetector depDetector = IntraSourceDependencyDetector.instance;
 		graph.clear();
 
-		final Subscription subA = new Subscription("Host", "A");
-		final Subscription subB = new Subscription("Host", "B");
-		final Subscription subC = new Subscription("Host", "C");
+		final Subscription<?> subA = new Subscription<>("Host", "A");
+		final Subscription<?> subB = new Subscription<>("Host", "B");
+		final Subscription<?> subC = new Subscription<>("Host", "C");
 
 		final Advertisement advA = new Advertisement("Host", "A");
 		final Advertisement advB = new Advertisement("Host", "B");
@@ -296,17 +296,17 @@ public class IntraSourceDependencyDetectorTest {
 		final Advertisement advD = new Advertisement("Host", "D");
 
 		// Subscription to A (A generates B)
-		final Set<Subscription> subsB = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB = new HashSet<Subscription<?>>();
 		subsB.add(subA);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to B (B generates C)
-		final Set<Subscription> subsC = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC = new HashSet<Subscription<?>>();
 		subsC.add(subB);
 		graph.processAdv(advC, subsC);
 
 		// Subscription to B, C (B, C generate D)
-		final Set<Subscription> subsD = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsD = new HashSet<Subscription<?>>();
 		subsD.add(subB);
 		subsD.add(subC);
 		graph.processAdv(advD, subsD);
@@ -359,10 +359,10 @@ public class IntraSourceDependencyDetectorTest {
 		final IntraSourceDependencyDetector depDetector = IntraSourceDependencyDetector.instance;
 		graph.clear();
 
-		final Subscription subA = new Subscription("Host", "A");
-		final Subscription subB = new Subscription("Host", "B");
-		final Subscription subC = new Subscription("Host", "C");
-		final Subscription subD = new Subscription("Host", "D");
+		final Subscription<?> subA = new Subscription<>("Host", "A");
+		final Subscription<?> subB = new Subscription<>("Host", "B");
+		final Subscription<?> subC = new Subscription<>("Host", "C");
+		final Subscription<?> subD = new Subscription<>("Host", "D");
 
 		final Advertisement advA = new Advertisement("Host", "A");
 		final Advertisement advB = new Advertisement("Host", "B");
@@ -373,22 +373,22 @@ public class IntraSourceDependencyDetectorTest {
 		graph.processAdv(advA);
 
 		// Subscription to A (A generates B)
-		final Set<Subscription> subsB = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB = new HashSet<Subscription<?>>();
 		subsB.add(subA);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to A (A generates C)
-		final Set<Subscription> subsC = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC = new HashSet<Subscription<?>>();
 		subsC.add(subA);
 		graph.processAdv(advC, subsC);
 
 		// Subscription to A (A generates D)
-		final Set<Subscription> subsD = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsD = new HashSet<Subscription<?>>();
 		subsD.add(subA);
 		graph.processAdv(advD, subsD);
 
 		// Subscription to B, C, D (B, C, D generate E)
-		final Set<Subscription> subsE = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsE = new HashSet<Subscription<?>>();
 		subsE.add(subB);
 		subsE.add(subC);
 		subsE.add(subD);
@@ -453,12 +453,12 @@ public class IntraSourceDependencyDetectorTest {
 		final IntraSourceDependencyDetector depDetector = IntraSourceDependencyDetector.instance;
 		graph.clear();
 
-		final Subscription subA1 = new Subscription("Host", "A1");
-		final Subscription subA2 = new Subscription("Host", "A2");
-		final Subscription subB1 = new Subscription("Host", "B1");
-		final Subscription subB2 = new Subscription("Host", "B2");
-		final Subscription subC1 = new Subscription("Host", "C1");
-		final Subscription subC2 = new Subscription("Host", "C2");
+		final Subscription<?> subA1 = new Subscription<>("Host", "A1");
+		final Subscription<?> subA2 = new Subscription<>("Host", "A2");
+		final Subscription<?> subB1 = new Subscription<>("Host", "B1");
+		final Subscription<?> subB2 = new Subscription<>("Host", "B2");
+		final Subscription<?> subC1 = new Subscription<>("Host", "C1");
+		final Subscription<?> subC2 = new Subscription<>("Host", "C2");
 
 		final Advertisement advA1 = new Advertisement("Host", "A1");
 		final Advertisement advA2 = new Advertisement("Host", "A2");
@@ -469,27 +469,27 @@ public class IntraSourceDependencyDetectorTest {
 		final Advertisement advD = new Advertisement("Host", "D");
 
 		// Subscription to A1 (A1 generates B2)
-		final Set<Subscription> subsB1 = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB1 = new HashSet<Subscription<?>>();
 		subsB1.add(subA1);
 		graph.processAdv(advB1, subsB1);
 
 		// Subscription to A2 (A2 generates B2)
-		final Set<Subscription> subsB2 = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB2 = new HashSet<Subscription<?>>();
 		subsB2.add(subA2);
 		graph.processAdv(advB2, subsB2);
 
 		// Subscription to A1 (A1 generates C1)
-		final Set<Subscription> subsC1 = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC1 = new HashSet<Subscription<?>>();
 		subsC1.add(subA1);
 		graph.processAdv(advC1, subsC1);
 
 		// Subscription to A2 (A2 generates C2)
-		final Set<Subscription> subsC2 = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC2 = new HashSet<Subscription<?>>();
 		subsC2.add(subA2);
 		graph.processAdv(advC2, subsC2);
 
 		// Subscription to B1, B2, C1, C2 (B1, B2, C1, C2 generate D)
-		final Set<Subscription> subsD = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsD = new HashSet<Subscription<?>>();
 		subsD.add(subB1);
 		subsD.add(subB2);
 		subsD.add(subC1);
@@ -560,10 +560,10 @@ public class IntraSourceDependencyDetectorTest {
 		final IntraSourceDependencyDetector depDetector = IntraSourceDependencyDetector.instance;
 		graph.clear();
 
-		final Subscription subA1 = new Subscription("Host", "A1");
-		final Subscription subA2 = new Subscription("Host", "A2");
-		final Subscription subB = new Subscription("Host", "B");
-		final Subscription subC = new Subscription("Host", "C");
+		final Subscription<?> subA1 = new Subscription<>("Host", "A1");
+		final Subscription<?> subA2 = new Subscription<>("Host", "A2");
+		final Subscription<?> subB = new Subscription<>("Host", "B");
+		final Subscription<?> subC = new Subscription<>("Host", "C");
 
 		final Advertisement advA1 = new Advertisement("Host", "A1");
 		final Advertisement advA2 = new Advertisement("Host", "A2");
@@ -575,18 +575,18 @@ public class IntraSourceDependencyDetectorTest {
 		graph.processAdv(advA2);
 
 		// Subscription to A1 (A1 generates B)
-		final Set<Subscription> subsB = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB = new HashSet<Subscription<?>>();
 		subsB.add(subA1);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to A1, A2 (A1, A2 generate C)
-		final Set<Subscription> subsC = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC = new HashSet<Subscription<?>>();
 		subsC.add(subA1);
 		subsC.add(subA2);
 		graph.processAdv(advC, subsC);
 
 		// Subscription to D (B, C generate D)
-		final Set<Subscription> subsD = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsD = new HashSet<Subscription<?>>();
 		subsD.add(subB);
 		subsD.add(subC);
 		graph.processAdv(advD, subsD);
@@ -648,13 +648,13 @@ public class IntraSourceDependencyDetectorTest {
 		final IntraSourceDependencyDetector depDetector = IntraSourceDependencyDetector.instance;
 		graph.clear();
 
-		final Subscription subA = new Subscription("Host", "A");
-		final Subscription subB = new Subscription("Host", "B");
-		final Subscription subC = new Subscription("Host", "C");
-		final Subscription subE = new Subscription("Host", "E");
-		final Subscription subF = new Subscription("Host", "F");
-		final Subscription subG = new Subscription("Host", "G");
-		final Subscription subH = new Subscription("Host", "H");
+		final Subscription<?> subA = new Subscription<>("Host", "A");
+		final Subscription<?> subB = new Subscription<>("Host", "B");
+		final Subscription<?> subC = new Subscription<>("Host", "C");
+		final Subscription<?> subE = new Subscription<>("Host", "E");
+		final Subscription<?> subF = new Subscription<>("Host", "F");
+		final Subscription<?> subG = new Subscription<>("Host", "G");
+		final Subscription<?> subH = new Subscription<>("Host", "H");
 
 		final Advertisement advA = new Advertisement("Host", "A");
 		final Advertisement advB = new Advertisement("Host", "B");
@@ -666,38 +666,38 @@ public class IntraSourceDependencyDetectorTest {
 		final Advertisement advH = new Advertisement("Host", "H");
 
 		// Subscription to A (A generates B)
-		final Set<Subscription> subsB = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB = new HashSet<Subscription<?>>();
 		subsB.add(subA);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to A (A generates C)
-		final Set<Subscription> subsC = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC = new HashSet<Subscription<?>>();
 		subsC.add(subA);
 		graph.processAdv(advC, subsC);
 
 		// Subscription to A (A generates E)
-		final Set<Subscription> subsE = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsE = new HashSet<Subscription<?>>();
 		subsE.add(subA);
 		graph.processAdv(advE, subsE);
 
 		// Subscription to E (E generates G)
-		final Set<Subscription> subsG = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsG = new HashSet<Subscription<?>>();
 		subsG.add(subE);
 		graph.processAdv(advG, subsG);
 
 		// Subscription to E (E generates F)
-		final Set<Subscription> subsF = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsF = new HashSet<Subscription<?>>();
 		subsF.add(subE);
 		graph.processAdv(advF, subsF);
 
 		// Subscription to F, G (F, G generate H)
-		final Set<Subscription> subsH = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsH = new HashSet<Subscription<?>>();
 		subsH.add(subF);
 		subsH.add(subG);
 		graph.processAdv(advH, subsH);
 
 		// Subscription to B, C, H (B, C, H generate D)
-		final Set<Subscription> subsD = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsD = new HashSet<Subscription<?>>();
 		subsD.add(subB);
 		subsD.add(subC);
 		subsD.add(subH);
@@ -789,10 +789,10 @@ public class IntraSourceDependencyDetectorTest {
 		final IntraSourceDependencyDetector depDetector = IntraSourceDependencyDetector.instance;
 		graph.clear();
 
-		final Subscription subA = new Subscription("Host", "A");
-		final Subscription subB = new Subscription("Host", "B");
-		final Subscription subC = new Subscription("Host", "C");
-		final Subscription subD = new Subscription("Host", "D");
+		final Subscription<?> subA = new Subscription<>("Host", "A");
+		final Subscription<?> subB = new Subscription<>("Host", "B");
+		final Subscription<?> subC = new Subscription<>("Host", "C");
+		final Subscription<?> subD = new Subscription<>("Host", "D");
 
 		final Advertisement advA = new Advertisement("Host", "A");
 		final Advertisement advB = new Advertisement("Host", "B");
@@ -801,24 +801,24 @@ public class IntraSourceDependencyDetectorTest {
 		final Advertisement advE = new Advertisement("Host", "E");
 
 		// Subscription to A (A generates B)
-		final Set<Subscription> subsB = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsB = new HashSet<Subscription<?>>();
 		subsB.add(subA);
 		graph.processAdv(advB, subsB);
 
 		// Subscription to A, B (A, B generate C)
-		final Set<Subscription> subsC = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsC = new HashSet<Subscription<?>>();
 		subsC.add(subA);
 		subsC.add(subB);
 		graph.processAdv(advC, subsC);
 
 		// Subscription to B, C (B, C generate D)
-		final Set<Subscription> subsD = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsD = new HashSet<Subscription<?>>();
 		subsD.add(subB);
 		subsD.add(subC);
 		graph.processAdv(advD, subsD);
 
 		// Subscription to A, D (A, D generate E)
-		final Set<Subscription> subsE = new HashSet<Subscription>();
+		final Set<Subscription<?>> subsE = new HashSet<Subscription<?>>();
 		subsE.add(subA);
 		subsE.add(subD);
 		graph.processAdv(advE, subsE);

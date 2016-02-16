@@ -106,7 +106,8 @@ public class ChatGUI extends JFrame implements WindowListener {
 
 	private void sendText() {
 		listener.sendMessage(getTypedText());
-		this.displayMessage("You: " + getTypedText());
+		if (!getTypedText().startsWith("/"))
+			this.displayMessage("You: " + getTypedText());
 		this.resetTypedText();
 	}
 

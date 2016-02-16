@@ -54,12 +54,30 @@ public class Chat {
 		System.out.println("Setup: Listening to Main Chat provided by Server");
 		remoteMessages = new RemoteVar<String>(ChatServer.NAME, serverVar);
 
-		Signal<String> display = new Signal<String>("display", () -> {
+		Signal<String> incoming = new Signal<String>("incoming", () -> {
 			if (remoteMessages.get() != null)
 				return remoteMessages.get();
 			else
 				return "";
 		} , remoteMessages);
+
+		Signal<String> display = new Signal<String>("display", () -> {
+			if (incoming.get().startsWith("/")) {
+				String[] temp = incoming.get().split(" ", 2);
+				String command = temp[0].substring(1, temp[0].length());
+				String rest = temp.length > 1 ? temp[1] : "";
+				// QUIT - for now only used to update the registeredClients list
+				// (aka who's online)
+				if (command.equalsIgnoreCase("W")) {
+					String[] temp1 = rest.split(" ", 2);
+					String sender = temp1[0];
+					String message = temp1.length > 1 ? temp1[1] : "";
+					return sender + " whispered: " + message;
+				} else
+					return null;
+			} else
+				return incoming.get();
+		} , incoming);
 
 		System.out.println("Setup: Starting GUI");
 		gui = new ChatGUI(userName);
@@ -68,7 +86,8 @@ public class Chat {
 		System.out.println("Setup: Initializing Online-List");
 		gui.setOnline(online);
 		display.change().addHandler((oldValue, newValue) -> {
-			gui.displayMessage(newValue);
+			if (newValue != null)
+				gui.displayMessage(newValue);
 		});
 	}
 

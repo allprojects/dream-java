@@ -98,14 +98,29 @@ public class ChatServer {
 	 * @param text
 	 */
 	private void clientWrote(String name, String text) {
-		// TODO propagate to correct clients (chat rooms etc.)
 		if (text.startsWith("/")) {
-			// special commands
 			String[] temp = text.split(" ", 2);
 			String command = temp[0].substring(1, temp[0].length());
 			String rest = temp.length > 1 ? temp[1] : "";
-			if (command.equals("quit")) {
+			// QUIT - for now only used to update the registeredClients list
+			// (aka who's online)
+			if (command.equalsIgnoreCase("QUIT") || command.equalsIgnoreCase("Q")) {
 				clients.modify((old) -> old.remove(name));
+			} else if (command.equalsIgnoreCase("PRIVMSG") || command.equalsIgnoreCase("W")
+					|| command.equalsIgnoreCase("WHISPER")) {
+				String[] temp1 = rest.split(" ", 2);
+				String target = temp1[0];
+				String message = temp1.length > 1 ? temp1[1] : "";
+				if (message.isEmpty()) {
+					// no actual message
+					// TODO: Reply to sender or ignore
+				} else if (!clientVars.containsKey(target) || !clients.get().contains(target)) {
+					// target is not known to the server or target is offline
+					// TODO: Reply to sender or send if target comes online or
+					// ignore
+				} else {
+					clientVars.get(target).set("/w " + name + " " + message);
+				}
 			}
 			System.out.println("Server: " + name + " USED " + command);
 		} else {

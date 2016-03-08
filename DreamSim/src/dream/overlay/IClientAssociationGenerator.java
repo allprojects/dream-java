@@ -10,14 +10,14 @@ import java.util.Set;
  */
 public interface IClientAssociationGenerator {
 
-  /**
-   * Get a list of associations between brokers and components.
-   */
-  public Set<Link> getAssociation();
+	/**
+	 * Get a list of associations between brokers and components.
+	 */
+	public Set<Link> getAssociation();
 
-  /**
-   * Reset the association.
-   */
-  public void clean();
+	/**
+	 * Reset the association.
+	 */
+	public void clean();
 
 }

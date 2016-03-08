@@ -8,13 +8,13 @@ import protopeer.PeerFactory;
 
 public class ServerFactory implements PeerFactory {
 
-  @Override
-  public Peer createPeer(int peerIndex, Experiment experiment) {
-    final Peer newPeer = new Peer(peerIndex);
-    newPeer.addPeerlet(new OverlayPeerlet());
-    newPeer.addPeerlet(new ServerMeasurementPeerlet());
-    newPeer.addPeerlet(new ServerEventForwarder());
-    return newPeer;
-  }
+	@Override
+	public Peer createPeer(int peerIndex, Experiment experiment) {
+		final Peer newPeer = new Peer(peerIndex);
+		newPeer.addPeerlet(new OverlayPeerlet());
+		newPeer.addPeerlet(new ServerMeasurementPeerlet());
+		newPeer.addPeerlet(new ServerEventForwarder());
+		return newPeer;
+	}
 
 }

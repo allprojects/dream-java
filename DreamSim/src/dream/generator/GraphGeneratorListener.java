@@ -9,15 +9,15 @@ import java.util.Set;
  */
 public interface GraphGeneratorListener {
 
-  /**
-   * Notifies the presence of a var with the given name.
-   */
-  public void notifyVar(String varName);
+	/**
+	 * Notifies the presence of a var with the given name.
+	 */
+	public void notifyVar(String varName);
 
-  /**
-   * Notifies the presence of a signal with the given name and the given
-   * dependencies.
-   */
-  public void notifySignal(String signalName, Set<String> dependencies);
+	/**
+	 * Notifies the presence of a signal with the given name and the given
+	 * dependencies.
+	 */
+	public void notifySignal(String signalName, Set<String> dependencies);
 
 }

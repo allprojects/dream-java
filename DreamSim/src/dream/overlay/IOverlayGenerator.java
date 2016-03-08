@@ -10,16 +10,16 @@ import java.util.Set;
  */
 public interface IOverlayGenerator {
 
-  /**
-   * Generates a new random topology with the default number of links. The
-   * default number of links depends on the implementing classes.
-   *
-   * @return a set of links that constitutes the generated topology
-   */
-  public Set<Link> generateOverlay();
+	/**
+	 * Generates a new random topology with the default number of links. The
+	 * default number of links depends on the implementing classes.
+	 *
+	 * @return a set of links that constitutes the generated topology
+	 */
+	public Set<Link> generateOverlay();
 
-  /**
-   * Reset the topology generation.
-   */
-  public void clean();
+	/**
+	 * Reset the topology generation.
+	 */
+	public void clean();
 }

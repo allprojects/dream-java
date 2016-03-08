@@ -262,9 +262,8 @@ def prepareDefaultDelay():
 
 # Values
 default = [0]
-centralized = [0]
 locality = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-numBrokers = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24]
+numBrokers = [1, 3, 5, 10, 15, 20]
 numVars = [1, 4, 7, 10, 40, 70, 100]
 graphDepth = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 numGraphDependencies = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -275,7 +274,6 @@ timeBetweenReads = [400, 700, 1000, 4000, 7000, 10000]
 
 # Invocations
 summarizeAll("default", default)
-summarizeAll("centralized", centralized)
 summarizeAll("locality", locality)
 summarizeAll("numBrokers", numBrokers)
 summarizeAll("numVars", numVars)
@@ -286,7 +284,6 @@ summarizeAll("timeBetweenEvents", timeBetweenEvents)
 summarizeAll("timeBetweenReads", timeBetweenReads)
 
 avgAll("default", default)
-avgAll("centralized", centralized)
 avgAll("locality", locality)
 avgAll("numBrokers", numBrokers)
 avgAll("numVars", numVars)

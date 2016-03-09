@@ -135,7 +135,7 @@ plot "../resultsAvg/numGraphDependencies_causal_TrafficByte" u ($1):($8/1000) t 
 # GRAPH SHARE PROBABILITY #
 ###########################
 
-set xlabel "Probability for a signal to depend on multiple sources" offset 0,0.2
+set xlabel "Degree of nodes sharing" offset 0,0.2
 
 set output "../graphs/graphShareDelay.ps"
 set ylabel "Average Delay (ms)" offset 0.5,0

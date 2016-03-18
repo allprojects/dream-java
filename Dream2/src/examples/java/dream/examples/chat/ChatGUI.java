@@ -63,8 +63,6 @@ public class ChatGUI extends JFrame implements WindowListener {
 	private List<String> lastOnline;
 
 	public void setOnline(List<String> online) {
-		System.out.println("listModel: " + listModel);
-		System.out.println("onlineList: " + online);
 		if (lastOnline != null) {
 			for (String s : lastOnline) {
 				if (!online.contains(s))
@@ -81,7 +79,6 @@ public class ChatGUI extends JFrame implements WindowListener {
 			if (!online.contains(listModel.get(i)))
 				offlineList.add(listModel.get(i));
 		}
-		System.out.println("offlineList: " + offlineList);
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
@@ -92,8 +89,6 @@ public class ChatGUI extends JFrame implements WindowListener {
 				}
 				for (String e : offlineList)
 					listModel.addElement(e);
-				System.out.println("listModel: " + listModel);
-				System.out.println("Interval: [0, " + (online.size() - 1) + "]");
 				statusList.setSelectionInterval(0, online.size() - 1);
 			}
 		});

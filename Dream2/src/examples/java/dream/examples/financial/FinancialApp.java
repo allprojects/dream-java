@@ -1,11 +1,11 @@
 package dream.examples.financial;
 
+import dream.client.ChangeEventHandler;
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.client.ValueChangeListener;
 import dream.common.Consts;
 
-public class FinancialApp implements ValueChangeListener<Integer> {
+public class FinancialApp implements ChangeEventHandler<Integer> {
 	private Signal<Integer> f1Signal;
 	private Signal<Integer> f2Signal;
 	private Signal<Integer> f3Signal;
@@ -37,9 +37,9 @@ public class FinancialApp implements ValueChangeListener<Integer> {
 		f2Signal = new Signal<>("f2Signal", () -> f2.get(), f2);
 		f3Signal = new Signal<>("f3Signal", () -> f3.get(), f3);
 
-		f1Signal.addValueChangeListener(this);
-		f2Signal.addValueChangeListener(this);
-		f3Signal.addValueChangeListener(this);
+		f1Signal.change().addHandler(this);
+		f2Signal.change().addHandler(this);
+		f3Signal.change().addHandler(this);
 
 		try {
 			Thread.sleep(2000);
@@ -55,7 +55,7 @@ public class FinancialApp implements ValueChangeListener<Integer> {
 	}
 
 	@Override
-	public void notifyValueChanged(Integer newValue) {
+	public void handle(Integer oldVal, Integer newVal) {
 		System.out.println("Value changed");
 
 		if (f1.get() != null && f2.get() != null && f3.get() != null) {

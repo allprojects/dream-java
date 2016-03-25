@@ -111,6 +111,7 @@ class DependencyGraphUtils {
 		final Set<String> newNodesToEvaluate = newNodes.stream().//
 				filter(expr -> !depGraph.getSources().contains(expr)).//
 				map(depGraph.getGraph()::get).//
+				filter(x -> x != null).//
 				collect(HashSet::new, HashSet::addAll, HashSet::addAll);
 
 		if (!newNodesToEvaluate.isEmpty()) {

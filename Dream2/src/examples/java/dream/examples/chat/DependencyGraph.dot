@@ -1,0 +1,14 @@
+digraph G {
+"incoming_messages@Bob" -> "display@Bob"
+"chat_message@Bob" -> "incomingBob@Bob"
+"chat_message@Alice" -> "incomingAlice@Bob"
+"incomingAlice@Bob" -> "incoming_messages@Bob"
+"incomingBob@Bob" -> "incoming_messages@Bob"
+"incoming_messages@Alice" -> "display@Alice"
+"chat_message@Bob" -> "incomingBob@Alice"
+"chat_message@Alice" -> "incomingAlice@Alice"
+"incomingAlice@Alice" -> "incoming_messages@Alice"
+"incomingBob@Alice" -> "incoming_messages@Alice"
+"server_RegisteredClients@ChatServer" -> "setup@Bob"
+"server_RegisteredClients@ChatServer" -> "setup@Alice"
+}

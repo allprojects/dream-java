@@ -35,7 +35,7 @@ public class Chat implements ChangeEventHandler<String> {
 				return new ArrayList<String>();
 			else
 				return registeredClients.get();
-		} , registeredClients);
+		}, registeredClients);
 		onlineList.change().addHandler((o, n) -> {
 			if (n.contains("chat_message@" + username) && gui == null) {
 				System.out.println("Setup: Server Registration done!");
@@ -59,10 +59,10 @@ public class Chat implements ChangeEventHandler<String> {
 					listening.add(x.getKey());
 					new Signal<String>("incoming" + x.getKey(), () -> {
 						if (temp.get() != null)
-							return temp.get();
+							return x.getKey() + ": " + temp.get();
 						else
 							return "";
-					} , temp).change().addHandler(this);
+					}, temp).change().addHandler(this);
 					System.out.println("Adding listener to " + x.getKey());
 				});
 		/*
@@ -92,7 +92,7 @@ public class Chat implements ChangeEventHandler<String> {
 					return null;
 			} else
 				return incoming.get();
-		} , incoming);
+		}, incoming);
 
 		System.out.println("Setup: Starting GUI");
 		gui = new ChatGUI(userName);

@@ -7,12 +7,12 @@ import protopeer.PeerFactory;
 
 public class LockManagerFactory implements PeerFactory {
 
-  @Override
-  public Peer createPeer(int peerIndex, Experiment experiment) {
-    final Peer newPeer = new Peer(peerIndex);
-    newPeer.addPeerlet(new LockManagerForwarder());
-    newPeer.addPeerlet(new LockManagerMeasurementPeerlet());
-    return newPeer;
-  }
+	@Override
+	public Peer createPeer(int peerIndex, Experiment experiment) {
+		final Peer newPeer = new Peer(peerIndex);
+		newPeer.addPeerlet(new LockManagerForwarder());
+		newPeer.addPeerlet(new LockManagerMeasurementPeerlet());
+		return newPeer;
+	}
 
 }

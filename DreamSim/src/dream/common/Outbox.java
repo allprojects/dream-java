@@ -30,24 +30,24 @@ import protopeer.network.Message;
 import protopeer.network.NetworkAddress;
 
 public class Outbox {
-  private final Map<Message, Collection<NetworkAddress>> packetsToSend = new HashMap<Message, Collection<NetworkAddress>>();
+	private final Map<Message, Collection<NetworkAddress>> packetsToSend = new HashMap<Message, Collection<NetworkAddress>>();
 
-  // Subject is not used, but introduced to preserve API compatibility
-  public void add(String subject, Message packet, Collection<NetworkAddress> recipients) {
-    Collection<NetworkAddress> addressSet = packetsToSend.get(packet);
-    if (addressSet == null) {
-      addressSet = new HashSet<NetworkAddress>();
-      packetsToSend.put(packet, addressSet);
-    }
-    addressSet.addAll(recipients);
-  }
+	// Subject is not used, but introduced to preserve API compatibility
+	public void add(String subject, Message packet, Collection<NetworkAddress> recipients) {
+		Collection<NetworkAddress> addressSet = packetsToSend.get(packet);
+		if (addressSet == null) {
+			addressSet = new HashSet<NetworkAddress>();
+			packetsToSend.put(packet, addressSet);
+		}
+		addressSet.addAll(recipients);
+	}
 
-  public Set<Message> getPacketsToSend() {
-    return packetsToSend.keySet();
-  }
+	public Set<Message> getPacketsToSend() {
+		return packetsToSend.keySet();
+	}
 
-  public Collection<NetworkAddress> getRecipientsFor(Message packet) {
-    return packetsToSend.get(packet);
-  }
+	public Collection<NetworkAddress> getRecipientsFor(Message packet) {
+		return packetsToSend.get(packet);
+	}
 
 }

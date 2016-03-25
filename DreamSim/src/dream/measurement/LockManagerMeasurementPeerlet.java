@@ -10,19 +10,19 @@ import protopeer.network.Message;
  * about the network traffic.
  */
 public class LockManagerMeasurementPeerlet extends BasePeerlet {
-  private MeasurementLogger mLogger;
+	private MeasurementLogger mLogger;
 
-  @Override
-  public void init(Peer peer) {
-    super.init(peer);
-    mLogger = MeasurementLogger.getLogger();
-  }
+	@Override
+	public void init(Peer peer) {
+		super.init(peer);
+		mLogger = MeasurementLogger.getLogger();
+	}
 
-  @Override
-  public void handleOutgoingMessage(Message msg) {
-    for (int i = 0; i < DreamConfiguration.get().linkLength; i++) {
-      mLogger.saveMessage(msg);
-    }
-  }
+	@Override
+	public void handleOutgoingMessage(Message msg) {
+		for (int i = 0; i < DreamConfiguration.get().numHopsToLockManager; i++) {
+			mLogger.saveMessage(msg);
+		}
+	}
 
 }

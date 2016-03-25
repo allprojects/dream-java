@@ -7,7 +7,7 @@ import java.io.Serializable;
  * connects to it.
  */
 public class ServerHelloPacket implements Serializable {
-  private static final long serialVersionUID = 3429557416466895040L;
+	private static final long serialVersionUID = 3429557416466895040L;
 
-  public static final String subject = "__DREAM_SERVER_HELLO_PACKET_SUBJECT";
+	public static final String subject = "__DREAM_SERVER_HELLO_PACKET_SUBJECT";
 }

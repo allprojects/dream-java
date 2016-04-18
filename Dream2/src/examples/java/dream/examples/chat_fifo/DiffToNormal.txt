@@ -1,0 +1,9 @@
+Chat:
+19 lines added (2 for Logging)
+5 lines changed
+
+ChatGUI:
+6 lines added
+
+VectorClock:
+148 lines added (252 lines with comments and empty lines)

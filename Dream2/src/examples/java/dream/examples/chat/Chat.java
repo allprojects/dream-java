@@ -3,16 +3,16 @@ package dream.examples.chat;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import dream.client.ChangeEventHandler;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
 import dream.common.Consts;
-import javafx.util.Pair;
 
-public class Chat implements ChangeEventHandler<String> {
+public class Chat {
 
 	private Var<String> myMessages;
 	private Var<String> incoming;
@@ -25,7 +25,7 @@ public class Chat implements ChangeEventHandler<String> {
 		this.userName = username;
 
 		Consts.hostName = userName;
-
+		Logger.getGlobal().setLevel(Level.ALL);
 		listening = new ArrayList<>();
 		// Establish new session with server
 		RemoteVar<ArrayList<String>> registeredClients = new RemoteVar<ArrayList<String>>(ChatServer.NAME,
@@ -42,7 +42,7 @@ public class Chat implements ChangeEventHandler<String> {
 				setup();
 			}
 			List<String> names = n.stream().map(x -> x.split("@")[1]).collect(Collectors.toList());
-			gui.setOnline(names);
+			setOnline(names);
 			checkConnections(n);
 		});
 
@@ -51,19 +51,40 @@ public class Chat implements ChangeEventHandler<String> {
 		System.out.println("Setup: Waiting for Registration to Server ...");
 	}
 
+	private List<String> lastOnline;
+
+	private void setOnline(List<String> online) {
+		if (lastOnline != null) {
+			for (String s : lastOnline) {
+				if (!online.contains(s)) {
+					String msg = s + " has left the Chat.";
+					gui.displayMessage(msg);
+				}
+			}
+			for (String s : online) {
+				if (!lastOnline.contains(s)) {
+					String msg = s + " has joined.";
+					gui.displayMessage(msg);
+				}
+			}
+		}
+		lastOnline = online;
+		gui.setOnline(online);
+	}
+
 	private void checkConnections(ArrayList<String> n) {
 		n.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0])).// Pair(Host,Var)
-				filter(x -> !listening.contains(x.getKey()) && x.getValue().startsWith("chat_")).//
+				filter(x -> !listening.contains(x.getHost()) && x.getVar().startsWith("chat_")).//
 				forEach(x -> {
-					RemoteVar<String> temp = new RemoteVar<>(x.getKey(), x.getValue());
-					listening.add(x.getKey());
-					new Signal<String>("incoming" + x.getKey(), () -> {
+					RemoteVar<String> temp = new RemoteVar<>(x.getHost(), x.getVar());
+					listening.add(x.getHost());
+					new Signal<String>("incoming" + x.getHost(), () -> {
 						if (temp.get() != null)
-							return x.getKey() + ": " + temp.get();
+							return x.getHost() + ": " + temp.get();
 						else
 							return "";
-					}, temp).change().addHandler(this);
-					System.out.println("Adding listener to " + x.getKey());
+					}, temp).change().addHandler((oldVal, newVal) -> incoming.set(newVal));
+					System.out.println("Adding listener to " + x.getHost());
 				});
 		/*
 		 * if (!n.stream().map(x -> listening.contains(x)).reduce((a, b) -> a &&
@@ -99,18 +120,19 @@ public class Chat implements ChangeEventHandler<String> {
 		gui.setListener(this);
 
 		display.change().addHandler((oldValue, newValue) -> {
-			if (newValue != null)
+			if (newValue != null) {
+				Logger.getGlobal().fine("Received Message: " + incoming.get());
 				gui.displayMessage(newValue);
+			}
 		});
 	}
 
-	@Override
-	public void handle(String oldVal, String newVal) {
-		incoming.set(newVal);
-	}
-
 	protected void sendMessage(String text) {
+		if (!text.startsWith("/")) {
+			gui.displayMessage("You: " + text);
+		}
 		myMessages.set(text);
+		Logger.getGlobal().fine("Send Message: " + text);
 	}
 
 	public static void main(String[] args) {
@@ -124,7 +146,6 @@ public class Chat implements ChangeEventHandler<String> {
 				@Override
 				public void run() {
 					try {
-
 						new Chat(args[0]);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -135,5 +156,31 @@ public class Chat implements ChangeEventHandler<String> {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+}
+
+class Pair<S, T> {
+	private final S first;
+	private final T second;
+
+	Pair(S host, T var) {
+		this.first = host;
+		this.second = var;
+	}
+
+	public T getSecond() {
+		return second;
+	}
+
+	public S getFirst() {
+		return first;
+	}
+
+	public S getHost() {
+		return first;
+	}
+
+	public T getVar() {
+		return second;
 	}
 }

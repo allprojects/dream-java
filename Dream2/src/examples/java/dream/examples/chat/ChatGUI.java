@@ -60,20 +60,7 @@ public class ChatGUI extends JFrame implements WindowListener {
 			msgs.append(System.lineSeparator() + text);
 	}
 
-	private List<String> lastOnline;
-
 	public void setOnline(List<String> online) {
-		if (lastOnline != null) {
-			for (String s : lastOnline) {
-				if (!online.contains(s))
-					displayMessage(s + " has left the Chat.");
-			}
-			for (String s : online) {
-				if (!lastOnline.contains(s))
-					displayMessage(s + " has joined.");
-			}
-		}
-		lastOnline = online;
 		List<String> offlineList = new ArrayList<String>();
 		for (int i = 0; i < listModel.size(); i++) {
 			if (!online.contains(listModel.get(i)))
@@ -101,8 +88,6 @@ public class ChatGUI extends JFrame implements WindowListener {
 
 	private void sendText() {
 		listener.sendMessage(getTypedText());
-		if (!getTypedText().startsWith("/"))
-			this.displayMessage("You: " + getTypedText());
 		this.resetTypedText();
 	}
 

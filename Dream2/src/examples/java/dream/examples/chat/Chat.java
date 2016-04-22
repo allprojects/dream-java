@@ -14,19 +14,22 @@ import dream.common.Consts;
 
 public class Chat {
 
-	private Var<String> myMessages;
-	private Var<String> incoming;
-	private String userName;
+	private final Var<String> myMessages;
+	private final Var<String> incoming;
+	private final String userName;
 	private ChatGUI gui;
-	private List<String> listening;
-	Signal<ArrayList<String>> onlineList;
+	private final List<String> listening = new ArrayList<>();
+	private final Signal<ArrayList<String>> onlineList;
 
-	public Chat(String username) throws Exception {
+	private List<String> lastOnline;
+	private final static Logger logger = Logger.getGlobal();
+
+	public Chat(String username) {
 		this.userName = username;
-
 		Consts.hostName = userName;
-		Logger.getGlobal().setLevel(Level.ALL);
-		listening = new ArrayList<>();
+
+		logger.setLevel(Level.ALL);
+
 		// Establish new session with server
 		RemoteVar<ArrayList<String>> registeredClients = new RemoteVar<ArrayList<String>>(ChatServer.NAME,
 				ChatServer.SERVER_REGISTERED_CLIENTS);
@@ -38,7 +41,7 @@ public class Chat {
 		}, registeredClients);
 		onlineList.change().addHandler((o, n) -> {
 			if (n.contains("chat_message@" + username) && gui == null) {
-				System.out.println("Setup: Server Registration done!");
+				logger.fine("Setup: Server Registration done!");
 				setup();
 			}
 			List<String> names = n.stream().map(x -> x.split("@")[1]).collect(Collectors.toList());
@@ -48,10 +51,8 @@ public class Chat {
 
 		myMessages = new Var<String>("chat_message", "");
 		incoming = new Var<String>("incoming_messages", "");
-		System.out.println("Setup: Waiting for Registration to Server ...");
+		logger.fine("Setup: Waiting for Registration to Server ...");
 	}
-
-	private List<String> lastOnline;
 
 	private void setOnline(List<String> online) {
 		if (lastOnline != null) {
@@ -74,26 +75,18 @@ public class Chat {
 
 	private void checkConnections(ArrayList<String> n) {
 		n.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0])).// Pair(Host,Var)
-				filter(x -> !listening.contains(x.getHost()) && x.getVar().startsWith("chat_")).//
+				filter(x -> !listening.contains(x.getFirst()) && x.getSecond().startsWith("chat_")).//
 				forEach(x -> {
-					RemoteVar<String> temp = new RemoteVar<>(x.getHost(), x.getVar());
-					listening.add(x.getHost());
-					new Signal<String>("incoming" + x.getHost(), () -> {
+					RemoteVar<String> temp = new RemoteVar<>(x.getFirst(), x.getSecond());
+					listening.add(x.getFirst());
+					new Signal<String>("incoming" + x.getFirst(), () -> {
 						if (temp.get() != null)
-							return x.getHost() + ": " + temp.get();
+							return x.getFirst() + ": " + temp.get();
 						else
 							return "";
 					}, temp).change().addHandler((oldVal, newVal) -> incoming.set(newVal));
-					System.out.println("Adding listener to " + x.getHost());
+					logger.finer("Adding listener to " + x.getFirst());
 				});
-		/*
-		 * if (!n.stream().map(x -> listening.contains(x)).reduce((a, b) -> a &&
-		 * b).orElse(false)) { System.out.println("checking again in 5"); try {
-		 * Thread.sleep(5000); } catch (InterruptedException e) {
-		 * e.printStackTrace(); }
-		 * 
-		 * checkConnections(onlineList.get()); }
-		 */
 	}
 
 	private void setup() {
@@ -115,13 +108,13 @@ public class Chat {
 				return incoming.get();
 		}, incoming);
 
-		System.out.println("Setup: Starting GUI");
+		logger.fine("Setup: Starting GUI");
 		gui = new ChatGUI(userName);
 		gui.setListener(this);
 
 		display.change().addHandler((oldValue, newValue) -> {
 			if (newValue != null) {
-				Logger.getGlobal().fine("Received Message: " + incoming.get());
+				logger.fine("Received Message: " + incoming.get());
 				gui.displayMessage(newValue);
 			}
 		});
@@ -132,30 +125,20 @@ public class Chat {
 			gui.displayMessage("You: " + text);
 		}
 		myMessages.set(text);
-		Logger.getGlobal().fine("Send Message: " + text);
+		logger.fine("Send Message: " + text);
 	}
 
 	public static void main(String[] args) {
-		try {
-			if (args.length < 1) {
-				System.out.println("username missing");
-				return;
-			}
-			EventQueue.invokeLater(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						new Chat(args[0]);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-				}
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (args.length < 1) {
+			logger.severe("username missing");
+			return;
 		}
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				new Chat(args[0]);
+			}
+		});
 	}
 }
 
@@ -163,24 +146,16 @@ class Pair<S, T> {
 	private final S first;
 	private final T second;
 
-	Pair(S host, T var) {
-		this.first = host;
-		this.second = var;
-	}
-
-	public T getSecond() {
-		return second;
+	Pair(S a, T b) {
+		this.first = a;
+		this.second = b;
 	}
 
 	public S getFirst() {
 		return first;
 	}
 
-	public S getHost() {
-		return first;
-	}
-
-	public T getVar() {
+	public T getSecond() {
 		return second;
 	}
 }

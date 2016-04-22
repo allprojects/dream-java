@@ -1,16 +1,15 @@
 package dream.examples.chat;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import dream.client.DreamClient;
 import dream.client.Var;
 import dream.common.Consts;
 import dream.locking.LockManagerLauncher;
 import dream.server.ServerLauncher;
-import javafx.util.Pair;
 
 public class ChatServer {
 	public static final String NAME = "ChatServer";
@@ -18,18 +17,21 @@ public class ChatServer {
 	private boolean serverStarted = false;
 	private boolean lockManagerStarted = false;
 
-	private Var<ArrayList<String>> clients;
+	private final Var<ArrayList<String>> clients;
 
-	private static SecureRandom r = new SecureRandom();
+	private final Logger logger = Logger.getGlobal();
 
 	public static final String SERVER_PREFIX = "server_";
 	public static final String SERVER_REGISTERED_CLIENTS = SERVER_PREFIX + "RegisteredClients";
 
 	public static void main(String[] args) {
-		new ChatServer().start();
+		new ChatServer();
 	}
 
-	private void initServer() {
+	public ChatServer() {
+		startServerIfNeeded();
+		startLockManagerIfNeeded();
+
 		Consts.hostName = NAME;
 
 		clients = new Var<ArrayList<String>>(SERVER_REGISTERED_CLIENTS, new ArrayList<String>());
@@ -42,18 +44,17 @@ public class ChatServer {
 	private void detectNewSession() {
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0])).// Pair(Host,Var)
-				filter(x -> !clients.get().contains(x.getValue() + "@" + x.getKey())
-						&& x.getValue().startsWith("chat_"))
+				filter(x -> !clients.get().contains(x.getSecond() + "@" + x.getFirst())
+						&& x.getSecond().startsWith("chat_"))
 				.//
-				forEach(x -> createNewSessionFor(x.getKey(), x.getValue()));
+				forEach(x -> createNewSessionFor(x.getFirst(), x.getSecond()));
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Failed to sleep for 5 seconds", e);
 		}
 
 		detectNewSession();
-
 	}
 
 	/**
@@ -70,29 +71,6 @@ public class ChatServer {
 		clients.modify((old) -> old.add(clientVar + "@" + clientName));
 	}
 
-	/**
-	 * @return random String hashed with SHA-256
-	 */
-	public static String getRandom() {
-		return new BigInteger(130, r).toString(32);
-	}
-
-	public void start() {
-		startServerIfNeeded();
-		startLockManagerIfNeeded();
-
-		// Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).setLevel(Level.ALL);
-		initServer();
-
-		while (true) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 	private final void startServerIfNeeded() {
 		if (!serverStarted) {
 			ServerLauncher.start();
@@ -101,7 +79,7 @@ public class ChatServer {
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Failed to wait for Server starting", e);
 		}
 	}
 
@@ -113,7 +91,7 @@ public class ChatServer {
 		try {
 			Thread.sleep(500);
 		} catch (final InterruptedException e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Failed to wait for LockManager starting", e);
 		}
 	}
 }

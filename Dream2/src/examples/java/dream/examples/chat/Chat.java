@@ -2,11 +2,14 @@ package dream.examples.chat;
 
 import java.awt.EventQueue;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
@@ -14,20 +17,25 @@ import dream.common.Consts;
 
 public class Chat {
 
-	private final Var<String> myMessages;
-	private final Var<String> incoming;
 	private final String userName;
 	private ChatGUI gui;
-	private final List<String> listening = new ArrayList<>();
-	private final Signal<ArrayList<String>> onlineList;
 
+	private final Signal<ArrayList<String>> onlineList;
 	private List<String> lastOnline;
-	private final static Logger logger = Logger.getGlobal();
+
+	private Var<String> toServer;
+
+	private Map<Integer, Var<String>> rooms = new HashMap<>();
+	private Map<String, Integer> roomNames = new HashMap<>();
+
+	private final Logger logger;
 
 	public Chat(String username) {
 		this.userName = username;
 		Consts.hostName = userName;
 
+		logger = Logger.getLogger("Chat_" + userName);
+		logger.addHandler(Logger.getGlobal().getHandlers()[0]);
 		logger.setLevel(Level.ALL);
 
 		// Establish new session with server
@@ -40,17 +48,14 @@ public class Chat {
 				return registeredClients.get();
 		}, registeredClients);
 		onlineList.change().addHandler((o, n) -> {
-			if (n.contains("chat_message@" + username) && gui == null) {
-				logger.fine("Setup: Server Registration done!");
+			if (n.contains("toServerVar@" + username) && gui == null)
 				setup();
-			}
+
 			List<String> names = n.stream().map(x -> x.split("@")[1]).collect(Collectors.toList());
 			setOnline(names);
-			checkConnections(n);
 		});
 
-		myMessages = new Var<String>("chat_message", "");
-		incoming = new Var<String>("incoming_messages", "");
+		toServer = new Var<String>("toServerVar", "");
 		logger.fine("Setup: Waiting for Registration to Server ...");
 	}
 
@@ -59,13 +64,13 @@ public class Chat {
 			for (String s : lastOnline) {
 				if (!online.contains(s)) {
 					String msg = s + " has left the Chat.";
-					gui.displayMessage(msg);
+					// gui.displayMessage(0, msg);
 				}
 			}
 			for (String s : online) {
 				if (!lastOnline.contains(s)) {
 					String msg = s + " has joined.";
-					gui.displayMessage(msg);
+					// gui.displayMessage(0, msg);
 				}
 			}
 		}
@@ -73,64 +78,127 @@ public class Chat {
 		gui.setOnline(online);
 	}
 
-	private void checkConnections(ArrayList<String> n) {
-		n.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0])).// Pair(Host,Var)
-				filter(x -> !listening.contains(x.getFirst()) && x.getSecond().startsWith("chat_")).//
-				forEach(x -> {
-					RemoteVar<String> temp = new RemoteVar<>(x.getFirst(), x.getSecond());
-					listening.add(x.getFirst());
-					new Signal<String>("incoming" + x.getFirst(), () -> {
-						if (temp.get() != null)
-							return x.getFirst() + ": " + temp.get();
-						else
-							return "";
-					}, temp).change().addHandler((oldVal, newVal) -> incoming.set(newVal));
-					logger.finer("Adding listener to " + x.getFirst());
-				});
-	}
-
 	private void setup() {
-		Signal<String> display = new Signal<String>("display", () -> {
-			if (incoming.get().startsWith("/")) {
-				String[] temp = incoming.get().split(" ", 2);
-				String command = temp[0].substring(1, temp[0].length());
-				String rest = temp.length > 1 ? temp[1] : "";
-				// QUIT - for now only used to update the registeredClients list
-				// (aka who's online)
-				if (command.equalsIgnoreCase("W")) {
-					String[] temp1 = rest.split(" ", 2);
-					String sender = temp1[0];
-					String message = temp1.length > 1 ? temp1[1] : "";
-					return sender + " whispered: " + message;
-				} else
-					return null;
-			} else
-				return incoming.get();
-		}, incoming);
+		logger.fine("Setup: Var successfully registered to Server");
+		// Var for messages from server
+		String serverVar = ChatServer.getRandom();
+		toServer.set(serverVar);
+		// while (!DreamClient.instance.listVariables().contains(serverVar + "@"
+		// + ChatServer.NAME)) {
+		logger.fine(DreamClient.instance.listVariables().toString());
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// }
+		RemoteVar<String> remote = new RemoteVar<String>(ChatServer.NAME, serverVar);
+		Signal<String> fromServer = new Signal<>("fromServer", () -> {
+			if (remote.get() != null)
+				return remote.get();
+			else
+				return "";
+		}, remote);
+		fromServer.change().addHandler((oldValue, newValue) -> receivedServerMessage(newValue));
 
 		logger.fine("Setup: Starting GUI");
 		gui = new ChatGUI(userName);
 		gui.setListener(this);
 
-		display.change().addHandler((oldValue, newValue) -> {
-			if (newValue != null) {
-				logger.fine("Received Message: " + incoming.get());
-				gui.displayMessage(newValue);
+		// main room:
+		// newRoom("Main", "*");
+	}
+
+	private void receivedChatMessage(int roomNumber, String sender, String text) {
+		gui.displayMessage(roomNumber, sender + ": " + text);
+	}
+
+	private void receivedServerMessage(String message) {
+		logger.fine("Received message from server: " + message);
+		String[] temp = message.split(" ", 2);
+		String command = temp[0];
+		String rest = temp.length > 1 ? temp[1] : "";
+		if (command.equalsIgnoreCase("room")) {
+			// room <roomName> <recipient1> <recipient2> ...
+			String[] t = rest.split(" ", 2);
+			String roomName = t[0];
+			String otherClients = t[1];
+			logger.finer("Server requested a Var for room " + roomName + " with " + otherClients);
+
+			int no = gui.newChat(roomName);
+			String roomVar = "room" + no;
+			Var<String> room = new Var<String>(roomVar, "");
+			rooms.put(no, room);
+			roomNames.put(roomName, no);
+			toServer.set("roomVar " + roomName + " " + roomVar);
+		} else if (command.equalsIgnoreCase("roomVar")) {
+			// roomVar <roomName> <member0>=<member0Var> <member1>=<member1Var>
+			String[] t = rest.split(" ", 2);
+			String roomName = t[0];
+			String[] pairs = t[1].split(" ");
+			for (String p : pairs) {
+				String[] t2 = p.split("=", 2);
+				String clientName = t2[0];
+				String clientVar = t2[1];
+				int roomNumber = roomNames.get(roomName);
+				createConnection(roomNumber, roomName, clientName, clientVar);
 			}
-		});
+		}
+	}
+
+	private void createConnection(int roomNumber, String roomName, String clientName, String clientVar) {
+		if (clientName.equals(userName))
+			return;
+		RemoteVar<String> r = new RemoteVar<>(clientName, clientVar);
+		Signal<String> s = new Signal<>(roomName + "_" + clientName, () -> {
+			if (r.get() != null)
+				return r.get();
+			else
+				return "";
+		}, r);
+		s.change().addHandler((oldValue, newValue) -> receivedChatMessage(roomNumber, clientName, newValue));
 	}
 
 	protected void sendMessage(String text) {
 		if (!text.startsWith("/")) {
-			gui.displayMessage("You: " + text);
+			// normal message
+			int room = gui.getSelectedChat();
+			gui.displayMessage(room, "You: " + text);
+			rooms.get(room).set(text);
+			logger.fine("Send Message to Room" + room + ": " + text);
+		} else {
+			// message to server
+			processCommand(text.substring(1, text.length()));
 		}
-		myMessages.set(text);
-		logger.fine("Send Message: " + text);
+	}
+
+	private void processCommand(String text) {
+		String[] temp = text.split(" ", 2);
+		String command = temp[0];
+		String rest = temp.length > 1 ? temp[1] : "";
+		if (command.equalsIgnoreCase("room")) {
+			String[] temp1 = rest.split(" ", 2);
+			String name = temp1[0];
+			newRoom(name, temp1[1]);
+		}
+		logger.fine("Processed Command: " + text);
+	}
+
+	private void newRoom(String name, String recipients) {
+		int no = gui.newChat(name);
+		String roomVar = "room" + no;
+		Var<String> room = new Var<String>(roomVar, "");
+		rooms.put(no, room);
+		roomNames.put(name, no);
+		logger.fine("Room: Creating new Room(" + no + ") to " + recipients);
+		// room command: room <Name> <Variable> <recipient1> <recipient2> ...
+		logger.finer("Room: Sending to Server: " + "room " + name + " " + roomVar + " " + recipients);
+		toServer.set("room " + name + " " + roomVar + " " + recipients);
 	}
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
-			logger.severe("username missing");
+			Logger.getGlobal().severe("username missing");
 			return;
 		}
 		EventQueue.invokeLater(new Runnable() {

@@ -1,6 +1,8 @@
 package dream.examples.chat;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -19,6 +21,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -28,7 +31,8 @@ import javax.swing.SwingUtilities;
 public class ChatGUI extends JFrame implements WindowListener {
 
 	private static final long serialVersionUID = 4659984914364067514L;
-	private JTextArea msgs;
+	private JTabbedPane jtp;
+	private List<JTextArea> msgs;
 	private JTextField sendText;
 	private JList<String> statusList;
 	private DefaultListModel<String> listModel;
@@ -38,7 +42,6 @@ public class ChatGUI extends JFrame implements WindowListener {
 	public ChatGUI(String userName) {
 		this.addWindowListener(this);
 		initUI(userName);
-
 	}
 
 	public void setListener(Chat c) {
@@ -53,11 +56,28 @@ public class ChatGUI extends JFrame implements WindowListener {
 		sendText.setText("");
 	}
 
-	public void displayMessage(String text) {
-		if (msgs.getText().isEmpty())
-			msgs.append(text);
+	public int getSelectedChat() {
+		return jtp.getSelectedIndex();
+	}
+
+	public int newChat(String name) {
+		msgs.add(new JTextArea(5, 27));
+		int r = msgs.size() - 1;
+		msgs.get(r).setEditable(false);
+		jtp.add(name, msgs.get(r));
+		pack();
+		return r;
+	}
+
+	public void closeChat(int index) {
+		Component t = jtp.getComponentAt(index);
+	}
+
+	public void displayMessage(int room, String text) {
+		if (msgs.get(room).getText().isEmpty())
+			msgs.get(room).append(text);
 		else
-			msgs.append(System.lineSeparator() + text);
+			msgs.get(room).append(System.lineSeparator() + text);
 	}
 
 	public void setOnline(List<String> online) {
@@ -116,9 +136,10 @@ public class ChatGUI extends JFrame implements WindowListener {
 				sendText();
 			}
 		});
-		msgs = new JTextArea(5, 27);
-		msgs.setEditable(false);
-		msgs.setMaximumSize(null);
+		jtp = new JTabbedPane(JTabbedPane.TOP);
+		jtp.setPreferredSize(new Dimension(400, 100));
+		msgs = new ArrayList<>();
+		// newChat("Main");
 
 		listModel = new DefaultListModel<String>();
 		statusList = new JList<String>(listModel);
@@ -166,15 +187,15 @@ public class ChatGUI extends JFrame implements WindowListener {
 		SpringLayout layout = new SpringLayout();
 
 		// put messages on (5,5)
-		layout.putConstraint(SpringLayout.WEST, msgs, 5, SpringLayout.WEST, getContentPane());
-		layout.putConstraint(SpringLayout.NORTH, msgs, 5, SpringLayout.NORTH, getContentPane());
+		layout.putConstraint(SpringLayout.WEST, jtp, 5, SpringLayout.WEST, getContentPane());
+		layout.putConstraint(SpringLayout.NORTH, jtp, 5, SpringLayout.NORTH, getContentPane());
 
 		// put textfield below messages
-		layout.putConstraint(SpringLayout.NORTH, sendText, 5, SpringLayout.SOUTH, msgs);
+		layout.putConstraint(SpringLayout.NORTH, sendText, 5, SpringLayout.SOUTH, jtp);
 		layout.putConstraint(SpringLayout.WEST, sendText, 5, SpringLayout.WEST, getContentPane());
 
 		// put button next to the textfield
-		layout.putConstraint(SpringLayout.NORTH, sendButton, 5, SpringLayout.SOUTH, msgs);
+		layout.putConstraint(SpringLayout.NORTH, sendButton, 5, SpringLayout.SOUTH, jtp);
 		layout.putConstraint(SpringLayout.WEST, sendButton, 5, SpringLayout.EAST, sendText);
 
 		// make the frame big enough to fit all in
@@ -182,11 +203,11 @@ public class ChatGUI extends JFrame implements WindowListener {
 		layout.putConstraint(SpringLayout.SOUTH, getContentPane(), 10, SpringLayout.SOUTH, sendText);
 
 		layout.putConstraint(SpringLayout.NORTH, statusList, 5, SpringLayout.NORTH, getContentPane());
-		layout.putConstraint(SpringLayout.WEST, statusList, 15, SpringLayout.EAST, sendButton);
+		layout.putConstraint(SpringLayout.WEST, statusList, 15, SpringLayout.EAST, jtp);
 
 		getContentPane().setLayout(layout);
 
-		getContentPane().add(msgs);
+		getContentPane().add(jtp);
 		getContentPane().add(sendText);
 		getContentPane().add(sendButton);
 		getContentPane().add(statusList);

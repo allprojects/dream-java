@@ -3,8 +3,6 @@ package dream.examples.chat;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
@@ -39,9 +37,11 @@ public class ChatGUI extends JFrame implements WindowListener {
 
 	private Chat listener;
 
-	public ChatGUI(String userName) {
+	public ChatGUI(String userName, int posX, int posY) {
 		this.addWindowListener(this);
 		initUI(userName);
+		if (posX >= 0 && posY >= 0)
+			this.setLocation(posX, posY);
 	}
 
 	public void setListener(Chat c) {
@@ -86,18 +86,14 @@ public class ChatGUI extends JFrame implements WindowListener {
 			if (!online.contains(listModel.get(i)))
 				offlineList.add(listModel.get(i));
 		}
-		SwingUtilities.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				listModel.clear();
-				for (String e : online) {
-					listModel.addElement(e);
-				}
-				for (String e : offlineList)
-					listModel.addElement(e);
-				statusList.setSelectionInterval(0, online.size() - 1);
+		SwingUtilities.invokeLater(() -> {
+			listModel.clear();
+			for (String e : online) {
+				listModel.addElement(e);
 			}
+			for (String e : offlineList)
+				listModel.addElement(e);
+			statusList.setSelectionInterval(0, online.size() - 1);
 		});
 
 	}
@@ -130,12 +126,7 @@ public class ChatGUI extends JFrame implements WindowListener {
 			}
 		});
 		JButton sendButton = new JButton("Send");
-		sendButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				sendText();
-			}
-		});
+		sendButton.addActionListener((e) -> sendText());
 		jtp = new JTabbedPane(JTabbedPane.TOP);
 		jtp.setPreferredSize(new Dimension(400, 100));
 		msgs = new ArrayList<>();

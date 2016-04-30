@@ -29,11 +29,14 @@ public class Chat {
 	private Map<String, Integer> roomNames = new HashMap<>();
 
 	private final Logger logger;
+	private int posX;
+	private int posY;
 
-	public Chat(String username) {
+	public Chat(String username, int window_x, int window_y) {
 		this.userName = username;
 		Consts.hostName = userName;
-
+		this.posX = window_x;
+		this.posY = window_y;
 		logger = Logger.getLogger("Chat_" + userName);
 		logger.addHandler(Logger.getGlobal().getHandlers()[0]);
 		logger.setLevel(Level.ALL);
@@ -102,7 +105,7 @@ public class Chat {
 		fromServer.change().addHandler((oldValue, newValue) -> receivedServerMessage(newValue));
 
 		logger.fine("Setup: Starting GUI");
-		gui = new ChatGUI(userName);
+		gui = new ChatGUI(userName, posX, posY);
 		gui.setListener(this);
 
 		// main room:
@@ -201,12 +204,21 @@ public class Chat {
 			Logger.getGlobal().severe("username missing");
 			return;
 		}
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				new Chat(args[0]);
-			}
-		});
+		int x, y;
+		for (String s : args) {
+			System.out.print(s + ",");
+		}
+		System.out.println();
+		if (args.length < 3)
+			y = -1;
+		else
+			y = Integer.parseInt(args[2]);
+
+		if (args.length < 2)
+			x = -1;
+		else
+			x = Integer.parseInt(args[1]);
+		EventQueue.invokeLater(() -> new Chat(args[0], x, y));
 	}
 }
 

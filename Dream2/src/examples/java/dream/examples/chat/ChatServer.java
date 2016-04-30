@@ -62,9 +62,9 @@ public class ChatServer {
 				.//
 				forEach(x -> createNewSessionFor(x.getFirst(), x.getSecond()));
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Failed to sleep for 5 seconds", e);
+			logger.log(Level.SEVERE, "Failed to sleep for 0.5 seconds", e);
 		}
 
 		detectNewSession();

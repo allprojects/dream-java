@@ -17,7 +17,7 @@ import dream.common.Consts;
 
 public class Chat {
 
-	private final String userName;
+	protected final String userName;
 	private ChatGUI gui;
 
 	private final Signal<ArrayList<String>> onlineList;
@@ -28,7 +28,7 @@ public class Chat {
 	private Map<Integer, Var<String>> rooms = new HashMap<>();
 	private Map<String, Integer> roomNames = new HashMap<>();
 
-	private final Logger logger;
+	protected final Logger logger;
 	private int posX;
 	private int posY;
 
@@ -153,8 +153,12 @@ public class Chat {
 		toServer.set(message);
 	}
 
-	protected String newRoom(String roomName) {
+	private String newRoom(String roomName) {
 		int roomNumber = gui.newChat(roomName);
+		return newRoom(roomName, roomNumber);
+	}
+
+	protected String newRoom(String roomName, int roomNumber) {
 		String roomVar = "room" + roomNumber;
 		Var<String> room = new Var<String>(roomVar, "");
 		rooms.put(roomNumber, room);

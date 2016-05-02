@@ -1,4 +1,4 @@
-package dream.examples.chat_fifo;
+package dream.examples.chat.fifo;
 
 import java.io.Serializable;
 import java.util.Arrays;

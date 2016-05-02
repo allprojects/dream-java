@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import dream.examples.chat.Chat;
-import dream.examples.chat.ChatServer;
+import dream.examples.chat.core.Chat;
+import dream.examples.chat.core.ChatServer;
 
 /**
  * Convenience class to start ChatServer and x Chats (x = CHAT_COUNT), each in

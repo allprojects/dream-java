@@ -1,4 +1,4 @@
-package dream.examples.chat;
+package dream.examples.chat.core;
 
 import java.awt.EventQueue;
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public class Chat {
 		logger.fine("Setup: Var successfully registered to Server");
 		// Var for messages from server
 		String serverVar = ChatServer.getRandom();
-		toServer.set(serverVar);
+		sendServerMessage(serverVar);
 		// while (!DreamClient.instance.listVariables().contains(serverVar + "@"
 		// + ChatServer.NAME)) {
 		logger.fine(DreamClient.instance.listVariables().toString());
@@ -112,11 +112,11 @@ public class Chat {
 		// newRoom("Main", "*");
 	}
 
-	private void receivedChatMessage(int roomNumber, String sender, String text) {
-		gui.displayMessage(roomNumber, sender + ": " + text);
+	protected void receivedChatMessage(int roomNumber, String sender, String message) {
+		gui.displayMessage(roomNumber, sender + ": " + message);
 	}
 
-	private void receivedServerMessage(String message) {
+	protected void receivedServerMessage(String message) {
 		logger.fine("Received message from server: " + message);
 		String[] temp = message.split(" ", 2);
 		String command = temp[0];
@@ -128,12 +128,8 @@ public class Chat {
 			String otherClients = t[1];
 			logger.finer("Server requested a Var for room " + roomName + " with " + otherClients);
 
-			int no = gui.newChat(roomName);
-			String roomVar = "room" + no;
-			Var<String> room = new Var<String>(roomVar, "");
-			rooms.put(no, room);
-			roomNames.put(roomName, no);
-			toServer.set("roomVar " + roomName + " " + roomVar);
+			String roomVar = newRoom(roomName);
+			sendServerMessage("roomVar " + roomName + " " + roomVar);
 		} else if (command.equalsIgnoreCase("roomVar")) {
 			// roomVar <roomName> <member0>=<member0Var> <member1>=<member1Var>
 			String[] t = rest.split(" ", 2);
@@ -149,6 +145,24 @@ public class Chat {
 		}
 	}
 
+	protected void sendChatMessage(int roomNumber, String message) {
+		rooms.get(roomNumber).set(message);
+	}
+
+	protected void sendServerMessage(String message) {
+		toServer.set(message);
+	}
+
+	protected String newRoom(String roomName) {
+		int roomNumber = gui.newChat(roomName);
+		String roomVar = "room" + roomNumber;
+		Var<String> room = new Var<String>(roomVar, "");
+		rooms.put(roomNumber, room);
+		roomNames.put(roomName, roomNumber);
+		logger.fine("Room: Creating new Room(" + roomNumber + ")");
+		return roomVar;
+	}
+
 	private void createConnection(int roomNumber, String roomName, String clientName, String clientVar) {
 		if (clientName.equals(userName))
 			return;
@@ -162,12 +176,12 @@ public class Chat {
 		s.change().addHandler((oldValue, newValue) -> receivedChatMessage(roomNumber, clientName, newValue));
 	}
 
-	protected void sendMessage(String text) {
+	protected void typedMessage(String text) {
 		if (!text.startsWith("/")) {
 			// normal message
 			int room = gui.getSelectedChat();
 			gui.displayMessage(room, "You: " + text);
-			rooms.get(room).set(text);
+			sendChatMessage(room, text);
 			logger.fine("Send Message to Room" + room + ": " + text);
 		} else {
 			// message to server
@@ -182,21 +196,16 @@ public class Chat {
 		if (command.equalsIgnoreCase("room")) {
 			String[] temp1 = rest.split(" ", 2);
 			String name = temp1[0];
-			newRoom(name, temp1[1]);
+			initiateNewRoom(name, temp1[1]);
 		}
 		logger.fine("Processed Command: " + text);
 	}
 
-	private void newRoom(String name, String recipients) {
-		int no = gui.newChat(name);
-		String roomVar = "room" + no;
-		Var<String> room = new Var<String>(roomVar, "");
-		rooms.put(no, room);
-		roomNames.put(name, no);
-		logger.fine("Room: Creating new Room(" + no + ") to " + recipients);
+	private void initiateNewRoom(String name, String recipients) {
+		String roomVar = newRoom(name);
 		// room command: room <Name> <Variable> <recipient1> <recipient2> ...
 		logger.finer("Room: Sending to Server: " + "room " + name + " " + roomVar + " " + recipients);
-		toServer.set("room " + name + " " + roomVar + " " + recipients);
+		sendServerMessage("room " + name + " " + roomVar + " " + recipients);
 	}
 
 	public static void main(String[] args) {

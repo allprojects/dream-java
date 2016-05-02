@@ -1,4 +1,4 @@
-package dream.examples.chat;
+package dream.examples.chat.core;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -99,7 +99,11 @@ public class ChatServer {
 		logger.fine("Setup: Waiting for first message from " + clientName);
 	}
 
-	private void receivedMessage(String clientName, String message) {
+	protected void sendMessage(String clientName, String message) {
+		clientVars.get(clientName).set(message);
+	}
+
+	protected void receivedMessage(String clientName, String message) {
 		logger.fine("Received client message from " + clientName + ": " + message);
 		if (!clientVars.containsKey(clientName)) {
 			// first message from client
@@ -122,20 +126,20 @@ public class ChatServer {
 				roomVars.put(clientName, t[1]);
 				// send message to every recipient to send a Var for that room
 				if (otherClients.equals("*")) {
-					for (String c : clients.get()) {
+					for (String client : clients.get()) {
 						// set Var for c as "not sent"
-						roomVars.put(c, null);
+						roomVars.put(client, null);
 						// and ask c for his Var
-						logger.finer("Room: Sending Var-Request for " + roomName + " to " + c);
-						clientVars.get(c).set("room " + roomName + " " + otherClients.replace(c, clientName));
+						logger.finer("Room: Sending Var-Request for " + roomName + " to " + client);
+						sendMessage(client, "room " + roomName + " " + otherClients.replace(client, clientName));
 					}
 				} else {
-					for (String c : otherClients.split(" ")) {
+					for (String client : otherClients.split(" ")) {
 						// set Var for c as "not sent"
-						roomVars.put(c, null);
+						roomVars.put(client, null);
 						// and ask c for his Var
-						logger.finer("Room: Sending Var-Request for " + roomName + " to " + c);
-						clientVars.get(c).set("room " + roomName + " " + otherClients.replace(c, clientName));
+						logger.finer("Room: Sending Var-Request for " + roomName + " to " + client);
+						sendMessage(client, "room " + roomName + " " + otherClients.replace(client, clientName));
 					}
 				}
 				rooms.put(roomName, roomVars);
@@ -155,7 +159,7 @@ public class ChatServer {
 						varString += e.getKey() + "=" + e.getValue() + " ";
 					}
 					for (String client : roomVars.keySet()) {
-						clientVars.get(client).set("roomVar " + roomName + " " + varString);
+						sendMessage(client, "roomVar " + roomName + " " + varString);
 					}
 					logger.fine("Room: Finished setting up room " + roomName);
 				}

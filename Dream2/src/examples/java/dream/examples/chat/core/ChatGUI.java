@@ -19,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -64,13 +65,16 @@ public class ChatGUI extends JFrame implements WindowListener {
 		msgs.add(new JTextArea(5, 27));
 		int r = msgs.size() - 1;
 		msgs.get(r).setEditable(false);
-		jtp.add(name, msgs.get(r));
+		JScrollPane sp = new JScrollPane(msgs.get(r));
+		sp.setAutoscrolls(true);
+		jtp.add(name, sp);
 		pack();
 		return r;
 	}
 
 	public void closeChat(int index) {
 		Component t = jtp.getComponentAt(index);
+		jtp.remove(t);
 	}
 
 	public void displayMessage(int room, String text) {

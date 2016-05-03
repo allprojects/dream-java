@@ -14,6 +14,7 @@ import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
 import dream.common.Consts;
+import dream.examples.chat.util.DependencyGraph;
 
 public class Chat {
 
@@ -44,7 +45,7 @@ public class Chat {
 		// Establish new session with server
 		RemoteVar<ArrayList<String>> registeredClients = new RemoteVar<ArrayList<String>>(ChatServer.NAME,
 				ChatServer.SERVER_REGISTERED_CLIENTS);
-		onlineList = new Signal<ArrayList<String>>("setup", () -> {
+		onlineList = new Signal<ArrayList<String>>("onlineList", () -> {
 			if (registeredClients.get() == null)
 				return new ArrayList<String>();
 			else
@@ -201,6 +202,10 @@ public class Chat {
 			String[] temp1 = rest.split(" ", 2);
 			String name = temp1[0];
 			initiateNewRoom(name, temp1[1]);
+		} else if (command.equalsIgnoreCase("graph")) {
+			DependencyGraph.show();
+		} else if (command.equalsIgnoreCase("sgraph")) {
+			sendServerMessage("graph");
 		}
 		logger.fine("Processed Command: " + text);
 	}

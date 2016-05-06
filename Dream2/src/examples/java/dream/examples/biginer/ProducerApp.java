@@ -15,9 +15,11 @@ public class ProducerApp {
 		// myVar is created and registered as exVar for remote consumption.
 		// exVar is initialized to AAA
 		Var<String> myVar = new Var<String>("exVar", "AAA");
+		System.out.println("Producer has started\n Please wait..initial communication may take upto 10 seconds");
 		int iteration = 10;
+		Thread.sleep(10000);
 		while (iteration > 0) {
-			Thread.sleep(1000);
+			Thread.sleep(100);
 			// change value of exVar
 			myVar.set("Value-" + (10 - iteration) + "");
 			System.out.println("Changed myvar " + myVar.get());

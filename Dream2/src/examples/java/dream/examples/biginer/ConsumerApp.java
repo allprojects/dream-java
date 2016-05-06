@@ -15,7 +15,7 @@ public class ConsumerApp {
 
 		// Register a Subscription
 		RemoteVar<String> rv = new RemoteVar<String>("Host1", "exVar");
-
+		System.out.println("Consumer has started\n Please wait..initial communication may take upto 10 seconds");
 		// On every change in remote variable rv create a signal which could
 		// trigger appropriate action
 		Signal<String> s = new Signal<String>("s", () -> {

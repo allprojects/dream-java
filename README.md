@@ -5,7 +5,7 @@ The relevant source code is in the Dream2 folder.
 
 We initially need to assign a name to the current host `Host1`.
 ```
-Consts.hostname = "Host1";
+Consts.hostName = "Host1";
 ```
 Now on `Host1` we can define a Var `myVar` that is visible remotely. The var `myVar` constains a string, it is advertised with the name `exVar` and it is initialized to the value `AAA`.
 ```
@@ -18,7 +18,7 @@ On a different host, `Host2` we can read the var defined on `Host1` whose name i
 RemoteVar<String> rv = new RemoteVar<String>("Host1", "exVar");
 
 Signal<String> s = new Signal<String>>("s", () -> {
-			return rv + "XXX";	
+			return rv.get() + "XXX";	
 		}, rv);
 ```
 If rv is not available yet, ...

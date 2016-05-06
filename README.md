@@ -3,6 +3,28 @@
 The relevant source code is in the Dream2 folder. 
 
 
+We initially need to assign a name to the current host `Host1`.
+```
+Consts.hostname = "Host1";
+```
+Now on `Host1` we can define a Var `myVar` that is visible remotely. The var `myVar` constains a string, it is advertised with the name `exVar` and it is initialized to the value `AAA`.
+```
+Var<String> myVar = new Var<String>("exVar", "AAA");
+```
+
+On a different host, `Host2` we can read the var defined on `Host1` whose name is `exVar`. We can also define a signal that builds a computation on top of it.
+
+```
+RemoteVar<String> rv = new RemoteVar<String>("Host1", "exVar");
+
+Signal<String> s = new Signal<String>>("s", () -> {
+			return rv + "XXX";	
+		}, rv);
+```
+If rv is not available yet, ...
+More examples:
+
+
 ```
 Var<Integer> a = new Var<>("a", Integer.valueOf(1));
 	  

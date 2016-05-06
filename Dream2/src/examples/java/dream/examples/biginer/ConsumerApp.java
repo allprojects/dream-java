@@ -5,7 +5,7 @@ import dream.client.Signal;
 import dream.common.Consts;
 
 /**
- * An app which consumes the variables
+ * An application which consumes the variables
  */
 public class ConsumerApp {
 

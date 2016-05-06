@@ -19,7 +19,7 @@ public class ProducerApp {
 		while (iteration > 0) {
 			Thread.sleep(1000);
 			// change value of exVar
-			myVar.set("Val-" + (10 - iteration) + "");
+			myVar.set("Value-" + (10 - iteration) + "");
 			System.out.println("Changed myvar " + myVar.get());
 			iteration--;
 		}

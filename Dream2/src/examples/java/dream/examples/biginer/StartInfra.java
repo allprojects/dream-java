@@ -9,7 +9,6 @@ public class StartInfra {
 		try {
 			// Start the Server
 			ServerLauncher.start();
-
 			// Start the LockManager
 			LockManagerLauncher.start();
 		} catch (Exception e) {

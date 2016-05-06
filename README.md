@@ -4,11 +4,11 @@ The relevant source code is in the Dream2 folder.
 
 
 
-Var<Integer> a = new Var<>("a", Integer.valueOf(1));
+	Var<Integer> a = new Var<>("a", Integer.valueOf(1));
 	  
-Var<Integer> b = new Var<>("b", Integer.valueOf(2));
+	Var<Integer> b = new Var<>("b", Integer.valueOf(2));
 	  
-Signal<Integer> c =
+	Signal<Integer> c =
 	  new Signal<>("c", () -> a.get() + b.get(), a, b);
 
 

@@ -17,7 +17,7 @@ public class ProducerApp {
 		Var<String> myVar = new Var<String>("exVar", "AAA");
 		System.out.println("Producer has started\n Please wait..initial communication may take upto 10 seconds");
 		int iteration = 10;
-		Thread.sleep(10000);
+		Thread.sleep(3000);
 		while (iteration > 0) {
 			Thread.sleep(100);
 			// change value of exVar

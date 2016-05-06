@@ -17,7 +17,7 @@ public class ConsumerApp {
 		RemoteVar<String> rv = new RemoteVar<String>("Host1", "exVar");
 
 		// On every change in remote variable rv create a signal which could
-		// trigger apprpriate action
+		// trigger appropriate action
 		Signal<String> s = new Signal<String>("s", () -> {
 			return rv.get() + "ABC";
 		} , rv);

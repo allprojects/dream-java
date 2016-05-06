@@ -4,7 +4,7 @@ The relevant source code is in the Dream2 folder.
 
 
 We initially need to assign a name to the current host `Host1`.
-```
+```java
 Consts.hostName = "Host1";
 ```
 Now on `Host1` we can define a Var `myVar` that is visible remotely. The var `myVar` constains a string, it is advertised with the name `exVar` and it is initialized to the value `AAA`.

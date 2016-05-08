@@ -126,19 +126,14 @@ class ClientEventForwarder implements PacketForwarder {
 		}
 	}
 
-	/**
-	 * Return false if the lock request is not needed
-	 */
-	final synchronized void sendReadOnlyLockRequest(String node, LockApplicant applicant) {
+	final synchronized void sendReadOnlyLockRequest(Set<String> nodesToLock, LockApplicant applicant) {
 		if (Consts.consistencyType != ConsistencyType.ATOMIC) {
 			assert false : Consts.consistencyType;
 			logger.warning("Invoked sendReadOnlyLockRequest() even if the consistency level does not require it.");
 			return;
 		}
 
-		logger.finer("Invoked sendReadOnlyLockRequest for node " + node);
-		final Set<String> nodesToLock = new HashSet<>();
-		nodesToLock.add(node);
+		logger.finer("Invoked sendReadOnlyLockRequest for nodes " + nodesToLock);
 
 		final LockRequestPacket reqPkt = new LockRequestPacket(connectionManager.getNodeDescriptor(), nodesToLock,
 				nodesToLock, LockType.READ_ONLY);

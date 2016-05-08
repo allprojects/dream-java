@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -21,10 +20,8 @@ import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.content.Subscription;
-import dream.common.packets.locking.LockGrantPacket;
 
-public class Signal<T extends Serializable>
-		implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer, LockApplicant {
+public class Signal<T extends Serializable> implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer {
 
 	// Management of local subscribers
 	private final Map<UpdateConsumer, List<SerializablePredicate<T>>> consumers = new HashMap<>();
@@ -40,8 +37,6 @@ public class Signal<T extends Serializable>
 	private final List<SerializablePredicate<T>> constraints = new ArrayList<>();
 
 	private final Supplier<T> evaluation;
-
-	private UUID lockID = null;
 
 	private T val;
 
@@ -111,9 +106,10 @@ public class Signal<T extends Serializable>
 			clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getSource());
 
 			final Set<UpdateConsumer> satConsumers = //
-			consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> constr.test(val)))//
-					.map(e -> e.getKey())//
-					.collect(Collectors.toSet());
+					consumers.entrySet().stream()
+							.filter(e -> e.getValue().stream().allMatch(constr -> constr.test(val)))//
+							.map(e -> e.getKey())//
+							.collect(Collectors.toSet());
 			// Notify local subscribers
 			if (!satConsumers.isEmpty()) {
 				pairs.forEach(pair -> waitingProducers.add(pair.getUpdateProducer()));
@@ -146,36 +142,6 @@ public class Signal<T extends Serializable>
 
 	public T get() {
 		return val;
-	}
-
-	public T atomicGet() {
-		acquireLock();
-		// TODO: this should actually be a copy of the object
-		final T currentVal = val;
-		releaseLock();
-		return currentVal;
-	}
-
-	private final synchronized void acquireLock() {
-		if (Consts.consistencyType != ConsistencyType.ATOMIC) {
-			return;
-		}
-		clientEventForwarder.sendReadOnlyLockRequest(object + "@" + host, this);
-		while (lockID == null) {
-			try {
-				wait();
-			} catch (final InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private final synchronized void releaseLock() {
-		if (Consts.consistencyType != ConsistencyType.ATOMIC) {
-			return;
-		}
-		clientEventForwarder.sendLockRelease(lockID);
-		lockID = null;
 	}
 
 	@Override
@@ -225,12 +191,6 @@ public class Signal<T extends Serializable>
 	@Override
 	public List<SerializablePredicate<T>> getConstraints() {
 		return constraints;
-	}
-
-	@Override
-	public final synchronized void notifyLockGranted(LockGrantPacket lockGrant) {
-		lockID = lockGrant.getLockID();
-		notifyAll();
 	}
 
 	@Override

@@ -22,7 +22,8 @@ public class Boss extends FormClient {
 	}
 
 	public static void main(String[] args) {
-		new Boss();
+		Boss b = new Boss();
+		b.init("Boss");
 	}
 
 }

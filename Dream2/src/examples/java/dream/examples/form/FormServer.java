@@ -1,6 +1,5 @@
 package dream.examples.form;
 
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,11 +20,6 @@ public class FormServer {
 
 	private RemoteVar<Integer> working_hours;
 	private RemoteVar<Double> euro_per_hour;
-	private Signal<Boolean> minimumHours;
-	private Signal<Boolean> maximumHours;
-	private Signal<Boolean> minimumEuroPerHour;
-	private Signal<Double> salary;
-	private Signal<Boolean> settingsOkay;
 
 	public FormServer() {
 		startServerIfNeeded();
@@ -42,61 +36,59 @@ public class FormServer {
 	 * Look for new clients every 5 seconds
 	 */
 	private void detectNewSession() {
-		Set<String> vars = DreamClient.instance.listVariables();
-		for (String str : vars) {
-			String host = str.split("@")[1];
-			String var = str.split("@")[0];
-			if (working_hours == null && var.equalsIgnoreCase("working_hours")) {
-				working_hours = new RemoteVar<>(host, var);
-				System.out.println("Found Secreatary");
-				updateDependencies();
+		while (euro_per_hour == null || working_hours == null) {
+			for (String str : DreamClient.instance.listVariables()) {
+				String host = str.split("@")[1];
+				String var = str.split("@")[0];
+				if (working_hours == null && var.equalsIgnoreCase("working_hours")) {
+					working_hours = new RemoteVar<>(host, var);
+					System.out.println("Found Secreatary");
+				} else if (euro_per_hour == null && var.equalsIgnoreCase("euro_per_hour")) {
+					euro_per_hour = new RemoteVar<>(host, var);
+					System.out.println("Found Boss");
+				}
 			}
-			if (euro_per_hour == null && var.equalsIgnoreCase("euro_per_hour")) {
-				euro_per_hour = new RemoteVar<>(host, var);
-				System.out.println("Found Boss");
-				updateDependencies();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				logger.log(Level.SEVERE, "Failed to sleep for 0.5 seconds", e);
 			}
 		}
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Failed to sleep for 0.5 seconds", e);
-		}
-
-		detectNewSession();
+		updateDependencies();
 	}
 
 	private void updateDependencies() {
-		if (euro_per_hour == null || working_hours == null)
-			return;
-
 		System.out.println("update Dep");
 
-		minimumHours = new Signal<>("minimumHours", () -> {
+		final Signal<Boolean> minimumHours = new Signal<>("minimumHours", () -> {
 			if (working_hours.get() != null)
 				return working_hours.get() > 10;
 			else
 				return false;
 		}, working_hours);
-		maximumHours = new Signal<>("maximumHours", () -> {
+
+		final Signal<Boolean> maximumHours = new Signal<>("maximumHours", () -> {
 			if (working_hours.get() != null)
 				return working_hours.get() < 60;
 			else
 				return false;
 		}, working_hours);
-		minimumEuroPerHour = new Signal<>("minimumEuroPerHour", () -> {
+
+		final Signal<Boolean> minimumEuroPerHour = new Signal<>("minimumEuroPerHour", () -> {
 			if (euro_per_hour.get() != null)
 				return euro_per_hour.get() > 10;
 			else
 				return false;
-		}, working_hours);
-		settingsOkay = new Signal<>("settingsOkay", () -> {
+		}, euro_per_hour);
+
+		new Signal<>("settingsOkay", () -> {
 			if (minimumHours.get() != null && maximumHours.get() != null && minimumEuroPerHour.get() != null)
 				return minimumHours.get() && maximumHours.get() && minimumEuroPerHour.get();
 			else
 				return false;
 		}, minimumHours, maximumHours, minimumEuroPerHour);
-		salary = new Signal<>("salary", () -> {
+
+		new Signal<>("salary", () -> {
 			if (working_hours.get() != null && euro_per_hour.get() != null)
 				return working_hours.get() * euro_per_hour.get();
 			else

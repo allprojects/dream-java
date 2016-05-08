@@ -1,5 +1,6 @@
 package dream.server;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +11,11 @@ import java.util.logging.Logger;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
+import dream.common.packets.content.AdvType;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.overlay.NeighborhoodChangeListener;
+import polimi.reds.broker.overlay.NotRunningException;
+import polimi.reds.broker.overlay.Overlay;
 import polimi.reds.broker.routing.Outbox;
 import polimi.reds.broker.routing.PacketForwarder;
 
@@ -21,6 +25,12 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 	protected final SubscriptionTable clientsSubTable = new SubscriptionTable();
 	protected final SubscriptionTable brokersSubTable = new SubscriptionTable();
 	protected final AdvertisementTable advTable = new AdvertisementTable();
+
+	private final Overlay overlay;
+
+	public ServerEventForwarder(final Overlay overlay) {
+		this.overlay = overlay;
+	}
 
 	@Override
 	public Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender, Serializable packet,
@@ -116,7 +126,17 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 
 	@Override
 	public final void notifyNeighborAdded(NodeDescriptor node) {
-		// Nothing to do
+		if (node.isClient()) {
+			advTable.getAllAdvertisements().stream() //
+					.map(adv -> new AdvertisementPacket(adv, AdvType.ADV, true)) //
+					.forEach(advPkt -> {
+						try {
+							overlay.send(AdvertisementPacket.subject, advPkt, node);
+						} catch (IOException | NotRunningException e) {
+							e.printStackTrace();
+						}
+					});
+		}
 	}
 
 	@Override

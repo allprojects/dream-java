@@ -22,7 +22,8 @@ public class Secretary extends FormClient {
 	}
 
 	public static void main(String[] args) {
-		new Secretary();
+		Secretary s = new Secretary();
+		s.init("Secretary");
 	}
 
 }

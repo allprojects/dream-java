@@ -3,6 +3,7 @@ package dream.server;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -45,6 +46,10 @@ final class AdvertisementTable {
 
 	final void removeAllAdvertisementsFor(NodeDescriptor node) {
 		advs.remove(node);
+	}
+
+	final Set<Advertisement> getAllAdvertisements() {
+		return advs.values().stream().collect(HashSet::new, HashSet::addAll, HashSet::addAll);
 	}
 
 }

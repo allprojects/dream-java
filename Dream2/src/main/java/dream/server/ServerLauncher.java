@@ -30,7 +30,7 @@ public class ServerLauncher implements NeighborhoodChangeListener {
 		final TopologyManager tm = new SimpleTopologyManager();
 		overlay = new GenericOverlay(tm, tr);
 		final GenericRouter router = new GenericRouter(overlay);
-		final ServerEventForwarder forwarder = new ServerEventForwarder();
+		final ServerEventForwarder forwarder = new ServerEventForwarder(overlay);
 		overlay.addNeighborhoodChangeListener(forwarder);
 		router.setPacketForwarder(EventPacket.subject, forwarder);
 		router.setPacketForwarder(SubscriptionPacket.subject, forwarder);

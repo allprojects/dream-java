@@ -20,6 +20,7 @@ public abstract class FormClient {
 	public FormClient(String name) {
 		Consts.hostName = name;
 		Logger.getGlobal().setLevel(Level.ALL);
+		DreamClient.instance.connect();
 	}
 
 	protected void init(String name) {

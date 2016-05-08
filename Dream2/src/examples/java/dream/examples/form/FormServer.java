@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.client.Var;
 import dream.common.Consts;
 import dream.locking.LockManagerLauncher;
 import dream.server.ServerLauncher;
@@ -28,7 +27,7 @@ public class FormServer {
 		logger.setLevel(Level.ALL);
 		// logger.addHandler(Logger.getGlobal().getHandlers()[0]);
 		Consts.hostName = NAME;
-		new Var<>("helper", "");
+		DreamClient.instance.connect();
 		detectNewSession();
 	}
 

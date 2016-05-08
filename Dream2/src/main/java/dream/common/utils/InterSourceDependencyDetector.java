@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * An InterSourceDependencyDetector is a dependency detector used to detect
- * dependencies in the propagations from starting from different sources.
+ * dependencies in propagations starting from different sources.
  *
  * For each source, the detector returns the nodes that require to be locked
  * during the propagation.

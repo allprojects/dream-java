@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -11,7 +12,6 @@ import java.util.logging.Logger;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
-import dream.common.packets.content.AdvType;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.overlay.NeighborhoodChangeListener;
 import polimi.reds.broker.overlay.NotRunningException;
@@ -26,6 +26,7 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 	protected final SubscriptionTable brokersSubTable = new SubscriptionTable();
 	protected final AdvertisementTable advTable = new AdvertisementTable();
 
+	private final Set<AdvertisementPacket> allValidAdvertisements = new HashSet<>();
 	private final Overlay overlay;
 
 	public ServerEventForwarder(final Overlay overlay) {
@@ -93,9 +94,11 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 		if (packet.isPublic()) {
 			switch (packet.getAdvType()) {
 			case ADV:
+				allValidAdvertisements.add(packet);
 				advTable.addAdvertisement(sender, packet.getAdvertisement());
 				break;
 			case UNADV:
+				allValidAdvertisements.removeIf(p -> p.getAdvertisement().equals(packet.getAdvertisement()));
 				advTable.removeAdvertisement(sender, packet.getAdvertisement());
 				break;
 			}
@@ -127,15 +130,13 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 	@Override
 	public final void notifyNeighborAdded(NodeDescriptor node) {
 		if (node.isClient()) {
-			advTable.getAllAdvertisements().stream() //
-					.map(adv -> new AdvertisementPacket(adv, AdvType.ADV, true)) //
-					.forEach(advPkt -> {
-						try {
-							overlay.send(AdvertisementPacket.subject, advPkt, node);
-						} catch (IOException | NotRunningException e) {
-							e.printStackTrace();
-						}
-					});
+			allValidAdvertisements.forEach(advPkt -> {
+				try {
+					overlay.send(AdvertisementPacket.subject, advPkt, node);
+				} catch (IOException | NotRunningException e) {
+					e.printStackTrace();
+				}
+			});
 		}
 	}
 

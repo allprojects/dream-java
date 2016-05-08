@@ -44,9 +44,9 @@ class ClientEventForwarder implements PacketForwarder {
 	// Dependency detectors
 	private final IntraSourceDependencyDetector intraDepDetector = IntraSourceDependencyDetector.instance;
 	private final InterSourceDependencyDetector interDepDetector = //
-	Consts.consistencyType == ConsistencyType.ATOMIC //
-			? new AtomicDependencyDetector() //
-			: new CompleteGlitchFreeDependencyDetector();
+			Consts.consistencyType == ConsistencyType.ATOMIC //
+					? new AtomicDependencyDetector() //
+					: new CompleteGlitchFreeDependencyDetector();
 	private final FinalNodesDetector finalNodesDetector = new FinalNodesDetector();
 
 	// Lock applicants waiting for a grant
@@ -82,8 +82,8 @@ class ClientEventForwarder implements PacketForwarder {
 	}
 
 	@Override
-	public Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender, Serializable packet,
-			Collection<NodeDescriptor> neighbors, Outbox outbox) {
+	public synchronized Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender,
+			Serializable packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
 		final Collection<NodeDescriptor> result = new ArrayList<NodeDescriptor>();
 		if (subject.equals(AdvertisementPacket.subject)) {
 			assert packet instanceof AdvertisementPacket;
@@ -107,7 +107,7 @@ class ClientEventForwarder implements PacketForwarder {
 		return result;
 	}
 
-	final void sendEvent(UUID id, Event<?> ev, String initialVar) {
+	final synchronized void sendEvent(UUID id, Event<?> ev, String initialVar) {
 		logger.finer("Sending an event " + ev);
 		Set<String> lockReleaseNodes;
 		switch (Consts.consistencyType) {
@@ -129,7 +129,7 @@ class ClientEventForwarder implements PacketForwarder {
 	/**
 	 * Return false if the lock request is not needed
 	 */
-	final void sendReadOnlyLockRequest(String node, LockApplicant applicant) {
+	final synchronized void sendReadOnlyLockRequest(String node, LockApplicant applicant) {
 		if (Consts.consistencyType != ConsistencyType.ATOMIC) {
 			assert false : Consts.consistencyType;
 			logger.warning("Invoked sendReadOnlyLockRequest() even if the consistency level does not require it.");
@@ -151,7 +151,7 @@ class ClientEventForwarder implements PacketForwarder {
 	/**
 	 * Return false if the lock request is not needed
 	 */
-	final boolean sendReadWriteLockRequest(String source, LockApplicant applicant) {
+	final synchronized boolean sendReadWriteLockRequest(String source, LockApplicant applicant) {
 		if (Consts.consistencyType != ConsistencyType.COMPLETE_GLITCH_FREE && //
 				Consts.consistencyType != ConsistencyType.ATOMIC) {
 			assert false : Consts.consistencyType;
@@ -176,7 +176,7 @@ class ClientEventForwarder implements PacketForwarder {
 		return true;
 	}
 
-	final Set<String> getLockReleaseNodesFor(String source) {
+	final synchronized Set<String> getLockReleaseNodesFor(String source) {
 		switch (Consts.consistencyType) {
 		case COMPLETE_GLITCH_FREE:
 			return interDepDetector.getNodesToLockFor(source);
@@ -187,7 +187,7 @@ class ClientEventForwarder implements PacketForwarder {
 		}
 	}
 
-	final void sendLockRelease(UUID lockID) {
+	final synchronized void sendLockRelease(UUID lockID) {
 		if (Consts.consistencyType != ConsistencyType.COMPLETE_GLITCH_FREE && //
 				Consts.consistencyType != ConsistencyType.ATOMIC) {
 			assert false : Consts.consistencyType;
@@ -198,7 +198,7 @@ class ClientEventForwarder implements PacketForwarder {
 		connectionManager.sendLockRelease(new LockReleasePacket(lockID));
 	}
 
-	final void advertise(Advertisement adv, boolean isPublic) {
+	final synchronized void advertise(Advertisement adv, boolean isPublic) {
 		logger.fine("Sending advertisement " + adv);
 		if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
@@ -209,7 +209,7 @@ class ClientEventForwarder implements PacketForwarder {
 		connectionManager.sendAdvertisement(adv, isPublic);
 	}
 
-	final void unadvertise(Advertisement adv, boolean isPublic) {
+	final synchronized void unadvertise(Advertisement adv, boolean isPublic) {
 		logger.fine("Sending unadvertisement " + adv);
 		if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
@@ -220,7 +220,7 @@ class ClientEventForwarder implements PacketForwarder {
 		connectionManager.sendUnadvertisement(adv, isPublic);
 	}
 
-	final void advertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
+	final synchronized void advertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
 		logger.fine("Sending advertisement " + adv + " with subscriptions " + subs);
 		if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
@@ -231,7 +231,7 @@ class ClientEventForwarder implements PacketForwarder {
 		connectionManager.sendAdvertisement(adv, subs, isPublic);
 	}
 
-	final void unadvertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
+	final synchronized void unadvertise(Advertisement adv, Set<Subscription<?>> subs, boolean isPublic) {
 		logger.fine("Sending unadvertisement " + adv + " with subscriptions " + subs);
 		if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
@@ -242,7 +242,7 @@ class ClientEventForwarder implements PacketForwarder {
 		connectionManager.sendUnadvertisement(adv, isPublic);
 	}
 
-	final void addSubscription(Subscriber subscriber, Subscription<?> subscription) {
+	final synchronized void addSubscription(Subscriber subscriber, Subscription<?> subscription) {
 		logger.fine("Adding subscription " + subscription);
 		subTable.addSubscription(subscriber, subscription);
 		if (needToSendToServer(subscription)) {
@@ -250,7 +250,7 @@ class ClientEventForwarder implements PacketForwarder {
 		}
 	}
 
-	final void removeSubscription(Subscriber subscriber, Subscription<?> subscription) {
+	final synchronized void removeSubscription(Subscriber subscriber, Subscription<?> subscription) {
 		logger.fine("Removing subscription " + subscription);
 		subTable.addSubscription(subscriber, subscription);
 		if (needToSendToServer(subscription)) {

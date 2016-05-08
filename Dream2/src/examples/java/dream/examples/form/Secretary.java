@@ -1,6 +1,5 @@
 package dream.examples.form;
 
-import dream.client.Signal;
 import dream.client.Var;
 
 public class Secretary extends FormClient {
@@ -10,7 +9,6 @@ public class Secretary extends FormClient {
 	public Secretary() {
 		super("Secretary");
 		wh = new Var<>("working_hours", 5);
-		new Signal<>("helper", () -> wh.get(), wh);
 	}
 
 	@Override

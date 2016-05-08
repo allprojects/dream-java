@@ -1,6 +1,5 @@
 package dream.examples.form;
 
-import dream.client.Signal;
 import dream.client.Var;
 
 public class Boss extends FormClient {
@@ -10,7 +9,6 @@ public class Boss extends FormClient {
 	public Boss() {
 		super("Boss");
 		eph = new Var<>("euro_per_hour", 8.5);
-		new Signal<>("helper", () -> eph.get(), eph);
 	}
 
 	@Override

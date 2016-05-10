@@ -3,6 +3,10 @@
  */
 package dream.examples.tasks;
 
+import dream.client.RemoteVar;
+import dream.client.Signal;
+import dream.common.Consts;
+
 /**
  * @author Ram
  *
@@ -34,10 +38,18 @@ public class WorkerProcess {
 
 	public static void main(String[] args) {
 
-		if (args.length < 2) {
-			System.out.println("Usage WorkerProcess <name> <host>\n Example : WorkerProcess \"worker1\" \"Host1\"");
-		}
-		new WorkerProcess(args[0], args[1]);
+		Consts.hostName = "Host2";
+		RemoteVar<Task> rv = new RemoteVar<Task>("Host1", "TASK");
+
+		Signal<Task> s = new Signal<Task>("s", () -> {
+			System.out.println("received New Object" + rv.get().getName());
+			return rv.get();
+		} , rv);
+
+		// Register a handler which will be executed upon receiving the signal
+		s.change().addHandler((oldVal, val) -> {
+			System.out.println("Consumed: " + val.getName());
+		});
 	}
 
 }

@@ -5,15 +5,13 @@ package dream.examples.tasks;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.client.Var;
 import dream.common.Consts;
 
 /**
  * @author Ram
  *
  */
-public class WorkerProcess {
-	static int i = 0;
+public class DeligatorProcess {
 	/**
 	 * @param args
 	 */
@@ -34,26 +32,23 @@ public class WorkerProcess {
 		this.processName = processName;
 	}
 
-	public WorkerProcess(String processName, String host) {
+	public DeligatorProcess(String processName, String host) {
 		this.setProcessName(processName);
 	}
 
 	public static void main(String[] args) {
 
 		Consts.hostName = "Host2";
+		RemoteVar<Task> rv = new RemoteVar<Task>("Host1", "TASK_");
 
-		RemoteVar<String> rv = new RemoteVar<String>("Host1", "TASK");
-		Var<String> myVar = new Var<String>("TASK_ASSIGNED", "");
-
-		Signal<String> s = new Signal<String>("s", () -> {
-			System.out.println("received New Object" + rv.get());
+		Signal<Task> s = new Signal<Task>("s", () -> {
+			System.out.println("received New Object" + rv.get().getName());
 			return rv.get();
 		} , rv);
 
 		// Register a handler which will be executed upon receiving the signal
 		s.change().addHandler((oldVal, val) -> {
-			System.out.println("Deligating Task : " + val);
-			myVar.set(val + "@" + i++);
+			System.out.println("Consumed: " + val.getName());
 		});
 	}
 

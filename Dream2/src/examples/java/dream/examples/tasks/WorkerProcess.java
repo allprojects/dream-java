@@ -39,7 +39,7 @@ public class WorkerProcess {
 	public static void main(String[] args) {
 
 		Consts.hostName = "Host2";
-		RemoteVar<Task> rv = new RemoteVar<Task>("Host1", "TASK");
+		RemoteVar<Task> rv = new RemoteVar<Task>("Host1", "TASK_");
 
 		Signal<Task> s = new Signal<Task>("s", () -> {
 			System.out.println("received New Object" + rv.get().getName());

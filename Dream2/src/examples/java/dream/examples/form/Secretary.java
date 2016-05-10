@@ -7,21 +7,20 @@ public class Secretary extends FormClient {
 	private Var<Integer> wh;
 
 	public Secretary() {
-		super("Secretary");
+		super("Secretary", "Working Hours");
 		wh = new Var<>("working_hours", 5);
 	}
 
 	@Override
 	public void typedText(String typedText) {
-		System.out.println("Secretary: \"" + typedText + "\"");
 		Integer value = Integer.valueOf(typedText);
-		System.out.println("Secretary: " + value);
 		wh.set(value);
+		logger.fine("Set Working_Hours to " + value);
 	}
 
 	public static void main(String[] args) {
 		Secretary s = new Secretary();
-		s.init("Secretary");
+		s.init();
 	}
 
 }

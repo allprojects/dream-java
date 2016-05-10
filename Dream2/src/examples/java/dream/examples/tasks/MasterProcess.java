@@ -18,7 +18,7 @@ public class MasterProcess {
 	public static void main(String[] args) {
 		Consts.hostName = "Host1";
 
-		Var<Task> myVar = new Var<Task>("TASK", new Task("Task1"));
+		Var<Task> myVar = new Var<Task>("TASK_", new Task("Task1"));
 		try {
 
 			int i = 0;

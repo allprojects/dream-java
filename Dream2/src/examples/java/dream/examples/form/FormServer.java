@@ -15,7 +15,7 @@ public class FormServer {
 	public static final String NAME = "FormServer";
 	private boolean serverStarted;
 	private boolean lockManagerStarted;
-	private final Logger logger = Logger.getGlobal();// Logger("FormServer");
+	private final Logger logger = Logger.getLogger(NAME);
 
 	private RemoteVar<Integer> working_hours;
 	private RemoteVar<Double> euro_per_hour;
@@ -25,7 +25,8 @@ public class FormServer {
 		startLockManagerIfNeeded();
 
 		logger.setLevel(Level.ALL);
-		// logger.addHandler(Logger.getGlobal().getHandlers()[0]);
+		logger.addHandler(Logger.getGlobal().getHandlers()[0]);
+
 		Consts.hostName = NAME;
 		DreamClient.instance.connect();
 		detectNewSession();
@@ -41,10 +42,10 @@ public class FormServer {
 				String var = str.split("@")[0];
 				if (working_hours == null && var.equalsIgnoreCase("working_hours")) {
 					working_hours = new RemoteVar<>(host, var);
-					System.out.println("Found Secreatary");
+					logger.fine("Found Secretary");
 				} else if (euro_per_hour == null && var.equalsIgnoreCase("euro_per_hour")) {
 					euro_per_hour = new RemoteVar<>(host, var);
-					System.out.println("Found Boss");
+					logger.fine("Found Boss");
 				}
 			}
 			try {
@@ -57,7 +58,7 @@ public class FormServer {
 	}
 
 	private void updateDependencies() {
-		System.out.println("update Dep");
+		logger.fine("Building Dependencies");
 
 		final Signal<Boolean> minimumHours = new Signal<>("minimumHours", () -> {
 			if (working_hours.get() != null)
@@ -94,7 +95,7 @@ public class FormServer {
 				return 0.0;
 		}, working_hours, euro_per_hour);
 
-		System.out.println("update Dep finished");
+		logger.fine("Finished building Dependencies");
 	}
 
 	public static void main(String[] args) {

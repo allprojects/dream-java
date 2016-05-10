@@ -9,6 +9,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class FormGUI extends JFrame {
@@ -18,12 +19,12 @@ public class FormGUI extends JFrame {
 	private FormClient listener;
 	private JLabel display;
 
-	public FormGUI(String name) {
-		initUI();
+	public FormGUI(String name, String labelText) {
+		initUI(labelText);
 		setTitle(name);
 	}
 
-	private void initUI() {
+	private void initUI(String labelText) {
 		sendText = new JTextField(20);
 		sendText.addKeyListener(new KeyListener() {
 
@@ -48,9 +49,16 @@ public class FormGUI extends JFrame {
 		display.setPreferredSize(new Dimension(100, 30));
 		display.setMinimumSize(new Dimension(100, 30));
 		display.setOpaque(true);
+
+		JLabel label = new JLabel(labelText + ": ");
+
+		JPanel p = new JPanel();
+		p.add(label);
+		p.add(sendText);
+
 		BorderLayout lay = new BorderLayout();
 		getContentPane().setLayout(lay);
-		getContentPane().add(sendText, BorderLayout.WEST);
+		getContentPane().add(p, BorderLayout.WEST);
 		getContentPane().add(sendButton, BorderLayout.EAST);
 		getContentPane().add(display, BorderLayout.NORTH);
 		// setSize(300, 200);

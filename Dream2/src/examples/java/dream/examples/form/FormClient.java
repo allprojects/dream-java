@@ -15,15 +15,23 @@ public abstract class FormClient {
 	private RemoteVar<Boolean> settings;
 	private Signal<Double> remoteSalary;
 	private Signal<Boolean> remoteSettings;
-	private FormGUI gui;
 
-	public FormClient(String name) {
+	private FormGUI gui;
+	protected final Logger logger;
+	private String labelText;
+
+	public FormClient(String name, String labelText) {
 		Consts.hostName = name;
-		Logger.getGlobal().setLevel(Level.ALL);
+		this.labelText = labelText;
+
+		logger = Logger.getLogger(name);
+		logger.setLevel(Level.ALL);
+		logger.addHandler(Logger.getGlobal().getHandlers()[0]);
+
 		DreamClient.instance.connect();
 	}
 
-	protected void init(String name) {
+	protected void init() {
 		while (!DreamClient.instance.listVariables().contains("salary@FormServer") || //
 				!DreamClient.instance.listVariables().contains("settingsOkay@FormServer")) {
 			try {
@@ -33,7 +41,7 @@ public abstract class FormClient {
 			}
 		}
 
-		gui = new FormGUI(name);
+		gui = new FormGUI(Consts.hostName, labelText);
 		gui.setListener(this);
 
 		salary = new RemoteVar<>("FormServer", "salary");
@@ -53,9 +61,9 @@ public abstract class FormClient {
 				return false;
 		}, settings);
 
-		gui.setText("");
+		gui.setText("Salary: ");
 		gui.setColor(Color.red);
-		remoteSalary.change().addHandler((o, n) -> gui.setText(n.toString()));
+		remoteSalary.change().addHandler((o, n) -> gui.setText("Salary: " + n.toString()));
 		remoteSettings.change().addHandler((o, n) -> gui.setColor((n ? Color.green : Color.red)));
 	}
 

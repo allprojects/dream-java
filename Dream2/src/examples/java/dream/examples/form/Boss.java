@@ -7,21 +7,20 @@ public class Boss extends FormClient {
 	private Var<Double> eph;
 
 	public Boss() {
-		super("Boss");
+		super("Boss", "Euro/Hour");
 		eph = new Var<>("euro_per_hour", 8.5);
 	}
 
 	@Override
 	public void typedText(String typedText) {
-		System.out.println("Boss: \"" + typedText + "\"");
 		Double value = Double.valueOf(typedText);
-		System.out.println("Boss: " + value);
 		eph.set(value);
+		logger.fine("Set Euro_Per_Hour to " + value);
 	}
 
 	public static void main(String[] args) {
 		Boss b = new Boss();
-		b.init("Boss");
+		b.init();
 	}
 
 }

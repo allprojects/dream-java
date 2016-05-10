@@ -1,4 +1,4 @@
-package dream.examples.chat.util;
+package dream.examples.chat;
 
 import java.io.IOException;
 import java.util.ArrayList;

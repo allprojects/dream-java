@@ -14,7 +14,7 @@ import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
 import dream.common.Consts;
-import dream.examples.chat.util.DependencyGraph;
+import dream.examples.util.DependencyVisualization;
 
 public class Chat {
 
@@ -203,7 +203,7 @@ public class Chat {
 			String name = temp1[0];
 			initiateNewRoom(name, temp1[1]);
 		} else if (command.equalsIgnoreCase("graph")) {
-			DependencyGraph.show();
+			DependencyVisualization.show();
 		} else if (command.equalsIgnoreCase("sgraph")) {
 			sendServerMessage("graph");
 		}
@@ -223,10 +223,6 @@ public class Chat {
 			return;
 		}
 		int x, y;
-		for (String s : args) {
-			System.out.print(s + ",");
-		}
-		System.out.println();
 		if (args.length < 3)
 			y = -1;
 		else
@@ -237,23 +233,5 @@ public class Chat {
 		else
 			x = Integer.parseInt(args[1]);
 		EventQueue.invokeLater(() -> new Chat(args[0], x, y));
-	}
-}
-
-class Pair<S, T> {
-	private final S first;
-	private final T second;
-
-	Pair(S a, T b) {
-		this.first = a;
-		this.second = b;
-	}
-
-	public S getFirst() {
-		return first;
-	}
-
-	public T getSecond() {
-		return second;
 	}
 }

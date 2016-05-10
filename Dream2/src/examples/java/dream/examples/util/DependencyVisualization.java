@@ -1,4 +1,4 @@
-package dream.examples.chat.util;
+package dream.examples.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class DependencyGraph {
+public class DependencyVisualization {
 
 	private static File writeAndOpen(String data, String filenamePrefix, String filenameSuffix) {
 		File file = null;

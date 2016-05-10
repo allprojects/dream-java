@@ -15,7 +15,8 @@ import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
 import dream.common.Consts;
-import dream.examples.chat.util.DependencyGraph;
+import dream.examples.util.DependencyVisualization;
+import dream.examples.util.Pair;
 import dream.locking.LockManagerLauncher;
 import dream.server.ServerLauncher;
 
@@ -165,7 +166,7 @@ public class ChatServer {
 					logger.fine("Room: Finished setting up room " + roomName);
 				}
 			} else if (command.equalsIgnoreCase("graph")) {
-				DependencyGraph.show();
+				DependencyVisualization.show();
 			}
 		}
 	}

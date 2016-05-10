@@ -15,10 +15,10 @@ public class FormServer {
 	public static final String NAME = "FormServer";
 	private boolean serverStarted;
 	private boolean lockManagerStarted;
-	private final Logger logger = Logger.getLogger(NAME);
+	protected final Logger logger = Logger.getLogger(NAME);
 
-	private RemoteVar<Integer> working_hours;
-	private RemoteVar<Double> euro_per_hour;
+	protected RemoteVar<Integer> working_hours;
+	protected RemoteVar<Double> euro_per_hour;
 
 	public FormServer() {
 		startServerIfNeeded();
@@ -54,10 +54,10 @@ public class FormServer {
 				logger.log(Level.SEVERE, "Failed to sleep for 0.5 seconds", e);
 			}
 		}
-		updateDependencies();
+		createDependencies();
 	}
 
-	private void updateDependencies() {
+	protected void createDependencies() {
 		logger.fine("Building Dependencies");
 
 		final Signal<Boolean> minimumHours = new Signal<>("minimumHours", () -> {

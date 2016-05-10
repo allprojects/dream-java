@@ -5,7 +5,6 @@ package dream.examples.tasks;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.client.Var;
 import dream.common.Consts;
 
 /**
@@ -40,20 +39,28 @@ public class WorkerProcess {
 
 	public static void main(String[] args) {
 
-		Consts.hostName = "Host2";
+		Consts.hostName = "Host3";
 
-		RemoteVar<String> rv = new RemoteVar<String>("Host1", "TASK");
-		Var<String> myVar = new Var<String>("TASK_ASSIGNED", "");
+		RemoteVar<Task> task = new RemoteVar<Task>("Host1", "TASK");
+		RemoteVar<Task> taskDeligated = new RemoteVar<Task>("Host2", "TASK_ASSIGNED");
 
-		Signal<String> s = new Signal<String>("s", () -> {
-			System.out.println("received New Object" + rv.get());
-			return rv.get();
-		} , rv);
+		Signal<Task> signalFromMaster = new Signal<Task>("s", () -> {
+			return task.get();
+		} , task);
+		Signal<Task> signalFromDeligator = new Signal<Task>("s1", () -> {
+			return taskDeligated.get();
+		} , taskDeligated);
 
 		// Register a handler which will be executed upon receiving the signal
-		s.change().addHandler((oldVal, val) -> {
-			System.out.println("Deligating Task : " + val);
-			myVar.set(val + "@" + i++);
+		// from master process
+		signalFromMaster.change().addHandler((oldVal, val) -> {
+			System.out.println("FROM MASTER : " + val.getAssignee() + " " + val.getName());
+		});
+
+		// Register a handler which will be executed upon receiving the signal
+		// from delegate process
+		signalFromDeligator.change().addHandler((oldVal, val) -> {
+			System.out.println("FROM DELIGATOR : " + val.getAssignee() + " " + val.getName());
 		});
 	}
 

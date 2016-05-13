@@ -3,6 +3,12 @@ package dream.examples.taskBoard;
 import dream.client.Var;
 import dream.common.Consts;
 
+/**
+ * 
+ * @author Min Yang
+ * @date May 13, 2016
+ * @description Creating tasks.
+ */
 public class Tasks {
 	public static void main(String[] args) {
 		new Tasks();

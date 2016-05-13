@@ -13,6 +13,13 @@ import dream.common.Consts;
 import dream.examples.util.Pair;
 import dream.server.ServerLauncher;
 
+/**
+ * 
+ * @author Min Yang
+ * @date May 13, 2016
+ * @description run background tasks: read task, create task lists: development
+ *              and test etc.
+ */
 public class ServerHost {
 	public static final String NAME = "ServerHost";
 	private boolean serverStarted = false;
@@ -40,7 +47,6 @@ public class ServerHost {
 				.filter(x -> !myClients.get().contains(x.getSecond() + "@" + x.getFirst())
 						&& x.getSecond().equalsIgnoreCase("toServerVar"))
 				.forEach(x -> createClient(x.getFirst(), x.getSecond()));
-
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {

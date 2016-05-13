@@ -1,6 +1,10 @@
 package dream.examples.taskBoard;
 
-//pair class
+/**
+ * @author Min Yang
+ * @date May 13, 2016
+ * @description common class for host-var pair
+ */
 public class Pair {
 	String host;
 	String Var;

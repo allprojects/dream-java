@@ -12,6 +12,12 @@ import dream.client.Var;
 import dream.common.Consts;
 import dream.examples.util.Pair;
 
+/**
+ * 
+ * @author Min Yang
+ * @date May 13, 2016
+ * @description Review the tasks.
+ */
 public class TaskReview {
 	private final Logger log = Logger.getLogger("MagtClient");
 	private Var<ArrayList<String>> myServer = null;

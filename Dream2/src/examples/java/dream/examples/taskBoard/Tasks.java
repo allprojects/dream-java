@@ -15,18 +15,22 @@ public class Tasks {
 	}
 
 	public Tasks() {
-		Consts.hostName = "host1";
-		System.out.println("In Tasks");
-		Var<String> v = new Var<String>("toServerVar", "D1:T1");
-		try {
-			int i = 0;
-			while (i < 10) {
-				Thread.sleep(1000);
-				v.set("D" + i + ":" + "T" + i);
-				i++;
+		int j = 0;
+		while (j < 3) {
+			Consts.hostName = "host" + j;
+			System.out.println("In Tasks");
+			Var<String> v = new Var<String>("toServerVar", "D1:T1");
+			try {
+				int i = 0;
+				while (i + j < 10) {
+					Thread.sleep(1000);
+					v.set("D" + i + "From host" + j + ":" + "T" + i + "From host" + j);
+					i++;
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			j++;
 		}
 	}
 

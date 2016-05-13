@@ -19,6 +19,7 @@ import dream.examples.util.Pair;
  * @description Review the tasks.
  */
 public class TaskReview {
+
 	private final Logger log = Logger.getLogger("MagtClient");
 	private Var<ArrayList<String>> myServer = null;
 	RemoteVar<String> devTasks = null;
@@ -81,11 +82,11 @@ public class TaskReview {
 	}
 
 	private void showTestQuery(String x) {
-		log.info("showQuery:" + x);
+		log.info("showTestQuery:" + x);
 	}
 
 	private void showDevQuery(String x) {
-		log.info("showQuery:" + x);
+		log.info("showDevQuery:" + x);
 	}
 
 	public static void main(String[] args) {

@@ -44,7 +44,6 @@ public class ServerHost {
 	}
 
 	private void detectClients() {
-		log.info("inside ServerHost");
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0]))
 				.filter(x -> !myClients.get().contains(x.getSecond() + "@" + x.getFirst())
@@ -55,6 +54,7 @@ public class ServerHost {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		log.info("inside ServerHost:" + vars.toString());
 		detectClients();
 	}
 

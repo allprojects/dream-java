@@ -27,12 +27,13 @@ public class TaskReview {
 	public TaskReview() {
 		Consts.hostName = "QueryClient";
 		log.setLevel(Level.ALL);
-		log.addHandler(log.getGlobal().getHandlers()[0]);
+		log.addHandler(Logger.getGlobal().getHandlers()[0]);
 		myServer = new Var<ArrayList<String>>("from_server", new ArrayList<String>());
 		detectQueryResults();
 	}
 
 	private void detectQueryResults() {
+		log.info("In TaskReview");
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0]))
 				.filter(x -> !myServer.get().contains(x.getSecond() + "@" + x.getFirst())
@@ -55,37 +56,35 @@ public class TaskReview {
 
 	private void updateDevQuery(String host, String value) {
 		RemoteVar<String> rv = new RemoteVar<String>(host, value);
-
 		Signal<String> sig = new Signal<String>("received_" + host, () -> {
 			if (rv.get() != null) {
-				log.fine("M: not empty " + rv.get());
 				return rv.get();
 			} else {
 				return "";
 			}
 		}, rv);
-
-		sig.change().addHandler((oldValue, newValue) -> showQuery(newValue));
+		sig.change().addHandler((oldValue, newValue) -> showDevQuery(newValue));
 		myServer.modify((old) -> old.add(value + "@" + host));
 	}
 
 	private void updateTestQuery(String host, String value) {
 		RemoteVar<String> rv = new RemoteVar<String>(host, value);
-
 		Signal<String> sig = new Signal<String>("received_" + host, () -> {
 			if (rv.get() != null) {
-				log.fine("M: not empty " + rv.get());
 				return rv.get();
 			} else {
 				return "";
 			}
 		}, rv);
-
-		sig.change().addHandler((oldValue, newValue) -> showQuery(newValue));
+		sig.change().addHandler((oldValue, newValue) -> showTestQuery(newValue));
 		myServer.modify((old) -> old.add(value + "@" + host));
 	}
 
-	private void showQuery(String x) {
+	private void showTestQuery(String x) {
+		log.info("showQuery:" + x);
+	}
+
+	private void showDevQuery(String x) {
 		log.info("showQuery:" + x);
 	}
 

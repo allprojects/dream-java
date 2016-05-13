@@ -16,6 +16,7 @@ public class Tasks {
 
 	public Tasks() {
 		Consts.hostName = "host1";
+		System.out.println("In Tasks");
 		Var<String> v = new Var<String>("toServerVar", "D1:T1");
 		try {
 			int i = 0;

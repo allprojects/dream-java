@@ -35,13 +35,16 @@ public class ServerHost {
 	public ServerHost() {
 		startServerIfNeeded();
 		log.setLevel(Level.ALL);
-		log.addHandler(log.getGlobal().getHandlers()[0]);
+		log.addHandler(Logger.getGlobal().getHandlers()[0]);
 		Consts.hostName = NAME;
 		myClients = new Var<ArrayList<String>>("Server_registered_clients", new ArrayList<String>());
 		detectClients();
+		new Tasks();
+		new TaskReview();
 	}
 
 	private void detectClients() {
+		log.info("inside ServerHost");
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0]))
 				.filter(x -> !myClients.get().contains(x.getSecond() + "@" + x.getFirst())
@@ -50,7 +53,6 @@ public class ServerHost {
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		detectClients();
@@ -65,15 +67,14 @@ public class ServerHost {
 				return "";
 			}
 		}, rv);
-		log.info("Sig" + sig.toString());
 		sig.change().addHandler((oldValue, newValue) -> createTaskLists(newValue));
 		myClients.modify((old) -> old.add(clientVar + "@" + clientHost));
 	}
 
-	private void createTaskLists(String message) {
-		if (message != null) {
-			String newDev = message.split(":")[0];
-			String newTest = message.split(":")[1];
+	private void createTaskLists(String newValue) {
+		if (newValue != null) {
+			String newDev = newValue.split(":")[0];
+			String newTest = newValue.split(":")[1];
 			if (devTask == null) {
 				devTask = new Var<String>("taskDevs", "");
 			}
@@ -81,14 +82,13 @@ public class ServerHost {
 				testTask = new Var<String>("taskTests", "");
 			}
 			// Set vars for remote querying
-			devTask.set(newDev);
-			testTask.set(newTest);
+			devTask.set(devTask.get().toString() + newDev);
+			testTask.set(testTask.get().toString() + newTest);
 		}
 	}
 
 	private final void startServerIfNeeded() {
 		if (!serverStarted) {
-			log.info("M: server started");
 			ServerLauncher.start();
 			serverStarted = true;
 		}

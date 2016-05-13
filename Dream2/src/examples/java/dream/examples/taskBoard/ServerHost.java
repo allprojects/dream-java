@@ -28,7 +28,7 @@ public class ServerHost {
 	private Var<String> devTask = null;
 	private Var<String> testTask = null;
 
-	public static void main(String[] args) {
+	public static void main(String... args) {
 		new ServerHost();
 	}
 

@@ -19,7 +19,6 @@ import dream.examples.util.Pair;
  * @description Review the tasks.
  */
 public class TaskReview {
-
 	private final Logger log = Logger.getLogger("MagtClient");
 	private Var<ArrayList<String>> myServer = null;
 	RemoteVar<String> devTasks = null;

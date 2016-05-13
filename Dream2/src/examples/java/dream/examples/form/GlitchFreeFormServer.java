@@ -28,22 +28,27 @@ public class GlitchFreeFormServer extends FormServer {
 
 		final LinkedList<Pair<Boolean, Integer>> minimumQueue = new LinkedList<>();
 		final LinkedList<Pair<Boolean, Integer>> maximumQueue = new LinkedList<>();
-		final OldValue<Boolean> currentValue = new OldValue<>();
+		final Value<Boolean> currentValue = new Value<>(false);
 
 		new Signal<>("settingsOkay", () -> {
-			if (minimumQueue.getLast().getSecond() < minimumHours.get().getSecond())
+			if (minimumHours.get() != null
+					&& (minimumQueue.isEmpty() || minimumQueue.getLast().getSecond() < minimumHours.get().getSecond()))
 				minimumQueue.add(minimumHours.get());
-			else if (maximumQueue.getLast().getSecond() < maximumHours.get().getSecond())
+			if (maximumHours.get() != null
+					&& (maximumQueue.isEmpty() || maximumQueue.getLast().getSecond() < maximumHours.get().getSecond()))
 				maximumQueue.add(maximumHours.get());
 
-			if (minimumQueue.size() > 0 && maximumQueue.size() > 0)
+			if (minimumQueue.size() > 0 && maximumQueue.size() > 0 && minimumEuroPerHour.get() != null)
 				currentValue.set(
 						minimumQueue.pop().getFirst() && maximumQueue.pop().getFirst() && minimumEuroPerHour.get());
 			return currentValue.get();
 		}, minimumHours, maximumHours, minimumEuroPerHour);
 
 		new Signal<>("salary", () -> {
-			return working_hours.get() * euro_per_hour.get();
+			if (working_hours.get() != null && euro_per_hour.get() != null)
+				return working_hours.get() * euro_per_hour.get();
+			else
+				return 0.0;
 		}, working_hours, euro_per_hour);
 
 		logger.fine("Finished building Dependencies");
@@ -55,7 +60,7 @@ public class GlitchFreeFormServer extends FormServer {
 }
 
 class UpdateCounter {
-	int i = 0;
+	private int i = 0;
 
 	public void inc() {
 		i += 1;
@@ -71,8 +76,15 @@ class UpdateCounter {
 	}
 }
 
-class OldValue<T> {
-	T value;
+class Value<T> {
+	private T value;
+
+	public Value() {
+	}
+
+	public Value(T init) {
+		set(init);
+	}
 
 	public T get() {
 		return value;

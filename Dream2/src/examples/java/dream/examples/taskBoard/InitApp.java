@@ -9,3 +9,6 @@ package dream.examples.taskBoard;
  *              (..examples.taskBoard.Tasks.java), then run TaskReview.java
  *              (..examples.taskBoard.ServerHost.java)
  */
+// TODO run the whole package together
+public class InitApp {
+}

@@ -18,13 +18,13 @@ import dream.examples.util.Pair;
  * @date May 13, 2016
  * @description Review the tasks.
  */
-public class TaskReview {
+public class TaskReviewer {
 	private final Logger log = Logger.getLogger("MagtClient");
 	private Var<ArrayList<String>> myServer = null;
 	RemoteVar<String> devTasks = null;
 	RemoteVar<String> testTasks = null;
 
-	public TaskReview() {
+	public TaskReviewer() {
 		Consts.hostName = "QueryClient";
 		log.setLevel(Level.ALL);
 		log.addHandler(Logger.getGlobal().getHandlers()[0]);
@@ -89,7 +89,7 @@ public class TaskReview {
 	}
 
 	public static void main(String[] args) {
-		new TaskReview();
+		new TaskReviewer();
 	}
 
 }

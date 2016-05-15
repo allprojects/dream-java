@@ -20,7 +20,7 @@ import dream.server.ServerLauncher;
  * @description run background tasks: read task, create task lists: development
  *              and test etc.
  */
-public class ServerHost {
+public class ServerNode {
 	public static final String NAME = "ServerHost";
 	private boolean serverStarted = false;
 	private Var<ArrayList<String>> myClients = null;
@@ -29,10 +29,10 @@ public class ServerHost {
 	private Var<String> testTask = null;
 
 	public static void main(String... args) {
-		new ServerHost();
+		new ServerNode();
 	}
 
-	public ServerHost() {
+	public ServerNode() {
 		startServerIfNeeded();
 		log.setLevel(Level.ALL);
 		log.addHandler(Logger.getGlobal().getHandlers()[0]);
@@ -40,7 +40,7 @@ public class ServerHost {
 		myClients = new Var<ArrayList<String>>("Server_registered_clients", new ArrayList<String>());
 		detectClients();
 		new Tasks();
-		new TaskReview();
+		new TaskReviewer();
 	}
 
 	private void detectClients() {

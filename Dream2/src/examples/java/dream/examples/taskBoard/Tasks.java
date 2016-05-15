@@ -1,8 +1,5 @@
 package dream.examples.taskBoard;
 
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-
 import javax.swing.JFrame;
 
 import dream.client.Var;
@@ -14,7 +11,7 @@ import dream.common.Consts;
  * @date May 13, 2016
  * @description Creating tasks.
  */
-public class Tasks extends JFrame implements WindowListener {
+public class Tasks extends JFrame {
 
 	/**
 	 * Default UID
@@ -24,7 +21,7 @@ public class Tasks extends JFrame implements WindowListener {
 	public static void main(String[] args) {
 
 		new Tasks();
-		// TODO
+		// TODO accept inputs of new tasks from Monitor
 		/*
 		 * javax.swing.SwingUtilities.invokeLater(new Runnable() { public void
 		 * run() { Monitor user1 = new Monitor(); user1.initComponents(); if
@@ -51,47 +48,4 @@ public class Tasks extends JFrame implements WindowListener {
 			j++;
 		}
 	}
-
-	@Override
-	public void windowActivated(WindowEvent paramWindowEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void windowClosed(WindowEvent paramWindowEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void windowClosing(WindowEvent paramWindowEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent paramWindowEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent paramWindowEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void windowIconified(WindowEvent paramWindowEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void windowOpened(WindowEvent paramWindowEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

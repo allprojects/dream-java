@@ -13,6 +13,12 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 
+/**
+ * 
+ * @author Min Yang
+ * @date May 15, 2016
+ * @description
+ */
 public class Monitor {
 	public static JTextField textField1;
 	static boolean flag = false;

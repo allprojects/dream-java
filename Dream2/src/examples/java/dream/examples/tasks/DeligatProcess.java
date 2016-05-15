@@ -15,6 +15,7 @@ import dream.common.Consts;
 public class DeligatProcess {
 
 	static int i;
+	int clock;
 	/**
 	 * @param args
 	 */
@@ -39,23 +40,38 @@ public class DeligatProcess {
 		this.setProcessName(processName);
 	}
 
-	public static void main(String[] args) {
+	public DeligatProcess() {
+		// TODO Auto-generated constructor stub
+	}
 
+	private void init() {
 		Consts.hostName = "Host2";
-		RemoteVar<Task> rv = new RemoteVar<Task>("Host1", "TASK");
-		Var<Task> myVar = new Var<Task>("TASK_ASSIGNED", null);
+		RemoteVar<Message> rv = new RemoteVar<Message>("Host1", "TASK");
+		Var<Message> myVar = new Var<Message>("TASK_ASSIGNED", null);
 
-		Signal<Task> s = new Signal<Task>("s", () -> {
+		Signal<Message> s = new Signal<Message>("s", () -> {
 			return rv.get();
 		} , rv);
 
 		// Register a handler which will be executed upon receiving the signal
 		s.change().addHandler((oldVal, val) -> {
-
-			val.setAssignee(i++ + "");
+			clock++;
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			val.getTask().setAssignee(i++ % 10 + "");
+			val.setClock(val.getClock() + "@p2:" + clock);
 			myVar.set(val);
 
 		});
+	}
+
+	public static void main(String[] args) {
+		new DeligatProcess().init();
+
 	}
 
 }

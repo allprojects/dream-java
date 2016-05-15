@@ -12,25 +12,41 @@ import dream.common.Consts;
  */
 public class MasterProcess {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
+	private void init() {
 		Consts.hostName = "Host1";
-
-		Var<Task> myVar = new Var<Task>("TASK", new Task("Task1"));
+		int clock = 0;
+		Var<Message> initTask = new Var<Message>("TASK", null);
+		Var<Message> initTask1 = new Var<Message>("TASK1", null);
 		try {
 
 			int i = 0;
 			while (true) {
-				Thread.sleep(2000);
-				myVar.set(new Task("Task" + i));
+				Message m = new Message();
+				Thread.sleep(5000);
+				Task t = new Task("Task" + i);
+				t.setId(1000 + i);
+				m.setTask(t);
+				clock++;
+				m.setClock("@p1:" + clock);
+				initTask.set(m);
+
+				t.setClock(clock);
+				t.setDescription("This is " + i + "th task");
+
+				initTask1.set(m);
 				i++;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		new MasterProcess().init();
 	}
 
 }

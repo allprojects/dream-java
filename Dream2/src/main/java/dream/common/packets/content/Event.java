@@ -33,7 +33,7 @@ public class Event<T extends Serializable> implements Serializable {
 
 	@Override
 	public String toString() {
-		return objectId + "@" + hostId + "(val = " + val.toString() + ")";
+		return objectId + "@" + hostId + "(val = " + (val == null ? "null" : val.toString()) + ")";
 	}
 
 }

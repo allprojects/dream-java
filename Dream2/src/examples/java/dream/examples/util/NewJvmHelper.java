@@ -5,12 +5,16 @@ package dream.examples.util;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * @author Ram
  *
  */
 public class NewJvmHelper {
+
+	private static Logger logger = Logger.getGlobal();
+
 	/**
 	 * 
 	 * @param c
@@ -21,8 +25,8 @@ public class NewJvmHelper {
 	 * @return process, which needs to be cleaned by the class which initializes
 	 *         the new JVM.
 	 */
-	public Process startNewJVM(Class<?> c, String... args) {
-		System.out.println("Starting " + c.getName() + " ...");
+	public static Process startNewJVM(Class<?> c, String... args) {
+		logger.fine("Starting " + c.getName() + " ...");
 		String separator = System.getProperty("file.separator");
 		String classpath = System.getProperty("java.class.path");
 		String path = System.getProperty("java.home") + separator + "bin" + separator + "java";
@@ -44,7 +48,7 @@ public class NewJvmHelper {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.out.println(c.getName() + " started!");
+		logger.fine(c.getName() + " started!");
 		return process;
 	}
 }

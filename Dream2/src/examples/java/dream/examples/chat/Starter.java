@@ -1,11 +1,10 @@
 package dream.examples.chat;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import dream.examples.chat.core.Chat;
 import dream.examples.chat.core.ChatServer;
+import dream.examples.util.NewJvmHelper;
 
 /**
  * Convenience class to start ChatServer and x Chats (x = CHAT_COUNT), each in
@@ -37,7 +36,7 @@ public class Starter {
 		int x = 0;
 		int y = 0;
 		for (int i = 0; i < CHAT_COUNT; i++) {
-			startSecondJVM(Chat.class, getName(i), Integer.toString(x), Integer.toString(y));
+			NewJvmHelper.startNewJVM(Chat.class, getName(i), Integer.toString(x), Integer.toString(y));
 			x += xStep;
 			if (x >= 3 * xStep) {
 				x = 0;
@@ -88,32 +87,5 @@ public class Starter {
 			p.destroyForcibly();
 			System.out.println("Destroying " + p.toString());
 		}
-	}
-
-	public void startSecondJVM(Class<?> c, String... args) {
-		System.out.println("Starting " + c.getName() + " ...");
-		String separator = System.getProperty("file.separator");
-		String classpath = System.getProperty("java.class.path");
-		String path = System.getProperty("java.home") + separator + "bin" + separator + "java";
-		String[] arguments = new String[args.length + 4];
-		arguments[0] = path;
-		arguments[1] = "-cp";
-		arguments[2] = classpath;
-		arguments[3] = c.getName();
-		for (int i = 0; i < args.length; i++) {
-			arguments[i + 4] = args[i];
-		}
-		ProcessBuilder processBuilder = new ProcessBuilder(arguments).inheritIO();
-		Process process;
-		try {
-			process = processBuilder.start();
-			processes.add(process);
-			process.waitFor(1, TimeUnit.SECONDS);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		System.out.println(c.getName() + " started!");
 	}
 }

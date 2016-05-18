@@ -1,6 +1,7 @@
 package dream.examples.financial;
 
 import dream.client.ChangeEventHandler;
+import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.common.Consts;
@@ -20,6 +21,7 @@ public class FinancialApp implements ChangeEventHandler<Integer> {
 
 	public void start() {
 		Consts.hostName = "Local";
+		DreamClient.instance.connect();
 
 		try {
 			Thread.sleep(2000);

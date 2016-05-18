@@ -18,7 +18,7 @@ public class Chat extends dream.examples.chat.core.Chat {
 	protected void sendChatMessage(int roomNumber, String message) {
 		// increment VectorClock by 1
 		VectorClock roomClock = roomClocks.get(roomNumber);
-		roomClock.incrementClock(userName);
+		roomClock.incrementClock(getHostName());
 		// attach VectorClock to message
 		String newMessage = roomClock.toString() + "|" + message;
 		logger.fine("Sending message with VectorClock " + roomClock + ": " + message);

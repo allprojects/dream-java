@@ -8,6 +8,10 @@ public class Secretary extends FormClient {
 
 	public Secretary() {
 		super("Secretary", "Working Hours");
+	}
+
+	@Override
+	protected void init() {
 		wh = new Var<>("working_hours", 5);
 	}
 
@@ -20,7 +24,7 @@ public class Secretary extends FormClient {
 
 	public static void main(String[] args) {
 		Secretary s = new Secretary();
-		s.init();
+		s.start();
 	}
 
 }

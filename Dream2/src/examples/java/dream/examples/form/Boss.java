@@ -8,6 +8,10 @@ public class Boss extends FormClient {
 
 	public Boss() {
 		super("Boss", "Euro/Hour");
+	}
+
+	@Override
+	protected void init() {
 		eph = new Var<>("euro_per_hour", 8.5);
 	}
 
@@ -20,7 +24,7 @@ public class Boss extends FormClient {
 
 	public static void main(String[] args) {
 		Boss b = new Boss();
-		b.init();
+		b.start();
 	}
 
 }

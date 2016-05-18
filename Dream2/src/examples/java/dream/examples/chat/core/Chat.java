@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -13,12 +12,11 @@ import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
-import dream.common.Consts;
+import dream.examples.util.Client;
 import dream.examples.util.DependencyVisualization;
 
-public class Chat {
+public class Chat extends Client {
 
-	protected final String userName;
 	private ChatGUI gui;
 
 	private final Signal<ArrayList<String>> onlineList;
@@ -29,18 +27,13 @@ public class Chat {
 	private Map<Integer, Var<String>> rooms = new HashMap<>();
 	private Map<String, Integer> roomNames = new HashMap<>();
 
-	protected final Logger logger;
 	private int posX;
 	private int posY;
 
 	public Chat(String username, int window_x, int window_y) {
-		this.userName = username;
-		Consts.hostName = userName;
+		super(username);
 		this.posX = window_x;
 		this.posY = window_y;
-		logger = Logger.getLogger("Chat_" + userName);
-		logger.addHandler(Logger.getGlobal().getHandlers()[0]);
-		logger.setLevel(Level.ALL);
 
 		// Establish new session with server
 		RemoteVar<ArrayList<String>> registeredClients = new RemoteVar<ArrayList<String>>(ChatServer.NAME,
@@ -106,7 +99,7 @@ public class Chat {
 		fromServer.change().addHandler((oldValue, newValue) -> receivedServerMessage(newValue));
 
 		logger.fine("Setup: Starting GUI");
-		gui = new ChatGUI(userName, posX, posY);
+		gui = new ChatGUI(getHostName(), posX, posY);
 		gui.setListener(this);
 
 		// main room:
@@ -169,7 +162,7 @@ public class Chat {
 	}
 
 	private void createConnection(int roomNumber, String roomName, String clientName, String clientVar) {
-		if (clientName.equals(userName))
+		if (clientName.equals(getHostName()))
 			return;
 		RemoteVar<String> r = new RemoteVar<>(clientName, clientVar);
 		Signal<String> s = new Signal<>(roomName + "_" + clientName, () -> {

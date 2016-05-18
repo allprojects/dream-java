@@ -1,15 +1,14 @@
 package dream.examples.form;
 
 import java.awt.Color;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.List;
 
-import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.common.Consts;
+import dream.examples.util.Client;
 
-public abstract class FormClient {
+public abstract class FormClient extends Client {
 
 	private RemoteVar<Double> salary;
 	private RemoteVar<Boolean> settings;
@@ -17,31 +16,20 @@ public abstract class FormClient {
 	private Signal<Boolean> remoteSettings;
 
 	private FormGUI gui;
-	protected final Logger logger;
 	private String labelText;
 
 	public FormClient(String name, String labelText) {
-		Consts.hostName = name;
+		super(name);
 		this.labelText = labelText;
-
-		logger = Logger.getLogger(name);
-		logger.setLevel(Level.ALL);
-		logger.addHandler(Logger.getGlobal().getHandlers()[0]);
-
-		DreamClient.instance.connect();
 	}
 
-	protected void init() {
-		while (!DreamClient.instance.listVariables().contains("salary@FormServer") || //
-				!DreamClient.instance.listVariables().contains("settingsOkay@FormServer")) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+	@Override
+	protected List<String> waitForVars() {
+		return Arrays.asList("salary@FormServer", "settingsOkay@FormServer");
+	}
 
-		gui = new FormGUI(Consts.hostName, labelText);
+	protected void start() {
+		gui = new FormGUI(getHostName(), labelText);
 		gui.setListener(this);
 
 		salary = new RemoteVar<>("FormServer", "salary");

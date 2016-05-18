@@ -1,34 +1,21 @@
 package dream.examples.form;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.common.Consts;
-import dream.locking.LockManagerLauncher;
-import dream.server.ServerLauncher;
+import dream.examples.util.Client;
 
-public class FormServer {
+public class FormServer extends Client {
 
 	public static final String NAME = "FormServer";
-	private boolean serverStarted;
-	private boolean lockManagerStarted;
-	protected final Logger logger = Logger.getLogger(NAME);
 
 	protected RemoteVar<Integer> working_hours;
 	protected RemoteVar<Double> euro_per_hour;
 
 	public FormServer() {
-		startServerIfNeeded();
-		startLockManagerIfNeeded();
-
-		logger.setLevel(Level.ALL);
-		logger.addHandler(Logger.getGlobal().getHandlers()[0]);
-
-		Consts.hostName = NAME;
-		DreamClient.instance.connect();
+		super("FormServer");
 		detectNewSession();
 	}
 
@@ -100,29 +87,5 @@ public class FormServer {
 
 	public static void main(String[] args) {
 		new FormServer();
-	}
-
-	private final void startServerIfNeeded() {
-		if (!serverStarted) {
-			ServerLauncher.start();
-			serverStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Failed to wait for Server starting", e);
-		}
-	}
-
-	private final void startLockManagerIfNeeded() {
-		if (!lockManagerStarted) {
-			LockManagerLauncher.start();
-			lockManagerStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (final InterruptedException e) {
-			logger.log(Level.SEVERE, "Failed to wait for LockManager starting", e);
-		}
 	}
 }

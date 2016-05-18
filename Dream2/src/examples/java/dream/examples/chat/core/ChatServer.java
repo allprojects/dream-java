@@ -14,17 +14,12 @@ import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
-import dream.common.Consts;
+import dream.examples.util.Client;
 import dream.examples.util.DependencyVisualization;
 import dream.examples.util.Pair;
-import dream.locking.LockManagerLauncher;
-import dream.server.ServerLauncher;
 
-public class ChatServer {
+public class ChatServer extends Client {
 	public static final String NAME = "ChatServer";
-
-	private boolean serverStarted = false;
-	private boolean lockManagerStarted = false;
 
 	private final static SecureRandom r = new SecureRandom();
 
@@ -41,12 +36,9 @@ public class ChatServer {
 	}
 
 	public ChatServer() {
-		startServerIfNeeded();
-		startLockManagerIfNeeded();
-
+		super(NAME);
 		logger.setLevel(Level.ALL);
 		logger.addHandler(Logger.getGlobal().getHandlers()[0]);
-		Consts.hostName = NAME;
 		clientVars = new HashMap<>();
 		rooms = new HashMap<>();
 		clients = new Var<ArrayList<String>>(SERVER_REGISTERED_CLIENTS, new ArrayList<String>());
@@ -176,29 +168,5 @@ public class ChatServer {
 	 */
 	public static String getRandom() {
 		return new BigInteger(130, r).toString(32);
-	}
-
-	private final void startServerIfNeeded() {
-		if (!serverStarted) {
-			ServerLauncher.start();
-			serverStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Failed to wait for Server starting", e);
-		}
-	}
-
-	private final void startLockManagerIfNeeded() {
-		if (!lockManagerStarted) {
-			LockManagerLauncher.start();
-			lockManagerStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (final InterruptedException e) {
-			logger.log(Level.SEVERE, "Failed to wait for LockManager starting", e);
-		}
 	}
 }

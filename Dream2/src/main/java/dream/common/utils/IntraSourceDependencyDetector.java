@@ -74,7 +74,7 @@ public enum IntraSourceDependencyDetector implements DependencyDetector {
 	 */
 	private final Set<String> computeDependentSiblingsFor(String expr, String initialExpression) {
 		return depGraph.getGraph().get(expr).stream().//
-				filter(dep -> relevantSources.get(dep).contains(initialExpression)).//
+				filter(dep -> relevantSources.getOrDefault(dep, new HashSet<>()).contains(initialExpression)).//
 				collect(Collectors.toSet());
 	}
 

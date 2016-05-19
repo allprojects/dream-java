@@ -29,11 +29,9 @@ public class FinancialApp implements ChangeEventHandler<Integer> {
 			e.printStackTrace();
 		}
 
-		f1 = new RemoteVar<>("f1@Model1");
-		f2 = new RemoteVar<>("f2@Model2");
-		f3 = new RemoteVar<>("f3@Model3");
-
-		final RemoteVar<Integer> model1 = new RemoteVar<>("Model1", "model1");
+		f1 = new RemoteVar<>("Model1", "f1");
+		f2 = new RemoteVar<>("Model2", "f2");
+		f3 = new RemoteVar<>("Model3", "f3");
 
 		f1Signal = new Signal<>("f1Signal", () -> f1.get(), f1);
 		f2Signal = new Signal<>("f2Signal", () -> f2.get(), f2);
@@ -52,8 +50,6 @@ public class FinancialApp implements ChangeEventHandler<Integer> {
 		System.out.println(f1.get());
 		System.out.println(f2.get());
 		System.out.println(f3.get());
-
-		System.out.println(model1.get());
 	}
 
 	@Override

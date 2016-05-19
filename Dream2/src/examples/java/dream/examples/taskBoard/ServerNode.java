@@ -65,26 +65,35 @@ public class ServerNode {
 				return "";
 			}
 		}, rv);
-		sig.change().addHandler((oldValue, newValue) -> createTaskLists(newValue));
+		// sig.change().addHandler((oldValue, newValue) ->
+		// createTaskLists(newValue));
+		sig.change().addHandler((oldValue, newValue) -> {
+			if (newValue != null) {
+				String newDev = newValue.split(":")[0];
+				String newTest = newValue.split(":")[1];
+				if (devTask == null) {
+					devTask = new Var<String>("taskDevs", "");
+				}
+				if (testTask == null) {
+					testTask = new Var<String>("taskTests", "");
+				}
+				// Set vars for remote querying
+				devTask.set(devTask.get().toString() + newDev);
+				testTask.set(testTask.get().toString() + newTest);
+			}
+		});
 		myClients.modify((old) -> old.add(clientVar + "@" + clientHost));
 	}
 
-	private void createTaskLists(String newValue) {
-		if (newValue != null) {
-			String newDev = newValue.split(":")[0];
-			String newTest = newValue.split(":")[1];
-			if (devTask == null) {
-				devTask = new Var<String>("taskDevs", "");
-			}
-			if (testTask == null) {
-				testTask = new Var<String>("taskTests", "");
-			}
-			// Set vars for remote querying
-			devTask.set(devTask.get().toString() + newDev);
-			testTask.set(testTask.get().toString() + newTest);
-		}
-	}
-
+	/*
+	 * private void createTaskLists(String newValue) { if (newValue != null) {
+	 * String newDev = newValue.split(":")[0]; String newTest =
+	 * newValue.split(":")[1]; if (devTask == null) { devTask = new
+	 * Var<String>("taskDevs", ""); } if (testTask == null) { testTask = new
+	 * Var<String>("taskTests", ""); } // Set vars for remote querying
+	 * devTask.set(devTask.get().toString() + newDev);
+	 * testTask.set(testTask.get().toString() + newTest); } }
+	 */
 	private final void startServerIfNeeded() {
 		if (!serverStarted) {
 			ServerLauncher.start();

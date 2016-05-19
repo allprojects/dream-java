@@ -1,12 +1,19 @@
 package dream.examples.financial;
 
+import java.util.Arrays;
+import java.util.List;
+
 import dream.client.ChangeEventHandler;
-import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.common.Consts;
+import dream.examples.util.Client;
 
-public class FinancialApp implements ChangeEventHandler<Integer> {
+public class FinancialApp extends Client implements ChangeEventHandler<Integer> {
+
+	public FinancialApp() {
+		super("Local");
+	}
+
 	private Signal<Integer> f1Signal;
 	private Signal<Integer> f2Signal;
 	private Signal<Integer> f3Signal;
@@ -19,16 +26,12 @@ public class FinancialApp implements ChangeEventHandler<Integer> {
 		new FinancialApp().start();
 	}
 
+	@Override
+	protected List<String> waitForVars() {
+		return Arrays.asList("f1@Model1", "f2@Model2", "f3@Model3");
+	}
+
 	public void start() {
-		Consts.hostName = "Local";
-		DreamClient.instance.connect();
-
-		try {
-			Thread.sleep(2000);
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
-
 		f1 = new RemoteVar<>("Model1", "f1");
 		f2 = new RemoteVar<>("Model2", "f2");
 		f3 = new RemoteVar<>("Model3", "f3");

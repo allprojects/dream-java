@@ -1,15 +1,23 @@
 package dream.examples.financial;
 
-import dream.client.DreamClient;
+import java.util.Arrays;
+import java.util.List;
+
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.common.Consts;
+import dream.examples.util.Client;
 
-public class Model1 {
+public class Model1 extends Client {
+	public Model1() {
+		super("Model1");
+	}
+
+	@Override
+	protected List<String> waitForVars() {
+		return Arrays.asList("marketIndex@InputModel", "stockOpts@InputModel");
+	}
+
 	public void start() {
-		Consts.hostName = "Model1";
-		DreamClient.instance.connect();
-
 		final RemoteVar<Integer> marketIndex = new RemoteVar<>("InputModel", "marketIndex");
 		final RemoteVar<Integer> stockOpts = new RemoteVar<>("InputModel", "stockOpts");
 
@@ -19,7 +27,7 @@ public class Model1 {
 			} else {
 				return marketIndex.get() * 2 + stockOpts.get();
 			}
-		}, marketIndex, stockOpts);
+		} , marketIndex, stockOpts);
 
 		f1.change().addHandler((oldVal, newVal) -> System.out.println("New value for f1: " + newVal));
 	}

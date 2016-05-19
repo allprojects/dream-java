@@ -3,24 +3,19 @@ package dream.examples.financial;
 import java.util.Random;
 
 import dream.client.Var;
-import dream.common.Consts;
-import dream.locking.LockManagerLauncher;
-import dream.server.ServerLauncher;
+import dream.examples.util.Client;
 
-public class InputModel {
-	private boolean serverStarted = false;
-	private boolean lockManagerStarted = false;
+public class InputModel extends Client {
+
+	public InputModel() {
+		super("InputModel");
+	}
 
 	public static void main(String[] args) {
 		new InputModel().start();
 	}
 
 	public void start() {
-		startServerIfNeeded();
-		startLockManagerIfNeeded();
-
-		Consts.hostName = "InputModel";
-
 		final Var<Integer> marketIndex = new Var<>("marketIndex", 1);
 		final Var<Integer> stockOpts = new Var<>("stockOpts", 1);
 		final Var<Integer> news = new Var<>("news", 1);
@@ -39,30 +34,6 @@ public class InputModel {
 			} catch (final InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-
-	private final void startServerIfNeeded() {
-		if (!serverStarted) {
-			ServerLauncher.start();
-			serverStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private final void startLockManagerIfNeeded() {
-		if (!lockManagerStarted) {
-			LockManagerLauncher.start();
-			lockManagerStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 }

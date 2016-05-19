@@ -62,7 +62,10 @@ public class TaskReviewer {
 				return "";
 			}
 		}, rv);
-		sig.change().addHandler((oldValue, newValue) -> showDevQuery(newValue));
+		sig.change().addHandler((oldValue, newValue) -> {
+			// TODO show current dev tasks on monitor
+			log.info("Current dev tasks are:" + newValue);
+		});
 		myServer.modify((old) -> old.add(value + "@" + host));
 	}
 
@@ -75,16 +78,11 @@ public class TaskReviewer {
 				return "";
 			}
 		}, rv);
-		sig.change().addHandler((oldValue, newValue) -> showTestQuery(newValue));
+		sig.change().addHandler((oldValue, newValue) -> {
+			// TODO show current dev tasks on monitor
+			log.info("Current test tasks are: " + newValue);
+		});
 		myServer.modify((old) -> old.add(value + "@" + host));
-	}
-
-	private void showTestQuery(String x) {
-		log.info("showTestQuery:" + x);
-	}
-
-	private void showDevQuery(String x) {
-		log.info("showDevQuery:" + x);
 	}
 
 	public static void main(String[] args) {

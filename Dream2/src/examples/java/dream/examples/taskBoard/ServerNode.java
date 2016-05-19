@@ -39,8 +39,6 @@ public class ServerNode {
 		Consts.hostName = NAME;
 		myClients = new Var<ArrayList<String>>("Server_registered_clients", new ArrayList<String>());
 		detectClients();
-		new Tasks();
-		new TaskReviewer();
 	}
 
 	private void detectClients() {

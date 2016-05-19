@@ -121,11 +121,11 @@ public class Monitor {
 		public void actionPerformed(ActionEvent paramActionEvent) {
 			if (paramActionEvent.getActionCommand() == "ADD") {
 				String toTasks = textField1.getText();
-				// TODO task format valid
 				if (toTasks.contains(":") && toTasks.split(":")[0].matches("D\\d*")
 						&& toTasks.split(":")[1].matches("T\\d*")) {
 					flag = true;
 				} else {
+					// TODO task format invalid handle
 					log.info("Wrong input pattern of tasks");
 				}
 				flag = true;

@@ -52,16 +52,19 @@ public class ServerNode {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		log.info("inside ServerHost:" + vars.toString());
+		log.info("inside ServerNode:" + vars.toString());
 		detectClients();
 	}
 
 	private void createClient(String clientHost, String clientVar) {
+		log.info("inside");
 		RemoteVar<String> rv = new RemoteVar<String>(clientHost, clientVar);
 		Signal<String> sig = new Signal<String>("received_" + clientHost, () -> {
 			if (rv.get() != null) {
+
 				return rv.get();
 			} else {
+
 				return "";
 			}
 		}, rv);

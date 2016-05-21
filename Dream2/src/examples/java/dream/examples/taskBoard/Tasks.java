@@ -21,13 +21,12 @@ public class Tasks extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	public Tasks(String input) {
-		Consts.hostName = "host";
-		Var<String> v = new Var<String>("toServerVar", input);
+		Consts.hostName = "TaskNode";
+		Var<String> v = new Var<String>("FromTaskNode", input);
 		for (int i = 0; i < 10; i++) {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			v.set(input);

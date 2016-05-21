@@ -27,7 +27,6 @@ public class NewTaskGUI {
 			public void run() {
 				NewTaskGUI user = new NewTaskGUI();
 				user.initComponents();
-
 			}
 		});
 

@@ -1,5 +1,6 @@
 package dream.examples.taskBoard;
 
+import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
@@ -21,7 +22,9 @@ public class Tasks extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	public Tasks(String input) {
-		Consts.hostName = "TaskNode";
+		Random rm = new Random();
+		Consts.hostName = "TaskNode" + rm.nextInt(100);
+		System.out.println("HOST name:" + Consts.hostName);
 		Var<String> v = new Var<String>("FromTaskNode", input);
 		for (int i = 0; i < 10; i++) {
 			try {

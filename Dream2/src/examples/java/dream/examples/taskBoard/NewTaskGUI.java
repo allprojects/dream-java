@@ -19,7 +19,7 @@ import javax.swing.JTextField;
  */
 public class NewTaskGUI {
 	public static JTextField textField1;
-	static Logger log = Logger.getLogger("Monitor");
+	static Logger log = Logger.getLogger("NewTaskGUI");
 
 	public static void main(String[] args) {
 
@@ -57,12 +57,14 @@ public class NewTaskGUI {
 									.addComponent(textField1, GroupLayout.PREFERRED_SIZE, 590,
 											GroupLayout.PREFERRED_SIZE)
 									.addGap(18, 18, 18).addComponent(button1).addContainerGap(34, Short.MAX_VALUE)));
+
 			frame1ContentPaneLayout.setVerticalGroup(frame1ContentPaneLayout.createParallelGroup()
 					.addGroup(frame1ContentPaneLayout.createSequentialGroup().addGap(19, 19, 19)
 							.addGroup(frame1ContentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 									.addComponent(button1).addComponent(textField1, GroupLayout.PREFERRED_SIZE,
 											GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addContainerGap(24, Short.MAX_VALUE)));
+
 			frame1.pack();
 			frame1.setLocationRelativeTo(frame1.getOwner());
 			frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -1,12 +1,10 @@
 package dream.examples.taskBoard;
 
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.client.Var;
 import dream.common.Consts;
 
 /**
@@ -16,8 +14,7 @@ import dream.common.Consts;
  * @description Review the tasks.
  */
 public class TaskReviewer {
-	private final Logger log = Logger.getLogger("MagtClient");
-	private Var<ArrayList<String>> myServer = null;
+	private final Logger log = Logger.getLogger("ViewNode");
 	RemoteVar<String> devs = null;
 	RemoteVar<String> tests = null;
 	Signal<String> sigDevs = null;

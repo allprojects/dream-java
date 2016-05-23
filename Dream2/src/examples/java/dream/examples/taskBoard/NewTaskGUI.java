@@ -3,6 +3,9 @@ package dream.examples.taskBoard;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
@@ -10,6 +13,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+
+import dream.examples.util.NewJvmHelper;
 
 /**
  * 
@@ -20,6 +25,7 @@ import javax.swing.JTextField;
 public class NewTaskGUI {
 	public static JTextField textField1;
 	static Logger log = Logger.getLogger("NewTaskGUI");
+	private static ArrayList<Process> tasks = new ArrayList<Process>();
 
 	public static void main(String[] args) {
 
@@ -37,6 +43,37 @@ public class NewTaskGUI {
 		// //GEN-BEGIN:initComponents
 		// Generated using JFormDesigner Evaluation license - Min Yang
 		frame1 = new JFrame();
+		frame1.addWindowListener(new WindowListener() {
+			@Override
+			public void windowOpened(WindowEvent e) {
+			}
+
+			@Override
+			public void windowIconified(WindowEvent e) {
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+			}
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				onExit();
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				onExit();
+			}
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+			}
+		});
 		textField1 = new JTextField();
 		button1 = new JButton();
 		button1.setActionCommand("ADD");
@@ -89,13 +126,21 @@ public class NewTaskGUI {
 				if (toTasks.contains(":") && toTasks.split(":")[0].matches("D\\d*")
 						&& toTasks.split(":")[1].matches("T\\d*")) {
 					// TODO: think! to make it more user friendly
-					new Tasks(toTasks);
+					tasks.add(NewJvmHelper.startNewJVM(Tasks.class, toTasks));
 				} else {
 					textField1.setText("");
 					JOptionPane.showMessageDialog(null, "Please input the right pattern of task.");
 					log.info("Wrong input pattern of tasks");
 				}
 			}
+		}
+	}
+
+	private void onExit() {
+		System.out.println("exit");
+		for (Process p : tasks) {
+			p.destroyForcibly();
+			System.out.println("Destroying " + p.toString());
 		}
 	}
 }

@@ -13,17 +13,13 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle;
 
 /**
  * @author Min Yang
  */
-public class Monitor extends JPanel {
-	public Monitor() {
-		initComponents();
-	}
+public class Monitor {
 
 	public static void main(String[] args) {
 

@@ -1,11 +1,11 @@
 package dream.examples.taskBoard;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.List;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.common.Consts;
+import dream.examples.util.Client;
 
 /**
  * 
@@ -13,8 +13,7 @@ import dream.common.Consts;
  * @date May 13, 2016
  * @description Review the tasks.
  */
-public class TaskReviewer {
-	private final Logger log = Logger.getLogger("ViewNode");
+public class TaskReviewer extends Client {
 	RemoteVar<String> devs = null;
 	RemoteVar<String> tests = null;
 	Signal<String> sigDevs = null;
@@ -24,10 +23,13 @@ public class TaskReviewer {
 		new TaskReviewer();
 	}
 
+	@Override
+	protected List<String> waitForVars() {
+		return Arrays.asList("taskDevs@ServerNode", "taskTests@ServerNode");
+	}
+
 	public TaskReviewer() {
-		Consts.hostName = "QueryClient";
-		log.setLevel(Level.ALL);
-		log.addHandler(Logger.getGlobal().getHandlers()[0]);
+		super("QueryClient");
 		if (devs == null) {
 			devs = new RemoteVar<String>("ServerNode", "taskDevs");
 			sigDevs = new Signal<String>("sigDevs", () -> {

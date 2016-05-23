@@ -2,16 +2,13 @@ package dream.examples.taskBoard;
 
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
-import dream.common.Consts;
+import dream.examples.util.Client;
 import dream.examples.util.Pair;
-import dream.server.ServerLauncher;
 
 /**
  * 
@@ -20,11 +17,9 @@ import dream.server.ServerLauncher;
  * @description run background tasks: read task, create task lists: development
  *              and test etc.
  */
-public class ServerNode {
+public class ServerNode extends Client {
 	public static final String NAME = "ServerNode";
-	private boolean serverStarted = false;
 	private Var<ArrayList<String>> myClients = null;
-	private final Logger log = Logger.getLogger("ServerNode");
 	private Var<String> devTask = null;
 	private Var<String> testTask = null;
 
@@ -33,10 +28,7 @@ public class ServerNode {
 	}
 
 	public ServerNode() {
-		startServerIfNeeded();
-		log.setLevel(Level.ALL);
-		log.addHandler(Logger.getGlobal().getHandlers()[0]);
-		Consts.hostName = NAME;
+		super(NAME);
 		myClients = new Var<ArrayList<String>>("Server_registered_clients", new ArrayList<String>());
 		detectClients();
 	}
@@ -82,17 +74,5 @@ public class ServerNode {
 			}
 		});
 		myClients.modify((old) -> old.add(clientVar + "@" + clientHost));
-	}
-
-	private final void startServerIfNeeded() {
-		if (!serverStarted) {
-			ServerLauncher.start();
-			serverStarted = true;
-		}
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			log.log(Level.SEVERE, "Failed to wait for Server starting", e);
-		}
 	}
 }

@@ -1,12 +1,12 @@
 package dream.examples.taskBoard;
 
+import java.awt.EventQueue;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import javax.swing.JFrame;
-
 import dream.client.Var;
 import dream.common.Consts;
+import dream.examples.util.Client;
 
 /**
  * 
@@ -14,16 +14,10 @@ import dream.common.Consts;
  * @date May 13, 2016
  * @description Creating tasks.
  */
-public class Tasks extends JFrame {
-	Logger log = Logger.getLogger("Tasks");
-	/**
-	 * Default UID
-	 */
-	private static final long serialVersionUID = 1L;
+public class Tasks extends Client {
 
 	public Tasks(String input) {
-		Random rm = new Random();
-		Consts.hostName = "TaskNode" + rm.nextInt(100);
+		super("TaskNode" + new Random().nextInt(100));
 		System.out.println("HOST name:" + Consts.hostName);
 		Var<String> v = new Var<String>("FromTaskNode", input);
 		for (int i = 0; i < 10; i++) {
@@ -34,5 +28,13 @@ public class Tasks extends JFrame {
 			}
 			v.set(input);
 		}
+	}
+
+	public static void main(String[] args) {
+		if (args.length < 1) {
+			Logger.getGlobal().severe("developer/tasks missing");
+			return;
+		}
+		EventQueue.invokeLater(() -> new Tasks(args[0]));
 	}
 }

@@ -36,7 +36,7 @@ public class Starter {
 		int x = 0;
 		int y = 0;
 		for (int i = 0; i < CHAT_COUNT; i++) {
-			NewJvmHelper.startNewJVM(Chat.class, getName(i), Integer.toString(x), Integer.toString(y));
+			processes.add(NewJvmHelper.startNewJVM(Chat.class, getName(i), Integer.toString(x), Integer.toString(y)));
 			x += xStep;
 			if (x >= 3 * xStep) {
 				x = 0;

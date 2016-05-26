@@ -8,6 +8,7 @@ public class Secretary extends FormClient {
 
 	public Secretary() {
 		super("Secretary", "Working Hours");
+		setInitValues(Integer.toString(5));
 	}
 
 	@Override
@@ -16,7 +17,7 @@ public class Secretary extends FormClient {
 	}
 
 	@Override
-	public void typedText(String typedText) {
+	public void typedText(int i, String typedText) {
 		Integer value = Integer.valueOf(typedText);
 		wh.set(value);
 		logger.fine("Set Working_Hours to " + value);

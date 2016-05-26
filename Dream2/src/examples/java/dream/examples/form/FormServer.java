@@ -13,6 +13,7 @@ public class FormServer extends Client {
 
 	protected RemoteVar<Integer> working_hours;
 	protected RemoteVar<Double> euro_per_hour;
+	protected RemoteVar<Integer> required_minimum_hours;
 
 	public FormServer() {
 		super("FormServer");
@@ -23,7 +24,7 @@ public class FormServer extends Client {
 	 * Look for new clients every 5 seconds
 	 */
 	private void detectNewSession() {
-		while (euro_per_hour == null || working_hours == null) {
+		while (euro_per_hour == null || working_hours == null || required_minimum_hours == null) {
 			for (String str : DreamClient.instance.listVariables()) {
 				String host = str.split("@")[1];
 				String var = str.split("@")[0];
@@ -32,6 +33,9 @@ public class FormServer extends Client {
 					logger.fine("Found Secretary");
 				} else if (euro_per_hour == null && var.equalsIgnoreCase("euro_per_hour")) {
 					euro_per_hour = new RemoteVar<>(host, var);
+					logger.fine("Found Boss");
+				} else if (required_minimum_hours == null && var.equalsIgnoreCase("required_minimum_hours")) {
+					required_minimum_hours = new RemoteVar<>(host, "required_minimum_hours");
 					logger.fine("Found Boss");
 				}
 			}
@@ -48,11 +52,11 @@ public class FormServer extends Client {
 		logger.fine("Building Dependencies");
 
 		final Signal<Boolean> minimumHours = new Signal<>("minimumHours", () -> {
-			if (working_hours.get() != null)
-				return working_hours.get() > 10;
+			if (working_hours.get() != null && required_minimum_hours.get() != null)
+				return working_hours.get() > required_minimum_hours.get();
 			else
 				return false;
-		}, working_hours);
+		}, working_hours, required_minimum_hours);
 
 		final Signal<Boolean> maximumHours = new Signal<>("maximumHours", () -> {
 			if (working_hours.get() != null)

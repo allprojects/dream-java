@@ -16,9 +16,10 @@ public abstract class FormClient extends Client {
 	private Signal<Boolean> remoteSettings;
 
 	private FormGUI gui;
-	private String labelText;
+	private String[] labelText;
+	private String[] values;
 
-	public FormClient(String name, String labelText) {
+	public FormClient(String name, String... labelText) {
 		super(name);
 		this.labelText = labelText;
 	}
@@ -31,6 +32,8 @@ public abstract class FormClient extends Client {
 	protected void start() {
 		gui = new FormGUI(getHostName(), labelText);
 		gui.setListener(this);
+		if (values != null)
+			gui.setInitValues(values);
 
 		salary = new RemoteVar<>("FormServer", "salary");
 		settings = new RemoteVar<>("FormServer", "settingsOkay");
@@ -55,5 +58,9 @@ public abstract class FormClient extends Client {
 		remoteSettings.change().addHandler((o, n) -> gui.setColor((n ? Color.green : Color.red)));
 	}
 
-	public abstract void typedText(String typedText);
+	public abstract void typedText(int i, String typedText);
+
+	public void setInitValues(String... values) {
+		this.values = values;
+	}
 }

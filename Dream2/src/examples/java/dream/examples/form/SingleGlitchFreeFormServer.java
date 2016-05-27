@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import dream.client.Signal;
 import dream.examples.util.Pair;
 
-public class GlitchFreeFormServer extends FormServer {
+public class SingleGlitchFreeFormServer extends FormServer {
 
 	@Override
 	protected void createDependencies() {
@@ -15,8 +15,8 @@ public class GlitchFreeFormServer extends FormServer {
 		final UpdateCounter maximumCounter = new UpdateCounter();
 
 		final Signal<Pair<Boolean, Integer>> minimumHours = new Signal<>("minimumHours", () -> {
-			return new Pair<>(working_hours.get() > 10, minimumCounter.incAndGet());
-		}, working_hours);
+			return new Pair<>(working_hours.get() > required_minimum_hours.get(), minimumCounter.incAndGet());
+		}, working_hours, required_minimum_hours);
 
 		final Signal<Pair<Boolean, Integer>> maximumHours = new Signal<>("maximumHours", () -> {
 			return new Pair<>(working_hours.get() < 60, maximumCounter.incAndGet());
@@ -55,7 +55,7 @@ public class GlitchFreeFormServer extends FormServer {
 	}
 
 	public static void main(String[] args) {
-		new GlitchFreeFormServer();
+		new SingleGlitchFreeFormServer();
 	}
 }
 

@@ -3,18 +3,19 @@ package dream.examples.taskBoard;
 import dream.examples.util.NewJvmHelper;
 
 /**
+ * To start this example either:<br>
+ * - run {@link ServerNode}, {@link TaskCreater} and {@link TaskMonitor} in any
+ * order<br>
+ * - or run this class.<br>
+ * This class will start all three classes each in a seperate instance of the
+ * JVM. It will also stop all classes if one of them is stopped normally.<br>
+ * <b>WARNING:</b> If they are destroyed forcefully via Eclipse (or any other
+ * way) there may continue to run and will have to be exited manually.
  * 
  * @author Min Yang
- * @date May 13, 2016
- * @description User can first run
- *              ServerNode.java(..examples.taskBoard.ServerNode.java), then run
- *              NewTaskGUI.java (..examples.taskBoard.NewTaskGUI.java), then run
- *              TaskReviewer.java (..examples.taskBoard.TaskReviewer.java)
- * 
+ * @author Tobias Becker
  */
-// TODO run the whole package together
 public class InitApp {
-
 	private static Process serverNode;
 	private static Process viewer;
 	private static Process gui;

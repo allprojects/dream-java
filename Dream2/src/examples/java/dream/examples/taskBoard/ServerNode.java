@@ -11,11 +11,12 @@ import dream.examples.util.Client;
 import dream.examples.util.Pair;
 
 /**
+ * Holds a list of tasks and a list of developers each indicated by a simple
+ * integer. Searches for new clients (TaskCreater) and registers to their
+ * "task creation channels"
  * 
  * @author Min Yang
  * @author Tobias Becker
- * @description run background tasks: read task, create task lists: development
- *              and test etc.
  */
 public class ServerNode extends Client {
 	public static final String NAME = "ServerNode";

@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
@@ -17,6 +18,8 @@ import dream.client.Var;
 import dream.examples.util.Client;
 
 /**
+ * Interface to create new Tasks. May be started multiple times!
+ * 
  * @author Min Yang
  * @author Tobias Becker
  */
@@ -24,7 +27,7 @@ public class TaskCreater extends Client {
 	private Var<Task> var;
 
 	public TaskCreater() {
-		super("TaskCreater");
+		super("TaskCreater" + new Random().nextInt(1000));
 		var = new Var<Task>("FromTaskNode", null);
 		new TaskCreaterGUI(this);
 	}

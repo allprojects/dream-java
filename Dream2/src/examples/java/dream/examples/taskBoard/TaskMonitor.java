@@ -1,12 +1,10 @@
 package dream.examples.taskBoard;
 
 import java.awt.Container;
-import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.GroupLayout;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
@@ -36,7 +34,7 @@ public class TaskMonitor extends Client {
 
 	public TaskMonitor() {
 		super("TaskMonitor");
-		gui = new MonitorGUI(this);
+		gui = new MonitorGUI();
 
 		devs = new RemoteVar<String>("ServerNode", "developers");
 		sigDevs = new Signal<String>("sigDevs", () -> {
@@ -60,10 +58,6 @@ public class TaskMonitor extends Client {
 		});
 	}
 
-	public void clickbutton1() {
-		// TODO:
-	}
-
 	public static void main(String[] args) {
 		new TaskMonitor();
 	}
@@ -75,17 +69,13 @@ class MonitorGUI {
 	private JLabel label1;
 	private JLabel label2;
 	private JTextArea textAreaDevs;
-	private JButton button1;
-	private TaskMonitor monitor;
 
-	public MonitorGUI(TaskMonitor m) {
-		this.monitor = m;
+	public MonitorGUI() {
 		frame1 = new JFrame();
 		textAreaTasks = new JTextArea();
 		label1 = new JLabel();
 		label2 = new JLabel();
 		textAreaDevs = new JTextArea();
-		button1 = new JButton();
 
 		// ======== frame1 ========
 		{
@@ -95,10 +85,6 @@ class MonitorGUI {
 
 			// ---- label2 ----
 			label2.setText("Current tasks:");
-
-			// ---- button1 ----
-			button1.setText("Show me tasks");
-			button1.addActionListener(e -> button1ActionPerformed(e));
 
 			GroupLayout frame1ContentPaneLayout = new GroupLayout(frame1ContentPane);
 			frame1ContentPane.setLayout(frame1ContentPaneLayout);
@@ -111,16 +97,15 @@ class MonitorGUI {
 									textAreaTasks, GroupLayout.PREFERRED_SIZE, 57, GroupLayout.PREFERRED_SIZE))
 							.addContainerGap(9, Short.MAX_VALUE))
 					.addGroup(GroupLayout.Alignment.TRAILING,
-							frame1ContentPaneLayout.createSequentialGroup().addContainerGap(11, Short.MAX_VALUE)));// .addComponent(button1).addGap(71,
+							frame1ContentPaneLayout.createSequentialGroup().addContainerGap(11, Short.MAX_VALUE)));
 			frame1ContentPaneLayout.setVerticalGroup(frame1ContentPaneLayout.createParallelGroup()
-					.addGroup(frame1ContentPaneLayout.createSequentialGroup() // .addComponent(button1)
+					.addGroup(frame1ContentPaneLayout.createSequentialGroup()
 							.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 							.addGroup(frame1ContentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 									.addComponent(label2).addComponent(label1))
 							.addGap(13, 13, 13)
 							.addGroup(frame1ContentPaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-									.addComponent(textAreaDevs, GroupLayout.DEFAULT_SIZE, 108,
-											Short.MAX_VALUE)
+									.addComponent(textAreaDevs, GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
 									.addComponent(textAreaTasks, GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE))
 							.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 			frame1.pack();
@@ -136,9 +121,5 @@ class MonitorGUI {
 
 	public void setTasks(String value) {
 		textAreaTasks.setText(value.replace(":", "\n"));
-	}
-
-	private void button1ActionPerformed(ActionEvent e) {
-		monitor.clickbutton1();
 	}
 }

@@ -5,9 +5,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Small serializable class that represents a task assigned to a developer.
+ * 
  * @author Min Yang
  * @author Tobias Becker
- * @description a task
  */
 public class Task implements Serializable {
 	private static final long serialVersionUID = 8329097603920137211L;

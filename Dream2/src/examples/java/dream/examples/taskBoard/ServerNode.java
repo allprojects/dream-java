@@ -13,15 +13,15 @@ import dream.examples.util.Pair;
 /**
  * 
  * @author Min Yang
- * @date May 13, 2016
+ * @author Tobias Becker
  * @description run background tasks: read task, create task lists: development
  *              and test etc.
  */
 public class ServerNode extends Client {
 	public static final String NAME = "ServerNode";
 	private Var<ArrayList<String>> myClients = null;
-	private Var<String> devTask = null;
-	private Var<String> testTask = null;
+	private Var<String> developers = null;
+	private Var<String> tasks = null;
 
 	public static void main(String... args) {
 		new ServerNode();
@@ -29,6 +29,8 @@ public class ServerNode extends Client {
 
 	public ServerNode() {
 		super(NAME);
+		developers = new Var<String>("developers", "");
+		tasks = new Var<String>("tasks", "");
 		myClients = new Var<ArrayList<String>>("Server_registered_clients", new ArrayList<String>());
 		detectClients();
 	}
@@ -48,29 +50,27 @@ public class ServerNode extends Client {
 	}
 
 	private void createClient(String clientHost, String clientVar) {
-		RemoteVar<String> rv = new RemoteVar<String>(clientHost, clientVar);
-		Signal<String> sig = new Signal<String>(clientHost, () -> {
+		System.out.println("detected client " + clientHost);
+		RemoteVar<Task> rv = new RemoteVar<Task>(clientHost, clientVar);
+		Signal<Task> sig = new Signal<Task>(clientHost, () -> {
 			if (rv.get() != null) {
 				return rv.get();
 			} else {
-
-				return "";
+				return null;
 			}
 		}, rv);
 
 		sig.change().addHandler((oldValue, newValue) -> {
 			if (newValue != null) {
-				String newDev = newValue.split(":")[0];
-				String newTest = newValue.split(":")[1];
-				if (devTask == null)
-					devTask = new Var<String>("taskDevs", "");
-
-				if (testTask == null)
-					testTask = new Var<String>("taskTests", "");
+				Integer newDev = newValue.getDeveloper();
+				Integer newTask = newValue.getTask();
 
 				// Set vars for remote querying
-				devTask.set(devTask.get().toString() + newDev + ":");
-				testTask.set(testTask.get().toString() + newTest + ":");
+				String devValue = developers.get().length() == 0 ? newDev.toString() : developers.get() + ":" + newDev;
+				String taskValue = tasks.get().length() == 0 ? newTask.toString() : tasks.get() + ":" + newTask;
+				developers.set(devValue);
+				tasks.set(taskValue);
+				System.out.println("new value from " + clientHost);
 			}
 		});
 		myClients.modify((old) -> old.add(clientVar + "@" + clientHost));

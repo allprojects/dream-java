@@ -37,4 +37,12 @@ public class Task implements Serializable {
 		return task;
 	}
 
+	public String getDevString() {
+		return Integer.toString(developer);
+	}
+
+	public String getTaskString() {
+		return Integer.toString(task);
+	}
+
 }

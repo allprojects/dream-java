@@ -24,11 +24,13 @@ import dream.examples.util.Client;
  * @author Tobias Becker
  */
 public class TaskCreater extends Client {
-	private Var<Task> var;
+	private Var<String> taskCreater;
+	private Var<String> devCreater;
 
 	public TaskCreater() {
 		super("TaskCreater" + new Random().nextInt(1000));
-		var = new Var<Task>("FromTaskNode", null);
+		taskCreater = new Var<>("newTask", null);
+		devCreater = new Var<>("newDev", null);
 		new TaskCreaterGUI(this);
 	}
 
@@ -40,8 +42,9 @@ public class TaskCreater extends Client {
 		return logger;
 	}
 
-	public void addTask(String toTasks) {
-		var.set(new Task(toTasks));
+	public void addTask(Task t) {
+		taskCreater.set(t.getTaskString());
+		devCreater.set(t.getDevString());
 	}
 }
 
@@ -128,7 +131,7 @@ class TaskCreaterGUI {
 			if (paramActionEvent.getActionCommand() == "ADD") {
 				String toTasks = textField1.getText();
 				if (Task.isValid(toTasks)) {
-					taskCreater.addTask(toTasks);
+					taskCreater.addTask(new Task(toTasks));
 					textField1.setText("");
 				} else {
 					textField1.setText("");

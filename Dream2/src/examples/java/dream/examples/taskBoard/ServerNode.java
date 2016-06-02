@@ -40,7 +40,7 @@ public class ServerNode extends Client {
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0]))
 				.filter(x -> !myClients.get().contains(x.getSecond() + "@" + x.getFirst())
-						&& x.getSecond().equalsIgnoreCase("FromTaskNode"))
+						&& (x.getSecond().equalsIgnoreCase("newTask") || x.getSecond().equalsIgnoreCase("newDev")))
 				.forEach(x -> createClient(x.getFirst(), x.getSecond()));
 		try {
 			Thread.sleep(500);
@@ -51,9 +51,9 @@ public class ServerNode extends Client {
 	}
 
 	private void createClient(String clientHost, String clientVar) {
-		System.out.println("detected client " + clientHost);
-		RemoteVar<Task> rv = new RemoteVar<Task>(clientHost, clientVar);
-		Signal<Task> sig = new Signal<Task>(clientHost, () -> {
+		System.out.println("detected client " + clientHost + " " + clientVar);
+		RemoteVar<String> rv = new RemoteVar<>(clientHost, clientVar);
+		Signal<String> sig = new Signal<>(clientHost, () -> {
 			if (rv.get() != null) {
 				return rv.get();
 			} else {
@@ -63,15 +63,14 @@ public class ServerNode extends Client {
 
 		sig.change().addHandler((oldValue, newValue) -> {
 			if (newValue != null) {
-				Integer newDev = newValue.getDeveloper();
-				Integer newTask = newValue.getTask();
-
 				// Set vars for remote querying
-				String devValue = developers.get().length() == 0 ? newDev.toString() : developers.get() + ":" + newDev;
-				String taskValue = tasks.get().length() == 0 ? newTask.toString() : tasks.get() + ":" + newTask;
-				developers.set(devValue);
-				tasks.set(taskValue);
-				System.out.println("new value from " + clientHost);
+				if (clientVar.equalsIgnoreCase("newDev")) {
+					developers.set(developers.get().length() == 0 ? newValue : developers.get() + ":" + newValue);
+				}
+				if (clientVar.equalsIgnoreCase("newTask")) {
+					tasks.set(tasks.get().length() == 0 ? newValue : tasks.get() + ":" + newValue);
+				}
+				System.out.println("new value from " + clientHost + "@" + clientVar);
 			}
 		});
 		myClients.modify((old) -> old.add(clientVar + "@" + clientHost));

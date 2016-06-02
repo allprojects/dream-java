@@ -3,6 +3,8 @@ package dream.examples.taskBoard;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Random;
@@ -91,8 +93,23 @@ class TaskCreaterGUI {
 			}
 		});
 		textField1 = new JTextField();
+		textField1.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+					button1.doClick();
+			}
+		});
 		button1 = new JButton();
-		button1.setActionCommand("ADD");
 
 		// ======== frame1 ========
 		{
@@ -128,16 +145,14 @@ class TaskCreaterGUI {
 	class ButtonListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent paramActionEvent) {
-			if (paramActionEvent.getActionCommand() == "ADD") {
-				String toTasks = textField1.getText();
-				if (Task.isValid(toTasks)) {
-					taskCreater.addTask(new Task(toTasks));
-					textField1.setText("");
-				} else {
-					textField1.setText("");
-					JOptionPane.showMessageDialog(null, "Please input the right pattern of task. (D<Int>:T<Int>)");
-					taskCreater.getLogger().info("Wrong input pattern of tasks");
-				}
+			String toTasks = textField1.getText();
+			if (Task.isValid(toTasks)) {
+				taskCreater.addTask(new Task(toTasks));
+				textField1.setText("");
+			} else {
+				textField1.setText("");
+				JOptionPane.showMessageDialog(null, "Please input the right pattern of task. (D<Int>:T<Int>)");
+				taskCreater.getLogger().info("Wrong input pattern of tasks");
 			}
 		}
 	}

@@ -15,9 +15,10 @@ import dream.client.Signal;
 import dream.examples.util.Client;
 
 /**
+ * Displays both lists, the developers and the tasks.
+ * 
  * @author Min Yang
  * @author Tobias Becker
- * @description Review the tasks.
  */
 public class TaskMonitor extends Client {
 
@@ -72,10 +73,12 @@ class MonitorGUI {
 
 	public MonitorGUI() {
 		frame1 = new JFrame();
-		textAreaTasks = new JTextArea();
 		label1 = new JLabel();
 		label2 = new JLabel();
+		textAreaTasks = new JTextArea();
 		textAreaDevs = new JTextArea();
+		textAreaDevs.setEditable(false);
+		textAreaTasks.setEditable(false);
 
 		// ======== frame1 ========
 		{

@@ -1,5 +1,8 @@
 package dream.examples.taskBoard;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import dream.examples.util.NewJvmHelper;
 
 /**
@@ -16,14 +19,14 @@ import dream.examples.util.NewJvmHelper;
  * @author Tobias Becker
  */
 public class InitApp {
-	private static Process serverNode;
-	private static Process viewer;
-	private static Process gui;
+	private static List<Process> processes;
 
 	public static void main(String... args) {
-		serverNode = NewJvmHelper.startNewJVM(ServerNode.class);
-		gui = NewJvmHelper.startNewJVM(TaskCreater.class);
-		viewer = NewJvmHelper.startNewJVM(TaskMonitor.class);
+		processes = new ArrayList<>();
+		processes.add(NewJvmHelper.startNewJVM(ServerNode.class));
+		processes.add(NewJvmHelper.startNewJVM(TaskCreater.class));
+		processes.add(NewJvmHelper.startNewJVM(TaskCreater.class));
+		processes.add(NewJvmHelper.startNewJVM(TaskMonitor.class));
 
 		sleep(-1);
 	}
@@ -41,33 +44,18 @@ public class InitApp {
 	}
 
 	private static void checkExit() {
-		if (!serverNode.isAlive()) {
-			System.out.println("server closed ... exiting!");
-			destr();
-			System.exit(0);
+		for (Process p : processes) {
+			if (!p.isAlive()) {
+				System.out.println(p.getClass().getSimpleName() + " closed ... exiting!");
+				destr();
+				System.exit(0);
+			}
 		}
-		if (!viewer.isAlive()) {
-			System.out.println("viewer window closed ... exiting!");
-			destr();
-			System.exit(0);
-		}
-		if (!gui.isAlive()) {
-			System.out.println("gui window closed ... exiting!");
-			destr();
-			System.exit(0);
-		}
-
 	}
 
 	private static void destr() {
-		if (serverNode != null) {
-			serverNode.destroyForcibly();
-		}
-		if (viewer != null) {
-			viewer.destroyForcibly();
-		}
-		if (gui != null) {
-			gui.destroyForcibly();
+		for (Process p : processes) {
+			p.destroyForcibly();
 		}
 	}
 }

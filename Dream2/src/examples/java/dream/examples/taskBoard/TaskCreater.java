@@ -49,8 +49,10 @@ public class TaskCreater extends Client {
 	}
 
 	public void addTask(Task t) {
+		readLock(toVar(getHostName(), VAR_newDev), toVar(getHostName(), VAR_newTask));
 		taskCreater.set(t.getTaskString());
 		devCreater.set(t.getDevString());
+		unlock();
 	}
 }
 

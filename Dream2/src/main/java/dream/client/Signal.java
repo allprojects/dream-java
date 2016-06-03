@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -87,8 +88,9 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 				val = evaluate();
 				logger.finest("New value computed for the reactive object: " + val);
 			} catch (final Exception e) {
-				logger.info(
-						"Exception during the evaluation of the expression. Acknowledging the producers, releasing the locks, and returning.");
+				logger.log(Level.INFO,
+						"Exception during the evaluation of the expression. Acknowledging the producers, releasing the locks, and returning.",
+						e);
 				pairs.forEach(pair -> pair.getUpdateProducer().notifyUpdateFinished());
 				// Release locks, if needed
 				if ((Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //

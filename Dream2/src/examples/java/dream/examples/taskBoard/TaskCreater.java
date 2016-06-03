@@ -26,13 +26,17 @@ import dream.examples.util.Client;
  * @author Tobias Becker
  */
 public class TaskCreater extends Client {
+
+	public static final String VAR_newDev = "newDev";
+	public static final String VAR_newTask = "newTask";
+
 	private Var<String> taskCreater;
 	private Var<String> devCreater;
 
 	public TaskCreater() {
 		super("TaskCreater" + new Random().nextInt(1000));
-		taskCreater = new Var<>("newTask", null);
-		devCreater = new Var<>("newDev", null);
+		taskCreater = new Var<>(VAR_newTask, null);
+		devCreater = new Var<>(VAR_newDev, null);
 		new TaskCreaterGUI(this);
 	}
 

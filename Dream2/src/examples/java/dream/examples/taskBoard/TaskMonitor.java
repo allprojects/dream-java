@@ -22,6 +22,8 @@ import dream.examples.util.Client;
  */
 public class TaskMonitor extends Client {
 
+	public static final String NAME = "TaskMonitor";
+
 	private final MonitorGUI gui;
 	private final RemoteVar<String> devs;
 	private final RemoteVar<String> tasks;
@@ -30,19 +32,20 @@ public class TaskMonitor extends Client {
 
 	@Override
 	protected List<String> waitForVars() {
-		return Arrays.asList("developers@ServerNode", "tasks@ServerNode");
+		return Arrays.asList(toVar(ServerNode.NAME, ServerNode.VAR_developers),
+				toVar(ServerNode.NAME, ServerNode.VAR_tasks));
 	}
 
 	public TaskMonitor() {
-		super("TaskMonitor");
+		super(NAME);
 		gui = new MonitorGUI();
 
-		devs = new RemoteVar<String>("ServerNode", "developers");
+		devs = new RemoteVar<String>(ServerNode.NAME, ServerNode.VAR_developers);
 		sigDevs = new Signal<String>("sigDevs", () -> {
 			return devs.get();
 		}, devs);
 
-		tasks = new RemoteVar<String>("ServerNode", "tasks");
+		tasks = new RemoteVar<String>(ServerNode.NAME, ServerNode.VAR_tasks);
 		sigTasks = new Signal<String>("sigTests", () -> {
 			return tasks.get();
 		}, tasks);

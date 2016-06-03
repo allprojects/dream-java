@@ -20,9 +20,12 @@ import dream.examples.util.Pair;
  */
 public class ServerNode extends Client {
 	public static final String NAME = "ServerNode";
-	private Var<ArrayList<String>> myClients = null;
-	private Var<String> developers = null;
-	private Var<String> tasks = null;
+	public static final String VAR_developers = "developers";
+	public static final String VAR_tasks = "tasks";
+
+	private final ArrayList<String> myClients;
+	private final Var<String> developers;
+	private final Var<String> tasks;
 
 	public static void main(String... args) {
 		new ServerNode();
@@ -30,17 +33,17 @@ public class ServerNode extends Client {
 
 	public ServerNode() {
 		super(NAME);
-		developers = new Var<String>("developers", "");
-		tasks = new Var<String>("tasks", "");
-		myClients = new Var<ArrayList<String>>("Server_registered_clients", new ArrayList<String>());
+		developers = new Var<String>(VAR_developers, "");
+		tasks = new Var<String>(VAR_tasks, "");
+		myClients = new ArrayList<String>();
 		detectClients();
 	}
 
 	private void detectClients() {
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0]))
-				.filter(x -> !myClients.get().contains(x.getSecond() + "@" + x.getFirst())
-						&& (x.getSecond().equalsIgnoreCase("newTask") || x.getSecond().equalsIgnoreCase("newDev")))
+				.filter(x -> !myClients.contains(toVar(x)) && (x.getSecond().equalsIgnoreCase(TaskCreater.VAR_newTask)
+						|| x.getSecond().equalsIgnoreCase(TaskCreater.VAR_newDev)))
 				.forEach(x -> createClient(x.getFirst(), x.getSecond()));
 		try {
 			Thread.sleep(500);
@@ -64,15 +67,15 @@ public class ServerNode extends Client {
 		sig.change().addHandler((oldValue, newValue) -> {
 			if (newValue != null) {
 				// Set vars for remote querying
-				if (clientVar.equalsIgnoreCase("newDev")) {
+				if (clientVar.equalsIgnoreCase(TaskCreater.VAR_newDev)) {
 					developers.set(developers.get().length() == 0 ? newValue : developers.get() + ":" + newValue);
 				}
-				if (clientVar.equalsIgnoreCase("newTask")) {
+				if (clientVar.equalsIgnoreCase(TaskCreater.VAR_newTask)) {
 					tasks.set(tasks.get().length() == 0 ? newValue : tasks.get() + ":" + newValue);
 				}
 				System.out.println("new value from " + clientHost + "@" + clientVar);
 			}
 		});
-		myClients.modify((old) -> old.add(clientVar + "@" + clientHost));
+		myClients.add(clientVar + "@" + clientHost);
 	}
 }

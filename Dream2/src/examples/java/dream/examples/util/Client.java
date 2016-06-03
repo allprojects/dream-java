@@ -133,4 +133,8 @@ public abstract class Client {
 		return var + "@" + host;
 	}
 
+	public String toVar(Pair<String, String> var) {
+		return toVar(var.getFirst(), var.getSecond());
+	}
+
 }

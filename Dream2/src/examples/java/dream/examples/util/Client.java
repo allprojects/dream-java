@@ -129,4 +129,8 @@ public abstract class Client {
 		return Consts.hostName;
 	}
 
+	public String toVar(String host, String var) {
+		return var + "@" + host;
+	}
+
 }

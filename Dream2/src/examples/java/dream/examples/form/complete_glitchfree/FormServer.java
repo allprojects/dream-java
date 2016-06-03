@@ -5,24 +5,15 @@ import java.util.logging.Level;
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
-import dream.examples.util.Client;
 import dream.examples.util.Pair;
 
-public class FormServer extends Client {
-
-	public static final String NAME = "FormServer";
-	public static final String MinimumHours = "minimumHours";
-	public static final String MaximumHours = "maximumHours";
-	public static final String MinimumEuroPerHour = "minimumEuroPerHour";
-	public static final String SettingsOkay = "settingsOkay";
-	public static final String Salary = "salary";
+public class FormServer extends dream.examples.form.core.FormServer {
 
 	protected RemoteVar<Integer> working_hours;
 	protected RemoteVar<Double> euro_per_hour;
 	protected RemoteVar<Pair<Integer, Integer>> required_hours;
 
 	public FormServer() {
-		super(NAME);
 		detectNewSession();
 	}
 

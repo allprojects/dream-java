@@ -39,7 +39,7 @@ public class Boss extends FormClient {
 			break;
 		case 2:
 			Integer value3 = Integer.valueOf(typedText);
-			rh.set(new Pair<>(rh.get().getSecond(), value3));
+			rh.set(new Pair<>(rh.get().getFirst(), value3));
 			logger.fine("Set maximum @ Required_Hours to " + value3);
 			break;
 		default:

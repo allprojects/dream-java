@@ -47,7 +47,6 @@ public class TaskMonitor extends Client {
 			return tasks.get();
 		}, tasks);
 
-		// TODO show in monitor
 		sigDevs.change().addHandler((oldVa, newVal) -> {
 			System.out.println("newVal devs:" + newVal);
 			gui.setDevs(newVal);

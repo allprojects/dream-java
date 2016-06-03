@@ -1,8 +1,6 @@
 package dream.examples.form.complete_glitchfree;
 
-import dream.examples.form.core.GlitchFreeFormServer;
-
-public class CompleteGlitchFreeFormServer extends GlitchFreeFormServer {
+public class CompleteGlitchFreeFormServer extends FormServer {
 
 	@Override
 	protected void createDependencies() {

@@ -1,6 +1,7 @@
-package dream.examples.form.core;
+package dream.examples.form.simple;
 
 import dream.client.Var;
+import dream.examples.form.core.FormClient;
 
 public class Secretary extends FormClient {
 

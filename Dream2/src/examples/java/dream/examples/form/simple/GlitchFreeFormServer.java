@@ -1,4 +1,4 @@
-package dream.examples.form.core;
+package dream.examples.form.simple;
 
 import java.util.LinkedList;
 

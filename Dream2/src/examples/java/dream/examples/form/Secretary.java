@@ -4,16 +4,19 @@ import dream.client.Var;
 
 public class Secretary extends FormClient {
 
+	public static final String NAME = "Secretary";
+	public static final String WorkingHours = "working_hours";
+
 	private Var<Integer> wh;
 
 	public Secretary() {
-		super("Secretary", "Working Hours");
+		super(NAME, "Working Hours");
 		setInitValues(Integer.toString(5));
 	}
 
 	@Override
 	protected void init() {
-		wh = new Var<>("working_hours", 5);
+		wh = new Var<>(WorkingHours, 5);
 	}
 
 	@Override

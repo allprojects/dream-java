@@ -1,6 +1,7 @@
-package dream.examples.form;
+package dream.examples.form.complete_glitchfree;
 
 import dream.client.Var;
+import dream.examples.form.core.FormClient;
 import dream.examples.util.Pair;
 
 public class Boss extends FormClient {

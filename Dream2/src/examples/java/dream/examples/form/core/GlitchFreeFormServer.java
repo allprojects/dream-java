@@ -1,11 +1,11 @@
-package dream.examples.form;
+package dream.examples.form.core;
 
 import java.util.LinkedList;
 
 import dream.client.Signal;
 import dream.examples.util.Pair;
 
-public class SingleGlitchFreeFormServer extends FormServer {
+public class GlitchFreeFormServer extends FormServer {
 
 	@Override
 	protected void createDependencies() {
@@ -55,7 +55,7 @@ public class SingleGlitchFreeFormServer extends FormServer {
 	}
 
 	public static void main(String[] args) {
-		new SingleGlitchFreeFormServer();
+		new GlitchFreeFormServer();
 	}
 }
 

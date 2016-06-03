@@ -1,4 +1,4 @@
-package dream.examples.form;
+package dream.examples.form.core;
 
 import dream.client.Var;
 

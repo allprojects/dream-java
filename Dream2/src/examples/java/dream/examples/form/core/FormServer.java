@@ -1,4 +1,4 @@
-package dream.examples.form;
+package dream.examples.form.core;
 
 import java.util.logging.Level;
 
@@ -6,7 +6,6 @@ import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.examples.util.Client;
-import dream.examples.util.Pair;
 
 public class FormServer extends Client {
 
@@ -19,7 +18,6 @@ public class FormServer extends Client {
 
 	protected RemoteVar<Integer> working_hours;
 	protected RemoteVar<Double> euro_per_hour;
-	protected RemoteVar<Pair<Integer, Integer>> required_hours;
 
 	public FormServer() {
 		super(NAME);
@@ -30,7 +28,7 @@ public class FormServer extends Client {
 	 * Look for new clients every 5 seconds
 	 */
 	private void detectNewSession() {
-		while (euro_per_hour == null || working_hours == null || required_hours == null) {
+		while (euro_per_hour == null || working_hours == null) {
 			for (String str : DreamClient.instance.listVariables()) {
 				String host = str.split("@")[1];
 				String var = str.split("@")[0];
@@ -39,9 +37,6 @@ public class FormServer extends Client {
 					logger.fine("Found Secretary");
 				} else if (euro_per_hour == null && var.equalsIgnoreCase(Boss.EuroPerHour)) {
 					euro_per_hour = new RemoteVar<>(host, var);
-					logger.fine("Found Boss");
-				} else if (required_hours == null && var.equalsIgnoreCase(Boss.RequiredHours)) {
-					required_hours = new RemoteVar<>(host, Boss.RequiredHours);
 					logger.fine("Found Boss");
 				}
 			}
@@ -58,18 +53,18 @@ public class FormServer extends Client {
 		logger.fine("Building Dependencies");
 
 		final Signal<Boolean> minimumHours = new Signal<>(MinimumHours, () -> {
-			if (working_hours.get() != null && required_hours.get() != null)
-				return working_hours.get() > required_hours.get().getFirst();
+			if (working_hours.get() != null)
+				return working_hours.get() > 10;
 			else
 				return false;
-		}, working_hours, required_hours);
+		}, working_hours);
 
 		final Signal<Boolean> maximumHours = new Signal<>(MaximumHours, () -> {
-			if (working_hours.get() != null && required_hours.get() != null)
-				return working_hours.get() < required_hours.get().getSecond();
+			if (working_hours.get() != null)
+				return working_hours.get() < 60;
 			else
 				return false;
-		}, working_hours, required_hours);
+		}, working_hours);
 
 		final Signal<Boolean> minimumEuroPerHour = new Signal<>(MinimumEuroPerHour, () -> {
 			if (euro_per_hour.get() != null)

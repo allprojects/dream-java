@@ -50,6 +50,54 @@ Signal<Integer> n =
     });
 ```
 	  
+## Locks
+When using Atomic_Consistency it is required to lock a Var before changing its value.
+```
+	LockToken lock = DreamClient.instance.readLock(new HashSet<>("exVar@Host1"));
+	myVar.set("CCC");
+	DreamClient.instance.unlock(lock);
+```
+
+## Utility Class
+In the dream.examples.util-package you can find the class Client which does all the needed setup for Dream.
+It starts the DreamServer if it is not already running, sets the Client Name and connects to the Dependency Graph.
+It also provides some additional utilities.
+
+```
+public class MyClass extends Client {
+
+	public MyClass() {
+		super("ClientName");
+		
+		// Here you can add you Vars/Signals
+		Var<String> myVar = new Var<>("myVar", "value");
+	}
+}
+```
+
+It can also wait for defined Vars to be available:
+
+```
+public class OtherClass extends Client {
+
+	public OtherClass() {
+		super("OtherName");
+		// The super class blocks until myVar@ClientName is available
+		RemoteVar<String> theirVar = new RemoteVar<>("ClientName", "myVar");
+	}
+	
+	@Override
+	protected List<String> waitForVars() {
+		return Arrays.asList("myVar@ClientName");
+	}
+	
+	@Override
+	protected void init() {
+		// The code here is executed before the the super class blocks
+	}
+}
+```
+
 ## Contributors
 
 Alessandro Margara

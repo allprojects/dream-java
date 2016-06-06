@@ -20,7 +20,7 @@ import dream.examples.util.Client;
  * @author Min Yang
  * @author Tobias Becker
  */
-public class TaskMonitor extends Client {
+public class Monitor extends Client {
 
 	public static final String NAME = "TaskMonitor";
 
@@ -32,20 +32,20 @@ public class TaskMonitor extends Client {
 
 	@Override
 	protected List<String> waitForVars() {
-		return Arrays.asList(toVar(ServerNode.NAME, ServerNode.VAR_developers),
-				toVar(ServerNode.NAME, ServerNode.VAR_tasks));
+		return Arrays.asList(toVar(Server.NAME, Server.VAR_developers),
+				toVar(Server.NAME, Server.VAR_tasks));
 	}
 
-	public TaskMonitor() {
+	public Monitor() {
 		super(NAME);
 		gui = new MonitorGUI();
 
-		devs = new RemoteVar<String>(ServerNode.NAME, ServerNode.VAR_developers);
+		devs = new RemoteVar<String>(Server.NAME, Server.VAR_developers);
 		sigDevs = new Signal<String>("sigDevs", () -> {
 			return devs.get();
 		}, devs);
 
-		tasks = new RemoteVar<String>(ServerNode.NAME, ServerNode.VAR_tasks);
+		tasks = new RemoteVar<String>(Server.NAME, Server.VAR_tasks);
 		sigTasks = new Signal<String>("sigTests", () -> {
 			return tasks.get();
 		}, tasks);
@@ -62,7 +62,7 @@ public class TaskMonitor extends Client {
 	}
 
 	public static void main(String[] args) {
-		new TaskMonitor();
+		new Monitor();
 	}
 }
 

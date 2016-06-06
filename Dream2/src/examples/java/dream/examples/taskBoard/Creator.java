@@ -25,33 +25,33 @@ import dream.examples.util.Client;
  * @author Min Yang
  * @author Tobias Becker
  */
-public class TaskCreater extends Client {
+public class Creator extends Client {
 
 	public static final String VAR_newDev = "newDev";
 	public static final String VAR_newTask = "newTask";
 
-	private Var<String> taskCreater;
-	private Var<String> devCreater;
+	private Var<String> taskCreator;
+	private Var<String> devCreator;
 
-	public TaskCreater() {
-		super("TaskCreater" + new Random().nextInt(1000));
-		taskCreater = new Var<>(VAR_newTask, null);
-		devCreater = new Var<>(VAR_newDev, null);
+	public Creator() {
+		super("Creator" + new Random().nextInt(1000));
+		taskCreator = new Var<>(VAR_newTask, null);
+		devCreator = new Var<>(VAR_newDev, null);
 		new TaskCreaterGUI(this);
 	}
 
 	public static void main(String[] args) {
-		new TaskCreater();
+		new Creator();
 	}
 
 	public Logger getLogger() {
 		return logger;
 	}
 
-	public void addTask(Task t) {
+	public void addTask(Assignment t) {
 		readLock(toVar(getHostName(), VAR_newDev), toVar(getHostName(), VAR_newTask));
-		taskCreater.set(t.getTaskString());
-		devCreater.set(t.getDevString());
+		taskCreator.set(t.getTaskString());
+		devCreator.set(t.getDevString());
 		unlock();
 	}
 }
@@ -60,10 +60,10 @@ class TaskCreaterGUI {
 	private JTextField textField1;
 	private JFrame frame1;
 	private JButton button1;
-	private TaskCreater taskCreater;
+	private Creator creator;
 
-	public TaskCreaterGUI(TaskCreater t) {
-		this.taskCreater = t;
+	public TaskCreaterGUI(Creator t) {
+		this.creator = t;
 		initComponents();
 	}
 
@@ -152,13 +152,13 @@ class TaskCreaterGUI {
 		@Override
 		public void actionPerformed(ActionEvent paramActionEvent) {
 			String toTasks = textField1.getText();
-			if (Task.isValid(toTasks)) {
-				taskCreater.addTask(new Task(toTasks));
+			if (Assignment.isValid(toTasks)) {
+				creator.addTask(new Assignment(toTasks));
 				textField1.setText("");
 			} else {
 				textField1.setText("");
 				JOptionPane.showMessageDialog(null, "Please input the right pattern of task. (D<Int>:T<Int>)");
-				taskCreater.getLogger().info("Wrong input pattern of tasks");
+				creator.getLogger().info("Wrong input pattern of tasks");
 			}
 		}
 	}

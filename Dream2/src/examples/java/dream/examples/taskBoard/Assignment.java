@@ -10,13 +10,13 @@ import java.util.regex.Pattern;
  * @author Min Yang
  * @author Tobias Becker
  */
-public class Task implements Serializable {
+public class Assignment implements Serializable {
 	private static final long serialVersionUID = 8329097603920137211L;
 	public static String pattern = "D(\\d*):T(\\d*)";
 	private int developer;
 	private int task;
 
-	public Task(String input) {
+	public Assignment(String input) {
 		Matcher m = Pattern.compile(pattern).matcher(input);
 		if (m.matches()) {
 			developer = Integer.parseInt(m.group(1));

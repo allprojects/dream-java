@@ -7,7 +7,7 @@ import dream.examples.util.NewJvmHelper;
 
 /**
  * To start this example either:<br>
- * - run {@link ServerNode}, {@link TaskCreater} and {@link TaskMonitor} in any
+ * - run {@link Server}, {@link Creator} and {@link Monitor} in any
  * order<br>
  * - or run this class.<br>
  * This class will start all three classes each in a seperate instance of the
@@ -23,10 +23,10 @@ public class InitApp {
 
 	public static void main(String... args) {
 		processes = new ArrayList<>();
-		processes.add(NewJvmHelper.startNewJVM(ServerNode.class));
-		processes.add(NewJvmHelper.startNewJVM(TaskCreater.class));
-		processes.add(NewJvmHelper.startNewJVM(TaskCreater.class));
-		processes.add(NewJvmHelper.startNewJVM(TaskMonitor.class));
+		processes.add(NewJvmHelper.startNewJVM(Server.class));
+		processes.add(NewJvmHelper.startNewJVM(Creator.class));
+		processes.add(NewJvmHelper.startNewJVM(Creator.class));
+		processes.add(NewJvmHelper.startNewJVM(Monitor.class));
 
 		sleep(-1);
 	}

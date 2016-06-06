@@ -49,10 +49,8 @@ public class Creator extends Client {
 	}
 
 	public void addTask(Assignment t) {
-		readLock(toVar(getHostName(), VAR_newDev), toVar(getHostName(), VAR_newTask));
 		taskCreator.set(t.getTaskString());
 		devCreator.set(t.getDevString());
-		unlock();
 	}
 }
 

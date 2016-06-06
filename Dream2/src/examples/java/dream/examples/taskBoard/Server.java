@@ -56,7 +56,7 @@ public class Server extends Client {
 	private void createClient(String clientHost, String clientVar) {
 		logger.info("detected client " + clientHost + " " + clientVar);
 		RemoteVar<String> rv = new RemoteVar<>(clientHost, clientVar);
-		Signal<String> sig = new Signal<>(clientHost, () -> {
+		Signal<String> sig = new Signal<>(clientHost + "-" + clientVar, () -> {
 			if (rv.get() != null) {
 				return rv.get();
 			} else {

@@ -22,7 +22,7 @@ import dream.examples.util.Client;
  */
 public class Monitor extends Client {
 
-	public static final String NAME = "TaskMonitor";
+	public static final String NAME = "Monitor";
 
 	private final MonitorGUI gui;
 	private final RemoteVar<String> devs;
@@ -32,8 +32,7 @@ public class Monitor extends Client {
 
 	@Override
 	protected List<String> waitForVars() {
-		return Arrays.asList(toVar(Server.NAME, Server.VAR_developers),
-				toVar(Server.NAME, Server.VAR_tasks));
+		return Arrays.asList(toVar(Server.NAME, Server.VAR_developers), toVar(Server.NAME, Server.VAR_tasks));
 	}
 
 	public Monitor() {

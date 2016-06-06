@@ -55,7 +55,7 @@ class LockManager {
 		final LockRequestPacket reqPkt = activeLocks.get(lockID);
 
 		final Set<LockRequestPacket> result = new HashSet<>();
-		if (release(reqPkt.getLockID(), reqPkt.getLockNodes(), reqPkt.getType())) {
+		if (reqPkt != null && release(reqPkt.getLockID(), reqPkt.getLockNodes(), reqPkt.getType())) {
 			final Iterator<LockRequestPacket> it = pendingRequests.iterator();
 			while (it.hasNext()) {
 				final LockRequestPacket request = it.next();

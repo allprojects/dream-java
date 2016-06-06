@@ -8,5 +8,8 @@ package dream.examples.tasks;
  *
  */
 public interface UiUpdatesListner {
-	public void updateTasks(String task);
+
+	void updateTasks(String task, boolean accepted);
+
+	void updateClockinUi(String string);
 }

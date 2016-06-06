@@ -4,6 +4,7 @@
 package dream.examples.tasks;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * Message format used for communication between different nodes
@@ -15,7 +16,7 @@ public class Message implements Serializable {
 
 	private static final long serialVersionUID = -9119849212879479791L;
 	Task task;
-	String clock;
+	HashMap<String, Integer> clock;
 
 	/**
 	 * @return the task
@@ -35,7 +36,7 @@ public class Message implements Serializable {
 	/**
 	 * @return the clock
 	 */
-	public String getClock() {
+	public HashMap<String, Integer> getClock() {
 		return clock;
 	}
 
@@ -43,7 +44,7 @@ public class Message implements Serializable {
 	 * @param clock
 	 *            the clock to set
 	 */
-	public void setClock(String clock) {
+	public void setClock(HashMap<String, Integer> clock) {
 		this.clock = clock;
 	}
 

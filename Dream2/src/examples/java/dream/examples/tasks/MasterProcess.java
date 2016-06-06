@@ -5,6 +5,7 @@ package dream.examples.tasks;
 
 import dream.client.Var;
 import dream.common.Consts;
+import dream.examples.util.VectorClock;
 
 /**
  * @author Ram
@@ -14,26 +15,41 @@ public class MasterProcess {
 
 	private void init() {
 		Consts.hostName = "Host1";
-		int clock = 0;
+
+		VectorClock vectorClock = new VectorClock("p1");
 		Var<Message> initTask = new Var<Message>("TASK", null);
-		Var<Message> initTask1 = new Var<Message>("TASK1", null);
+		Var<Message> initTask2 = new Var<Message>("TASK2", null);
 		try {
 
 			int i = 0;
 			while (true) {
-				Message m = new Message();
+				// Create a message to be distributed
+				Message message = new Message();
 				Thread.sleep(5000);
-				Task t = new Task("Task" + i);
-				t.setId(1000 + i);
-				m.setTask(t);
-				clock++;
-				m.setClock("@p1:" + clock);
-				initTask.set(m);
 
-				t.setClock(clock);
-				t.setDescription("This is " + i + "th task");
+				// Add task to a message
+				Task task = new Task("Task" + i);
 
-				initTask1.set(m);
+				// Set id for the task
+				task.setId(1000 + i);
+
+				message.setTask(task);
+				// increment local clock
+				vectorClock.updateClock();
+
+				// set clock for the task
+				message.setClock(vectorClock.getLocalClock());
+
+				// Add description to task
+				task.setDescription("This is " + i + "th task");
+
+				// Send task to Deligator
+				initTask.set(message);
+
+				// link latency
+				Thread.sleep(5000);
+				// Send task to worker
+				initTask2.set(message);
 				i++;
 			}
 		} catch (Exception e) {

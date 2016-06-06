@@ -3,10 +3,13 @@
  */
 package dream.examples.tasks;
 
+import java.util.HashMap;
+
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
 import dream.common.Consts;
+import dream.examples.util.VectorClock;
 
 /**
  * @author Ram
@@ -16,6 +19,7 @@ public class DeligatProcess {
 
 	static int i;
 	int clock;
+	VectorClock localClock = new VectorClock("p2");
 	/**
 	 * @param args
 	 */
@@ -55,7 +59,12 @@ public class DeligatProcess {
 
 		// Register a handler which will be executed upon receiving the signal
 		s.change().addHandler((oldVal, val) -> {
-			clock++;
+
+			localClock.updateClock();
+			HashMap<String, Integer> messageClock = val.getClock();
+			if (localClock.isNew(messageClock)) {
+				localClock.updateClock(messageClock);
+			}
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {
@@ -63,7 +72,8 @@ public class DeligatProcess {
 				e.printStackTrace();
 			}
 			val.getTask().setAssignee(i++ % 10 + "");
-			val.setClock(val.getClock() + "@p2:" + clock);
+			localClock.updateClock();
+			val.setClock(localClock.getLocalClock());
 			myVar.set(val);
 
 		});

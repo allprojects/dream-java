@@ -29,16 +29,19 @@ public class Boss extends FormClient {
 		switch (i) {
 		case 0:
 			Double value = Double.valueOf(typedText);
+			// TODO check locks
 			eph.set(value);
 			logger.fine("Set Euro_Per_Hour to " + value);
 			break;
 		case 1:
 			Integer value2 = Integer.valueOf(typedText);
+			// TODO check locks
 			rh.set(new Pair<>(value2, rh.get().getSecond()));
 			logger.fine("Set minimum @ Required_Hours to " + value2);
 			break;
 		case 2:
 			Integer value3 = Integer.valueOf(typedText);
+			// TODO check locks
 			rh.set(new Pair<>(rh.get().getFirst(), value3));
 			logger.fine("Set maximum @ Required_Hours to " + value3);
 			break;

@@ -8,14 +8,10 @@
  * which ensures itself that no glitch can occur.<br>
  * <br>
  * b) {@link dream.examples.form.complete_glitchfree complete} uses a different
- * graph, which requires a locking mechanism. Again there are two different
- * solutions:<br>
- * {@link dream.examples.form.complete_glitchfree.FormServer FormServer}
- * depending on Dream's <i>complete_glitch_free</i> consistency to solve the
- * glitch and<br>
+ * graph, which requires a locking mechanism.
  * {@link dream.examples.form.complete_glitchfree.CompleteGlitchFreeFormServer
- * CompleteGlitchFreeFormServer}, which ensures itself with a own locking
- * mechanism that no glitch can occur.<br>
+ * CompleteGlitchFreeFormServer}, which ensures complete_glitch_freedom itself
+ * with a own locking mechanism.<br>
  * <br>
  * <br>
  * Both examples contain an image of their used dependency graph

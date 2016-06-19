@@ -15,8 +15,24 @@ import java.util.HashMap;
 public class Message implements Serializable {
 
 	private static final long serialVersionUID = -9119849212879479791L;
-	Task task;
-	HashMap<String, Integer> clock;
+	private Task task;
+	private HashMap<String, Integer> clock;
+	private String id;
+
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	/**
 	 * @return the task

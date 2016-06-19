@@ -7,7 +7,6 @@ import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
 import dream.common.Consts;
-import dream.examples.util.VectorClock;
 
 /**
  * @author Ram
@@ -16,7 +15,7 @@ import dream.examples.util.VectorClock;
 public class WorkerHelper implements Runnable {
 	static int i = 0;
 	UiUpdatesListner listner;
-	VectorClock localClock = new VectorClock("p3");
+	VectorClockHelper localClock;// = new VectorClock("p3");
 	Var<Task> complexEvent = new Var<Task>("COMPEVENT", null);
 	/**
 	 * @param args
@@ -38,41 +37,35 @@ public class WorkerHelper implements Runnable {
 		this.processName = processName;
 	}
 
-	public WorkerHelper(String processName, String host) {
-		this.setProcessName(processName);
-	}
-
 	public WorkerHelper() {
-		// TODO Auto-generated constructor stub
+		this.setProcessName(processName);
+
 	}
 
-	public void isEvent(Message val) {
+	public void handleEvent(Message p1, Message p2) {
 		// update clock on receiving new message
-		localClock.updateClock();
-		// check if the received message is new
-		if (localClock.isNew(val.getClock())) {
-			// update clock with the help of new message
-			localClock.updateClock(val.getClock());
-			Task task = val.getTask();
-			listner.updateTasks("\nTask Name: " + task.getName() + "\n" + "Task Discription: " + task.getDescription()
-					+ "\n" + "Assignee ID: " + task.getAssignee(), true);
-			System.out.println("New Message and Accepted \n" + "Task Name: " + task.getName() + "\n"
-					+ "Task Discription: " + task.getDescription() + "\n" + "Assignee ID: " + task.getAssignee());
+		Task task = p1.getTask();
+		updateClock();
+		listner.updateTasks("\nTask Name: " + task.getName() + "\n" + "Task Discription: " + task.getDescription()
+				+ "\n" + "Assignee ID: " + p2.getTask().getAssignee(), true);
 
-		} else {
-			Task task = val.getTask();
-			listner.updateTasks("\nTask Name: " + task.getName() + "\n" + "Task Discription: " + task.getDescription()
-					+ "\n" + "Assignee ID: " + task.getAssignee(), false);
-			System.out.println("New Message and Rejected \n" + "Task Name: " + task.getName() + "\n"
-					+ "Task Discription: " + task.getDescription() + "\n" + "Assignee ID: " + task.getAssignee());
-		}
+	}
+
+	void updateClock() {
 		listner.updateClockinUi(localClock.getLocalClock().toString());
 	}
 
+	public void isEvent(String val) {
+		updateClock();
+		listner.updateTasks(val, false);
+
+	}
+
 	public void run() {
-
+		localClock = new VectorClockHelper("p3", this);
 		Consts.hostName = "Host3";
-
+		Thread t = new Thread(localClock);
+		t.start();
 		RemoteVar<Message> task = new RemoteVar<Message>("Host1", "TASK2");
 		RemoteVar<Message> taskDeligated = new RemoteVar<Message>("Host2", "TASK_ASSIGNED");
 
@@ -87,7 +80,8 @@ public class WorkerHelper implements Runnable {
 		// from master process
 		signalFromMaster.change().addHandler((oldVal, val) -> {
 			if (val != null) {
-				isEvent(val);
+				localClock.updateClock();
+				localClock.checkEvent(val);
 			}
 		});
 
@@ -95,7 +89,8 @@ public class WorkerHelper implements Runnable {
 		// from delegate process
 		signalFromDeligator.change().addHandler((oldVal, val) -> {
 			if (val != null) {
-				isEvent(val);
+				localClock.updateClock();
+				localClock.checkEvent(val);
 			}
 		});
 

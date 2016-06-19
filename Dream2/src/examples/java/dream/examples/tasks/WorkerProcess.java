@@ -16,6 +16,10 @@ package dream.examples.tasks;
 public class WorkerProcess extends javax.swing.JFrame implements UiUpdatesListner {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
 	 * Creates new form TaskWindow
 	 */
 	WorkerHelper manager;
@@ -120,7 +124,7 @@ public class WorkerProcess extends javax.swing.JFrame implements UiUpdatesListne
 
 		jLabel2.setText("Accepted Events");
 
-		jLabel3.setText("Rejected Events");
+		jLabel3.setText("Log");
 
 		jButton1.setText("Clear");
 		jButton1.addActionListener(new java.awt.event.ActionListener() {

@@ -21,10 +21,11 @@ public class MasterProcess {
 		Var<Message> initTask2 = new Var<Message>("TASK2", null);
 		try {
 
-			int i = 0;
+			int i = 1;
 			while (true) {
 				// Create a message to be distributed
 				Message message = new Message();
+				message.setId("p1");
 				Thread.sleep(5000);
 
 				// Add task to a message

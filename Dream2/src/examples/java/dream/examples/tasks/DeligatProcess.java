@@ -72,6 +72,7 @@ public class DeligatProcess {
 				e.printStackTrace();
 			}
 			val.getTask().setAssignee(i++ % 10 + "");
+			val.setId("p2");
 			localClock.updateClock();
 			val.setClock(localClock.getLocalClock());
 			myVar.set(val);

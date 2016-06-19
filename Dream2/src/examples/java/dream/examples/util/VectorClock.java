@@ -44,23 +44,35 @@ public class VectorClock {
 	 * @param messageClock
 	 * @return
 	 */
-	public boolean isEqual(HashMap<String, Integer> messageClock) {
+	public Clock compareClock(HashMap<String, Integer> messageClock) {
 		checkNull();
-		// clocks are not same if their lengths are not same
-		if (localClock.keySet().size() != messageClock.keySet().size()) {
-			return false;
-		}
-		// if length are same then we will check if both maps have same value
-		// for same keys. If there are different keys then null will be returned
-		// to compare statement which makes if statement true.
-
-		for (String key : localClock.keySet()) {
-			if (!localClock.get(key).equals(messageClock.get(key))) {
-				return false;
+		if (localClock.keySet().containsAll(messageClock.keySet())
+				&& localClock.keySet().size() == messageClock.keySet().size()) {
+			for (String key : localClock.keySet()) {
+				if (!localClock.get(key).equals(messageClock.get(key)) && localClock.get(key) > messageClock.get(key)) {
+					return Clock.OLD;
+				}
+				if (!localClock.get(key).equals(messageClock.get(key)) && localClock.get(key) < messageClock.get(key)) {
+					return Clock.NEW;
+				}
 			}
+			return Clock.EQUAL;
+
+		} else if (localClock.keySet().containsAll(messageClock.keySet())
+				&& localClock.keySet().size() > messageClock.keySet().size()) {
+			for (String key : messageClock.keySet()) {
+				if (!localClock.get(key).equals(messageClock.get(key)) && localClock.get(key) > messageClock.get(key)) {
+					return Clock.NEW;
+				}
+				if (!localClock.get(key).equals(messageClock.get(key)) && localClock.get(key) < messageClock.get(key)) {
+					return Clock.OLD;
+				}
+			}
+			return Clock.EQUAL;
+
 		}
-		// Keys are similar, values are same.
-		return true;
+
+		return null;
 
 	}
 

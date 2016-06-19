@@ -1,7 +1,7 @@
 /**
  * 
  */
-package dream.examples.tasks;
+package dream.examples.tasks.inconsistent;
 
 import java.util.HashMap;
 

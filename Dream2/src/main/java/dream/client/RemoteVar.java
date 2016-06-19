@@ -60,9 +60,9 @@ public class RemoteVar<T extends Serializable> implements Subscriber, UpdateProd
 	@Override
 	public synchronized void notifyEventReceived(EventPacket evPkt) {
 		eventsQueue.add(evPkt);
-		logger.finest("Received event packet " + evPkt + ". Added to the queue.");
+		logger.finest("Received event packet " + evPkt + ". Added to the queue1.");
 		if (eventsQueue.size() == 1) {
-			logger.finest("The element is the only one in the queue. Let's process it.");
+			logger.finest("The element is the only one in the queue1. Let's process it.");
 			processNextEvent();
 		}
 	}

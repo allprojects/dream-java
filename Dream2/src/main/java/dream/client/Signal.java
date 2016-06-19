@@ -157,9 +157,9 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 	public final synchronized void updateFromProducer(EventPacket packet, UpdateProducer<?> producer) {
 		final EventProducerPair pair = new EventProducerPair(packet, producer);
 		eventQueue.add(pair);
-		logger.finest("Method update called for event " + pair + ". Added to the queue.");
+		logger.finest("Method update called for event " + pair + ". Added to the queue1.");
 		if (eventQueue.size() == 1) {
-			logger.finest("The element is the only one in the queue. Let's process it.");
+			logger.finest("The element is the only one in the queue1. Let's process it.");
 			processNextUpdate();
 		}
 	}

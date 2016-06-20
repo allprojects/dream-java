@@ -23,7 +23,7 @@ public class Server extends Client {
 	public static final String VAR_developers = "developers";
 	public static final String VAR_tasks = "tasks";
 
-	private final ArrayList<String> myClients;
+	private final ArrayList<String> creators;
 	private final Var<String> developers;
 	private final Var<String> tasks;
 
@@ -35,14 +35,14 @@ public class Server extends Client {
 		super(NAME);
 		developers = new Var<String>(VAR_developers, "");
 		tasks = new Var<String>(VAR_tasks, "");
-		myClients = new ArrayList<String>();
+		creators = new ArrayList<String>();
 		detectClients();
 	}
 
 	private void detectClients() {
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0]))
-				.filter(x -> !myClients.contains(toVar(x)) && (x.getSecond().equalsIgnoreCase(Creator.VAR_newTask)
+				.filter(x -> !creators.contains(toVar(x)) && (x.getSecond().equalsIgnoreCase(Creator.VAR_newTask)
 						|| x.getSecond().equalsIgnoreCase(Creator.VAR_newDev)))
 				.forEach(x -> createClient(x.getFirst(), x.getSecond()));
 		try {
@@ -54,7 +54,9 @@ public class Server extends Client {
 	}
 
 	private void createClient(String clientHost, String clientVar) {
-		logger.info("detected client " + clientHost + " " + clientVar);
+		logger.info("found creator instance " + clientHost + " " + clientVar);
+		creators.add(clientVar + "@" + clientHost);
+
 		RemoteVar<String> rv = new RemoteVar<>(clientHost, clientVar);
 		Signal<String> sig = new Signal<>(clientHost + "-" + clientVar, () -> {
 			if (rv.get() != null) {
@@ -76,6 +78,5 @@ public class Server extends Client {
 				System.out.println("new value from " + clientHost + "@" + clientVar);
 			}
 		});
-		myClients.add(clientVar + "@" + clientHost);
 	}
 }

@@ -68,8 +68,10 @@ public class Monitor extends Client {
 
 	public void clickButton1() {
 		readLock(toVar(Server.NAME, Server.VAR_tasks), toVar(Server.NAME, Server.VAR_developers));
-		gui.setTasks(tasks.get());
-		gui.setDevs(devs.get());
+		if (tasks.get() != null)
+			gui.setTasks(tasks.get());
+		if (devs.get() != null)
+			gui.setDevs(devs.get());
 		unlock();
 	}
 }

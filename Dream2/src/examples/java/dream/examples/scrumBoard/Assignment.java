@@ -1,4 +1,4 @@
-package dream.examples.taskBoard;
+package dream.examples.scrumBoard;
 
 import java.io.Serializable;
 import java.util.regex.Matcher;

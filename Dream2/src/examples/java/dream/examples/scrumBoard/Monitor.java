@@ -1,4 +1,4 @@
-package dream.examples.taskBoard;
+package dream.examples.scrumBoard;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;

@@ -27,16 +27,13 @@ import dream.examples.util.Client;
  */
 public class Creator extends Client {
 
-	public static final String VAR_newDev = "newDev";
-	public static final String VAR_newTask = "newTask";
+	public static final String VAR_newAssignment = "newAssign";
 
-	private Var<String> taskCreator;
-	private Var<String> devCreator;
+	private Var<Assignment> assignmentCreator;
 
 	public Creator() {
 		super("Creator" + new Random().nextInt(1000));
-		taskCreator = new Var<>(VAR_newTask, null);
-		devCreator = new Var<>(VAR_newDev, null);
+		assignmentCreator = new Var<>(VAR_newAssignment, null);
 		new TaskCreaterGUI(this);
 	}
 
@@ -48,9 +45,8 @@ public class Creator extends Client {
 		return logger;
 	}
 
-	public void addTask(Assignment t) {
-		taskCreator.set(t.getTaskString());
-		devCreator.set(t.getDevString());
+	public void addAssignment(Assignment t) {
+		assignmentCreator.set(t);
 	}
 }
 
@@ -151,7 +147,7 @@ class TaskCreaterGUI {
 		public void actionPerformed(ActionEvent paramActionEvent) {
 			String toTasks = textField1.getText();
 			if (Assignment.isValid(toTasks)) {
-				creator.addTask(new Assignment(toTasks));
+				creator.addAssignment(new Assignment(toTasks));
 				textField1.setText("");
 			} else {
 				textField1.setText("");

@@ -42,8 +42,7 @@ public class Server extends Client {
 	private void detectClients() {
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0]))
-				.filter(x -> !creators.contains(toVar(x)) && (x.getSecond().equalsIgnoreCase(Creator.VAR_newTask)
-						|| x.getSecond().equalsIgnoreCase(Creator.VAR_newDev)))
+				.filter(x -> !creators.contains(toVar(x)) && x.getSecond().equalsIgnoreCase(Creator.VAR_newAssignment))
 				.forEach(x -> createClient(x.getFirst(), x.getSecond()));
 		try {
 			Thread.sleep(500);
@@ -57,8 +56,8 @@ public class Server extends Client {
 		logger.info("found creator instance " + clientHost + " " + clientVar);
 		creators.add(clientVar + "@" + clientHost);
 
-		RemoteVar<String> rv = new RemoteVar<>(clientHost, clientVar);
-		Signal<String> sig = new Signal<>(clientHost + "-" + clientVar, () -> {
+		RemoteVar<Assignment> rv = new RemoteVar<>(clientHost, clientVar);
+		Signal<Assignment> sig = new Signal<>(clientHost + "-" + clientVar, () -> {
 			if (rv.get() != null) {
 				return rv.get();
 			} else {
@@ -69,12 +68,10 @@ public class Server extends Client {
 		sig.change().addHandler((oldValue, newValue) -> {
 			if (newValue != null) {
 				// Set vars for remote querying
-				if (clientVar.equalsIgnoreCase(Creator.VAR_newDev)) {
-					developers.set(developers.get().length() == 0 ? newValue : developers.get() + ":" + newValue);
-				}
-				if (clientVar.equalsIgnoreCase(Creator.VAR_newTask)) {
-					tasks.set(tasks.get().length() == 0 ? newValue : tasks.get() + ":" + newValue);
-				}
+				developers.set(developers.get().length() == 0 ? newValue.getDevString()
+						: developers.get() + ":" + newValue.getDevString());
+				tasks.set(tasks.get().length() == 0 ? newValue.getTaskString()
+						: tasks.get() + ":" + newValue.getTaskString());
 				System.out.println("new value from " + clientHost + "@" + clientVar);
 			}
 		});

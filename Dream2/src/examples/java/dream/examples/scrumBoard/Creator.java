@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -29,11 +30,11 @@ public class Creator extends Client {
 
 	public static final String VAR_newAssignment = "newAssign";
 
-	private Var<Assignment> assignmentCreator;
+	private Var<LinkedList<Assignment>> assignmentCreator;
 
 	public Creator() {
 		super("Creator" + new Random().nextInt(1000));
-		assignmentCreator = new Var<>(VAR_newAssignment, null);
+		assignmentCreator = new Var<>(VAR_newAssignment, new LinkedList<>());
 		new TaskCreaterGUI(this);
 	}
 
@@ -46,7 +47,7 @@ public class Creator extends Client {
 	}
 
 	public void addAssignment(Assignment t) {
-		assignmentCreator.set(t);
+		assignmentCreator.modify((old) -> old.addLast(t));
 	}
 }
 

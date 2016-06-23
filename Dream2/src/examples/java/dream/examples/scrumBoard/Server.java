@@ -1,6 +1,9 @@
 package dream.examples.scrumBoard;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
@@ -63,17 +66,27 @@ public class Server extends Client {
 
 	private void initDependencies() {
 
-		RemoteVar<Assignment> rv1 = new RemoteVar<>(creator1.getFirst(), creator1.getSecond());
-		RemoteVar<Assignment> rv2 = new RemoteVar<>(creator2.getFirst(), creator2.getSecond());
+		RemoteVar<LinkedList<Assignment>> rv1 = new RemoteVar<>(creator1.getFirst(), creator1.getSecond());
+		RemoteVar<LinkedList<Assignment>> rv2 = new RemoteVar<>(creator2.getFirst(), creator2.getSecond());
 
 		Signal<String> developers = new Signal<String>(VAR_developers, () -> {
-			// TODO
-			return "";
+			LinkedList<Assignment> temp = new LinkedList<>();
+			if (rv1.get() != null)
+				temp.addAll(rv1.get());
+			if (rv2.get() != null)
+				temp.addAll(rv2.get());
+			Collections.sort(temp);
+			return temp.stream().map(a -> a.getDevString()).collect(Collectors.joining(":"));
 		}, rv1, rv2);
 
 		Signal<String> tasks = new Signal<String>(VAR_tasks, () -> {
-			// TODO
-			return "";
+			LinkedList<Assignment> temp = new LinkedList<>();
+			if (rv1.get() != null)
+				temp.addAll(rv1.get());
+			if (rv2.get() != null)
+				temp.addAll(rv2.get());
+			Collections.sort(temp);
+			return temp.stream().map(a -> a.getTaskString()).collect(Collectors.joining(":"));
 		}, rv1, rv2);
 
 	}

@@ -36,8 +36,7 @@ public class Server extends Client {
 	private void detectClients() {
 		Set<String> vars = DreamClient.instance.listVariables();
 		vars.stream().map(x -> new Pair<String, String>(x.split("@")[1], x.split("@")[0]))
-				.filter(x -> (creator1 == null || !creator1.equals(toVar(x)))
-						&& (creator2 == null || !creator2.equals(toVar(x)))
+				.filter(x -> (creator1 == null || !creator1.equals(x)) && (creator2 == null || !creator2.equals(x))
 						&& x.getSecond().equalsIgnoreCase(Creator.VAR_newAssignment))
 				.forEach(x -> foundCreator(x));
 		try {

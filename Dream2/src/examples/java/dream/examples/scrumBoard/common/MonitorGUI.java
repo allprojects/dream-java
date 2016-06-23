@@ -1,9 +1,7 @@
-package dream.examples.scrumBoard;
+package dream.examples.scrumBoard.common;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -12,71 +10,12 @@ import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle;
 
-import dream.client.RemoteVar;
-import dream.client.Signal;
-import dream.examples.util.Client;
+public class MonitorGUI {
 
-/**
- * Displays both lists, the developers and the tasks.
- * 
- * @author Min Yang
- * @author Tobias Becker
- */
-public class Monitor extends Client {
-
-	public static final String NAME = "Monitor";
-
-	private final MonitorGUI gui;
-	private final RemoteVar<String> devs;
-	private final RemoteVar<String> tasks;
-	private final Signal<String> sigDevs;
-	private final Signal<String> sigTasks;
-
-	@Override
-	protected List<String> waitForVars() {
-		return Arrays.asList(toVar(Server.NAME, Server.VAR_developers), toVar(Server.NAME, Server.VAR_tasks));
+	public interface Monitor {
+		void clickButton();
 	}
 
-	public Monitor() {
-		super(NAME);
-		gui = new MonitorGUI(this);
-
-		devs = new RemoteVar<String>(Server.NAME, Server.VAR_developers);
-		sigDevs = new Signal<String>("sigDevs", () -> {
-			return devs.get();
-		}, devs);
-
-		tasks = new RemoteVar<String>(Server.NAME, Server.VAR_tasks);
-		sigTasks = new Signal<String>("sigTests", () -> {
-			return tasks.get();
-		}, tasks);
-
-		sigDevs.change().addHandler((oldVa, newVal) -> {
-			System.out.println("newVal devs:" + newVal);
-			// gui.setDevs(newVal);
-		});
-
-		sigTasks.change().addHandler((oldVa, newVal) -> {
-			System.out.println("newVal tasks:" + newVal);
-			// gui.setTasks(newVal);
-		});
-	}
-
-	public static void main(String[] args) {
-		new Monitor();
-	}
-
-	public void clickButton1() {
-		readLock(toVar(Server.NAME, Server.VAR_tasks), toVar(Server.NAME, Server.VAR_developers));
-		if (tasks.get() != null)
-			gui.setTasks(tasks.get());
-		if (devs.get() != null)
-			gui.setDevs(devs.get());
-		unlock();
-	}
-}
-
-class MonitorGUI {
 	private JFrame frame1;
 	private JTextArea textAreaTasks;
 	private JLabel label1;
@@ -139,7 +78,7 @@ class MonitorGUI {
 	}
 
 	private void button1ActionPerformed(ActionEvent e) {
-		monitor.clickButton1();
+		monitor.clickButton();
 	}
 
 	public void setDevs(String value) {

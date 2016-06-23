@@ -1,4 +1,4 @@
-package dream.examples.scrumBoard;
+package dream.examples.scrumBoard.common;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -7,8 +7,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.LinkedList;
-import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
@@ -17,47 +15,19 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import dream.client.Var;
-import dream.examples.util.Client;
+public class CreatorGUI {
+	public interface Creator {
+		void addAssignment(Assignment assignment);
 
-/**
- * Interface to create new Tasks. May be started multiple times!
- * 
- * @author Min Yang
- * @author Tobias Becker
- */
-public class Creator extends Client {
-
-	public static final String VAR_newAssignment = "newAssign";
-
-	private Var<LinkedList<Assignment>> assignmentCreator;
-
-	public Creator() {
-		super("Creator" + new Random().nextInt(1000));
-		assignmentCreator = new Var<>(VAR_newAssignment, new LinkedList<>());
-		new TaskCreaterGUI(this);
+		Logger getLogger();
 	}
 
-	public static void main(String[] args) {
-		new Creator();
-	}
-
-	public Logger getLogger() {
-		return logger;
-	}
-
-	public void addAssignment(Assignment t) {
-		assignmentCreator.modify((old) -> old.addLast(t));
-	}
-}
-
-class TaskCreaterGUI {
 	private JTextField textField1;
 	private JFrame frame1;
 	private JButton button1;
 	private Creator creator;
 
-	public TaskCreaterGUI(Creator t) {
+	public CreatorGUI(Creator t) {
 		this.creator = t;
 		initComponents();
 	}

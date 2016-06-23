@@ -1,4 +1,4 @@
-package dream.examples.scrumBoard;
+package dream.examples.scrumBoard.core;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
+import dream.examples.scrumBoard.common.Assignment;
 import dream.examples.util.Client;
 import dream.examples.util.Pair;
 

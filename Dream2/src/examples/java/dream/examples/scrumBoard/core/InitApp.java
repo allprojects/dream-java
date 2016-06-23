@@ -1,4 +1,4 @@
-package dream.examples.scrumBoard;
+package dream.examples.scrumBoard.core;
 
 import dream.examples.util.MultipleStarter;
 

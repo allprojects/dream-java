@@ -1,4 +1,4 @@
-package dream.examples.scrumBoard;
+package dream.examples.scrumBoard.common;
 
 import java.io.Serializable;
 import java.util.Date;

@@ -62,6 +62,8 @@ public class Creator extends Client implements dream.examples.scrumBoard.common.
 	}
 
 	public void addAssignment(Assignment t) {
+		// TODO: lock
 		assignmentCreator.modify((old) -> old.addLast(t));
+		// TODO: unlock
 	}
 }

@@ -32,6 +32,7 @@ public class LockManager extends Client {
 		super(NAME);
 		clients = new Var<>(VAR_clients, new ArrayList<>());
 		lock = new Var<>(VAR_lock, "");
+		lockRequests = new LinkedList<>();
 		detectNewSession();
 	}
 

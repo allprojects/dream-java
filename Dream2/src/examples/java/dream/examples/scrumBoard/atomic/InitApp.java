@@ -1,5 +1,6 @@
 package dream.examples.scrumBoard.atomic;
 
+import dream.examples.scrumBoard.core.Server;
 import dream.examples.util.MultipleStarter;
 
 /**

@@ -64,21 +64,27 @@ public class LockManager extends Client {
 				if (lock.get().equals("")) {
 					// no lock present, granting
 					lock.set(x.getFirst());
+					logger.fine("Currently not locked, granting lock for: " + x.getFirst());
 				} else {
 					// already locked, adding to queue
 					lockRequests.add(x.getFirst());
+					logger.fine("Already locked for \"" + lock.get() + "\". Adding \"" + x.getFirst() + "\"to queue");
 				}
 			} else if (!newValue) {
 				// client trying to release a lock
 				if (lock.get().equals(x.getFirst())) {
 					// client had the lock, releasing
 					lock.set("");
+					logger.fine("Releasing lock for:" + x.getFirst());
 					// granting lock request for next client
-					if (!lockRequests.isEmpty())
+					if (!lockRequests.isEmpty()) {
 						lock.set(lockRequests.poll());
+						logger.fine("Processing next in queue");
+					}
 				} else {
 					// client didn't have the lock -> withdrawing lock request
 					lockRequests.remove(x.getFirst());
+					logger.fine("\"" + x.getFirst() + "\" withdraw lock request");
 				}
 			}
 		});

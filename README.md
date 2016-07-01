@@ -51,10 +51,10 @@ Signal<Integer> n =
 ```
 	  
 ## Locks
-When using Atomic_Consistency it is required to lock a Var before changing its value.
+When using Atomic_Consistency it is required to lock a Var before reading its value.
 ```
 	LockToken lock = DreamClient.instance.readLock(new HashSet<>("exVar@Host1"));
-	myVar.set("CCC");
+	String value = rv.get();
 	DreamClient.instance.unlock(lock);
 ```
 

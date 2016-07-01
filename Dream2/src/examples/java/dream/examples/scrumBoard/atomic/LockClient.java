@@ -41,10 +41,13 @@ public abstract class LockClient extends Client {
 			return lock.get();
 		}, lock);
 		sLock.change().addHandler((oldValue, newValue) -> {
-			if (newValue.equals(getHostName())) {
+			if (newValue.equals(getHostName()))
 				hasLock = true;
-			} else
+			else
 				hasLock = false;
+			synchronized (this) {
+				this.notify();
+			}
 		});
 
 		setup();
@@ -54,12 +57,13 @@ public abstract class LockClient extends Client {
 
 	public void lock() {
 		lockRequest.set(true);
-		while (!hasLock) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		synchronized (this) {
+			while (!hasLock)
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 		}
 	}
 

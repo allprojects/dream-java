@@ -1,9 +1,8 @@
 package dream.examples.form.complete_glitchfree;
 
 import dream.client.Var;
-import dream.examples.form.core.FormClient;
 
-public class Secretary extends FormClient {
+public class Secretary extends LockClient {
 
 	public static final String NAME = "Secretary";
 	public static final String WorkingHours = "working_hours";
@@ -23,14 +22,18 @@ public class Secretary extends FormClient {
 	@Override
 	public void typedText(int i, String typedText) {
 		Integer value = Integer.valueOf(typedText);
-		// TODO check locks
+		lock(Variable.get(wh));
 		wh.set(value);
+		unlock();
 		logger.fine("Set Working_Hours to " + value);
 	}
 
 	public static void main(String[] args) {
-		Secretary s = new Secretary();
-		s.start();
+		new Secretary();
 	}
 
+	@Override
+	protected void setup() {
+		start();
+	}
 }

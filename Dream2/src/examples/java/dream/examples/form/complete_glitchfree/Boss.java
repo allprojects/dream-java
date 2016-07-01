@@ -1,10 +1,9 @@
 package dream.examples.form.complete_glitchfree;
 
 import dream.client.Var;
-import dream.examples.form.core.FormClient;
 import dream.examples.util.Pair;
 
-public class Boss extends FormClient {
+public class Boss extends LockClient {
 
 	public static final String NAME = "Boss";
 	public static final String EuroPerHour = "euro_per_hour";
@@ -29,20 +28,23 @@ public class Boss extends FormClient {
 		switch (i) {
 		case 0:
 			Double value = Double.valueOf(typedText);
-			// TODO check locks
+			lock(Variable.get(eph));
 			eph.set(value);
+			unlock();
 			logger.fine("Set Euro_Per_Hour to " + value);
 			break;
 		case 1:
 			Integer value2 = Integer.valueOf(typedText);
-			// TODO check locks
+			lock(Variable.get(rh));
 			rh.set(new Pair<>(value2, rh.get().getSecond()));
+			unlock();
 			logger.fine("Set minimum @ Required_Hours to " + value2);
 			break;
 		case 2:
 			Integer value3 = Integer.valueOf(typedText);
-			// TODO check locks
+			lock(Variable.get(rh));
 			rh.set(new Pair<>(rh.get().getFirst(), value3));
+			unlock();
 			logger.fine("Set maximum @ Required_Hours to " + value3);
 			break;
 		default:
@@ -52,7 +54,11 @@ public class Boss extends FormClient {
 	}
 
 	public static void main(String[] args) {
-		Boss b = new Boss();
-		b.start();
+		new Boss();
+	}
+
+	@Override
+	protected void setup() {
+		start();
 	}
 }

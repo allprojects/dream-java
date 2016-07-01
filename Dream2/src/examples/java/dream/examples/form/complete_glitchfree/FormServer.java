@@ -7,6 +7,7 @@ import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.examples.util.Pair;
 
+// TODO: refactor class setup and extends from LockClient
 public class FormServer extends dream.examples.form.core.FormServer {
 
 	protected RemoteVar<Integer> working_hours;

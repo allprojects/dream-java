@@ -3,15 +3,20 @@ package dream.examples.form.complete_glitchfree;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
+import dream.common.utils.DependencyGraph;
 import dream.examples.util.Client;
 import dream.examples.util.Pair;
 
@@ -117,6 +122,15 @@ class Variable extends Pair<String, String> {
 		return new Variable(v.getHost(), v.getObject());
 	}
 
+	public static Variable fromDreamString(String s) {
+		String[] temp = s.split("@", 2);
+		return new Variable(temp[1], temp[0]);
+	}
+
+	public String toDreamString() {
+		return getVar() + "@" + getHost();
+	}
+
 	@Override
 	public String toString() {
 		return "Var" + super.toString();
@@ -125,16 +139,41 @@ class Variable extends Pair<String, String> {
 
 class LockRequest implements Serializable {
 	private static final long serialVersionUID = -7166632148414861582L;
-	private Variable[] vars;
+	private CopyOnWriteArrayList<Variable> vars;
 	private String client;
 
 	public LockRequest(String client, Variable... vars) {
-		this.vars = vars;
+		this.vars = new CopyOnWriteArrayList<>();
+		this.vars.addAll(Arrays.asList(vars));
 		this.client = client;
+
+		computeDependencies();
+	}
+
+	private void computeDependencies() {
+		Map<Variable, Collection<Variable>> nodes = new HashMap<>();
+		DependencyGraph.instance.getGraph().forEach((v1, v2) -> {
+			Collection<Variable> t = new LinkedList<>();
+			v2.forEach(x -> t.add(Variable.fromDreamString(x)));
+			nodes.put(Variable.fromDreamString(v1), t);
+		});
+		for (Variable v : vars) {
+			computeDependencies(nodes, v);
+		}
+	}
+
+	private void computeDependencies(Map<Variable, Collection<Variable>> nodes, Variable v) {
+		nodes.forEach((v1, v2) -> {
+			if (v2.contains(v) && !vars.contains(v1)) {
+				// v1 depends on v
+				this.vars.add(v1);
+				computeDependencies(nodes, v1);
+			}
+		});
 	}
 
 	public Variable[] getVars() {
-		return vars;
+		return vars.toArray(new Variable[] {});
 	}
 
 	public String getClient() {
@@ -142,14 +181,14 @@ class LockRequest implements Serializable {
 	}
 
 	public boolean isLockRequest() {
-		return vars.length > 0;
+		return vars.size() > 0;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		if (isLockRequest())
-			sb.append("LockRequest(").append(client).append("->").append(Arrays.toString(vars)).append(")");
+			sb.append("LockRequest(").append(client).append("->").append(vars).append(")");
 		else
 			sb.append("LockRelease()");
 		return sb.toString();
@@ -167,8 +206,9 @@ class Lock extends HashMap<Variable, String> {
 		this.putAll(lock);
 		if (!req.isLockRequest()) {
 			// lock release
-			for (Variable v : keySet()) {
-				remove(v, req.getClient());
+			for (Iterator<Variable> k = keySet().iterator(); k.hasNext();) {
+				if (get(k.next()).equals(req.getClient()))
+					k.remove();
 			}
 		} else {
 			for (int i = 0; i < req.getVars().length; i++) {

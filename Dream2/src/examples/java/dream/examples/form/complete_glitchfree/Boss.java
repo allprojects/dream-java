@@ -3,7 +3,7 @@ package dream.examples.form.complete_glitchfree;
 import dream.client.Var;
 import dream.examples.util.Pair;
 
-public class Boss extends LockClient {
+public class Boss extends FormClient {
 
 	public static final String NAME = "Boss";
 	public static final String EuroPerHour = "euro_per_hour";
@@ -57,8 +57,4 @@ public class Boss extends LockClient {
 		new Boss();
 	}
 
-	@Override
-	protected void setup() {
-		start();
-	}
 }

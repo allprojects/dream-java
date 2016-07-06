@@ -1,20 +1,22 @@
 package dream.examples.form.complete_glitchfree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.client.Var;
-import dream.examples.form.core.FormClient;
+import dream.examples.util.Client;
 import dream.examples.util.Pair;
 
-public abstract class LockClient extends FormClient {
+public abstract class LockClient extends Client {
 	private boolean setup = false;
 	private Var<LockRequest> lockRequest;
-	private boolean hasLock;
+	private List<Variable> hasLock;
 
-	public LockClient(String name, String... labelText) {
-		super(name, labelText);
+	public LockClient(String name) {
+		super(name);
 
 		// Establish new session with LockManager
 		RemoteVar<ArrayList<Pair<String, String>>> registeredClients = new RemoteVar<>(LockManager.NAME,
@@ -30,21 +32,24 @@ public abstract class LockClient extends FormClient {
 				lockSetup();
 		});
 
+		hasLock = new ArrayList<>();
 		lockRequest = new Var<>(LockManager.VAR_requestLock, null);
 		logger.fine("Setup: Waiting for Registration to LockManager ...");
 	}
 
 	private void lockSetup() {
 		setup = true;
-		RemoteVar<String> lock = new RemoteVar<>(LockManager.NAME, LockManager.VAR_lock);
-		Signal<String> sLock = new Signal<>("lock", () -> {
+		RemoteVar<Lock> lock = new RemoteVar<>(LockManager.NAME, LockManager.VAR_lock);
+		Signal<Lock> sLock = new Signal<>("lock", () -> {
 			return lock.get();
 		}, lock);
 		sLock.change().addHandler((oldValue, newValue) -> {
-			if (newValue.equals(getHostName()))
-				hasLock = true;
-			else
-				hasLock = false;
+			newValue.forEach((var, client) -> {
+				if (client.equals(getHostName()))
+					hasLock.add(var);
+				else
+					hasLock.remove(var);
+			});
 			synchronized (this) {
 				this.notify();
 			}
@@ -56,15 +61,15 @@ public abstract class LockClient extends FormClient {
 	protected abstract void setup();
 
 	public void lock(Variable... vars) {
-		// TODO: add dependencies as well
 		lockRequest.set(new LockRequest(getHostName(), vars));
 		synchronized (this) {
-			while (!hasLock)
+			while (!hasLock.containsAll(Arrays.asList(vars))) {
 				try {
 					this.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+			}
 		}
 	}
 

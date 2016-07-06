@@ -2,7 +2,7 @@ package dream.examples.form.complete_glitchfree;
 
 import dream.client.Var;
 
-public class Secretary extends LockClient {
+public class Secretary extends FormClient {
 
 	public static final String NAME = "Secretary";
 	public static final String WorkingHours = "working_hours";
@@ -30,10 +30,5 @@ public class Secretary extends LockClient {
 
 	public static void main(String[] args) {
 		new Secretary();
-	}
-
-	@Override
-	protected void setup() {
-		start();
 	}
 }

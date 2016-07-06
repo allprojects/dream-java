@@ -110,13 +110,17 @@ class Variable extends Pair<String, String> {
 	}
 
 	public String getVar() {
-		return getVar();
+		return getSecond();
 	}
 
 	public static Variable get(Var<?> v) {
 		return new Variable(v.getHost(), v.getObject());
 	}
 
+	@Override
+	public String toString() {
+		return "Var" + super.toString();
+	}
 }
 
 class LockRequest implements Serializable {
@@ -138,7 +142,17 @@ class LockRequest implements Serializable {
 	}
 
 	public boolean isLockRequest() {
-		return vars != null;
+		return vars.length > 0;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		if (isLockRequest())
+			sb.append("LockRequest(").append(client).append("->").append(Arrays.toString(vars)).append(")");
+		else
+			sb.append("LockRelease()");
+		return sb.toString();
 	}
 }
 
@@ -164,7 +178,7 @@ class Lock extends HashMap<Variable, String> {
 	}
 
 	public boolean isLocked(Variable[] vars) {
-		return !Arrays.asList(vars).stream().anyMatch(x -> containsKey(x));
+		return Arrays.asList(vars).stream().anyMatch(x -> containsKey(x));
 	}
 
 }

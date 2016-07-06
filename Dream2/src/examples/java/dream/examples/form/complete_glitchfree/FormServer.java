@@ -7,14 +7,21 @@ import dream.client.RemoteVar;
 import dream.client.Signal;
 import dream.examples.util.Pair;
 
-// TODO: refactor class setup and extends from LockClient
-public class FormServer extends dream.examples.form.core.FormServer {
+public class FormServer extends LockClient {
 
 	protected RemoteVar<Integer> working_hours;
 	protected RemoteVar<Double> euro_per_hour;
 	protected RemoteVar<Pair<Integer, Integer>> required_hours;
 
+	public static final String NAME = "FormServer";
+	public static final String MinimumHours = "minimumHours";
+	public static final String MaximumHours = "maximumHours";
+	public static final String MinimumEuroPerHour = "minimumEuroPerHour";
+	public static final String SettingsOkay = "settingsOkay";
+	public static final String Salary = "salary";
+
 	public FormServer() {
+		super(NAME);
 		detectNewSession();
 	}
 
@@ -90,4 +97,9 @@ public class FormServer extends dream.examples.form.core.FormServer {
 	public static void main(String[] args) {
 		new FormServer();
 	}
+
+	@Override
+	protected void setup() {
+	}
+
 }

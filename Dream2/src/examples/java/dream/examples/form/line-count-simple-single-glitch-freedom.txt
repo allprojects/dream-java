@@ -2,13 +2,14 @@ Counted Files:
 core
 simple/Boss.java
 simple/Secretary.java
+simple/FormServer.java
 simple/GlitchFreeFormServer.java
 
-http://cloc.sourceforge.net v 1.64  T=0.02 s (287.0 files/s, 16886.7 lines/s)
+http://cloc.sourceforge.net v 1.64  T=0.03 s (279.9 files/s, 17590.9 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Java                             6             79              1            273
+Java                             7             93              4            343
 -------------------------------------------------------------------------------
-SUM:                             6             79              1            273
+SUM:                             7             93              4            343
 -------------------------------------------------------------------------------

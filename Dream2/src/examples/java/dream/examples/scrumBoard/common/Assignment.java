@@ -1,6 +1,7 @@
-package dream.examples.taskBoard;
+package dream.examples.scrumBoard.common;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,17 +11,19 @@ import java.util.regex.Pattern;
  * @author Min Yang
  * @author Tobias Becker
  */
-public class Task implements Serializable {
+public class Assignment implements Serializable, Comparable<Assignment> {
 	private static final long serialVersionUID = 8329097603920137211L;
 	public static String pattern = "D(\\d*):T(\\d*)";
 	private int developer;
 	private int task;
+	private Date time;
 
-	public Task(String input) {
+	public Assignment(String input) {
 		Matcher m = Pattern.compile(pattern).matcher(input);
 		if (m.matches()) {
 			developer = Integer.parseInt(m.group(1));
 			task = Integer.parseInt(m.group(2));
+			time = new Date();
 		} else
 			throw new UnsupportedOperationException("Wrong Input");
 	}
@@ -43,6 +46,15 @@ public class Task implements Serializable {
 
 	public String getTaskString() {
 		return Integer.toString(task);
+	}
+
+	public Date getTime() {
+		return time;
+	}
+
+	@Override
+	public int compareTo(Assignment o) {
+		return time.compareTo(o.time);
 	}
 
 }

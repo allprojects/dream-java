@@ -1,4 +1,4 @@
-package dream.examples.form;
+package dream.examples.form.core;
 
 import java.awt.Color;
 import java.util.Arrays;
@@ -26,7 +26,8 @@ public abstract class FormClient extends Client {
 
 	@Override
 	protected List<String> waitForVars() {
-		return Arrays.asList("salary@FormServer", "settingsOkay@FormServer");
+		return Arrays.asList(toVar(FormServer.NAME, FormServer.Salary),
+				toVar(FormServer.NAME, FormServer.SettingsOkay));
 	}
 
 	protected void start() {
@@ -35,8 +36,8 @@ public abstract class FormClient extends Client {
 		if (values != null)
 			gui.setInitValues(values);
 
-		salary = new RemoteVar<>("FormServer", "salary");
-		settings = new RemoteVar<>("FormServer", "settingsOkay");
+		salary = new RemoteVar<>(FormServer.NAME, FormServer.Salary);
+		settings = new RemoteVar<>(FormServer.NAME, FormServer.SettingsOkay);
 
 		remoteSalary = new Signal<>("remoteSalary", () -> {
 			if (salary.get() != null)

@@ -19,4 +19,17 @@ public class Pair<S, T> implements Serializable {
 	public T getSecond() {
 		return second;
 	}
+
+	@Override
+	public String toString() {
+		return "(" + first + ", " + second + ")";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Pair))
+			return false;
+		Pair p2 = (Pair) obj;
+		return first.equals(p2.first) && second.equals(p2.second);
+	}
 }

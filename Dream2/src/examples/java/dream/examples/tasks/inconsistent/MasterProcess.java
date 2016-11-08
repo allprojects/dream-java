@@ -1,7 +1,7 @@
 /**
  * 
  */
-package dream.examples.tasks;
+package dream.examples.tasks.inconsistent;
 
 import dream.client.Var;
 import dream.common.Consts;

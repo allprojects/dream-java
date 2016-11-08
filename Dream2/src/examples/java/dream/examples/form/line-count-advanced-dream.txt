@@ -1,0 +1,14 @@
+complete_glitchfree/Boss.java
+complete_glitchfree/Secretary.java
+complete_glitchfree/FormClient.java
+complete_glitchfree/FormGUI.java
+complete_glitchfree/FormServer.java
+
+http://cloc.sourceforge.net v 1.64  T=0.02 s (263.4 files/s, 20755.3 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java                             5             76              4            314
+-------------------------------------------------------------------------------
+SUM:                             5             76              4            314
+-------------------------------------------------------------------------------

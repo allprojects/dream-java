@@ -1,0 +1,20 @@
+Distributed Form 
+	Single-source glitch freedom with DREAM: 297
+	Single-source glitch freedom without DREAM: 343
+	Complete glitch freedom with DREAM: 314
+	Complete glitch freedom without DREAM: 607
+
+
+Management application
+	causal consistency with DREAM: XXX
+	causal consistency without DREAM: YYY
+
+
+Scrum board
+	atomic consistency with Dream: 155
+	atomic consistency without Dream: 213
+
+
+Chat application
+	fifo consistency with Dream: 516
+	fifo consistency without Dream: 798

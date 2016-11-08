@@ -1,21 +1,23 @@
-package dream.examples.form;
+package dream.examples.form.simple;
 
 import dream.client.Var;
+import dream.examples.form.core.FormClient;
 
 public class Boss extends FormClient {
 
-	private Var<Double> eph;
-	private Var<Integer> rmh;
+	public static final String NAME = "Boss";
+	public static final String EuroPerHour = "euro_per_hour";
+
+	protected Var<Double> eph;
 
 	public Boss() {
-		super("Boss", "Euro/Hour", "Minimum Hours");
-		setInitValues(Double.toString(8.5), Integer.toString(10));
+		super(NAME, "Euro/Hour");
+		setInitValues(Double.toString(8.5));
 	}
 
 	@Override
 	protected void init() {
-		eph = new Var<>("euro_per_hour", 8.5);
-		rmh = new Var<>("required_minimum_hours", 10);
+		eph = new Var<>(EuroPerHour, 8.5);
 	}
 
 	@Override
@@ -25,11 +27,6 @@ public class Boss extends FormClient {
 			Double value = Double.valueOf(typedText);
 			eph.set(value);
 			logger.fine("Set Euro_Per_Hour to " + value);
-			break;
-		case 1:
-			Integer value2 = Integer.valueOf(typedText);
-			rmh.set(value2);
-			logger.fine("Set Required_Minimum_Hours to " + value2);
 			break;
 		default:
 			break;
@@ -41,5 +38,4 @@ public class Boss extends FormClient {
 		Boss b = new Boss();
 		b.start();
 	}
-
 }

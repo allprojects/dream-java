@@ -1,7 +1,7 @@
 /**
  * 
  */
-package dream.examples.tasks;
+package dream.examples.tasks.inconsistent;
 
 import dream.client.RemoteVar;
 import dream.client.Signal;
@@ -15,7 +15,6 @@ import dream.common.Consts;
 public class WorkerHelper implements Runnable {
 	static int i = 0;
 	UiUpdatesListner listner;
-	VectorClockHelper localClock;// = new VectorClock("p3");
 	Var<Task> complexEvent = new Var<Task>("COMPEVENT", null);
 	/**
 	 * @param args
@@ -45,27 +44,20 @@ public class WorkerHelper implements Runnable {
 	public void handleEvent(Message p1, Message p2) {
 		// update clock on receiving new message
 		Task task = p1.getTask();
-		updateClock();
 		listner.updateTasks("\nTask Name: " + task.getName() + "\n" + "Task Discription: " + task.getDescription()
-				+ "\n" + "Assignee ID: " + p2.getTask().getAssignee(), true);
+				+ "\n" + "Assignee ID: " + p1.getTask().getAssignee(), true);
 
-	}
-
-	void updateClock() {
-		listner.updateClockinUi(localClock.getLocalClock().toString());
 	}
 
 	public void isEvent(String val) {
-		updateClock();
 		listner.updateTasks(val, false);
 
 	}
 
 	public void run() {
-		localClock = new VectorClockHelper("p3", this);
+
 		Consts.hostName = "Host3";
-		Thread t = new Thread(localClock);
-		t.start();
+
 		RemoteVar<Message> task = new RemoteVar<Message>("Host1", "TASK2");
 		RemoteVar<Message> taskDeligated = new RemoteVar<Message>("Host2", "TASK_ASSIGNED");
 
@@ -80,8 +72,7 @@ public class WorkerHelper implements Runnable {
 		// from master process
 		signalFromMaster.change().addHandler((oldVal, val) -> {
 			if (val != null) {
-				localClock.updateClock();
-				localClock.checkEvent(val);
+				handleEvent(val, null);
 			}
 		});
 
@@ -89,8 +80,7 @@ public class WorkerHelper implements Runnable {
 		// from delegate process
 		signalFromDeligator.change().addHandler((oldVal, val) -> {
 			if (val != null) {
-				localClock.updateClock();
-				localClock.checkEvent(val);
+				handleEvent(val, null);
 			}
 		});
 

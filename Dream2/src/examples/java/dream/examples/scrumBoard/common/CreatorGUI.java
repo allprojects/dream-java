@@ -1,4 +1,4 @@
-package dream.examples.taskBoard;
+package dream.examples.scrumBoard.common;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -7,7 +7,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
@@ -16,48 +15,20 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import dream.client.Var;
-import dream.examples.util.Client;
+public class CreatorGUI {
+	public interface Creator {
+		void addAssignment(Assignment assignment);
 
-/**
- * Interface to create new Tasks. May be started multiple times!
- * 
- * @author Min Yang
- * @author Tobias Becker
- */
-public class TaskCreater extends Client {
-	private Var<String> taskCreater;
-	private Var<String> devCreater;
-
-	public TaskCreater() {
-		super("TaskCreater" + new Random().nextInt(1000));
-		taskCreater = new Var<>("newTask", null);
-		devCreater = new Var<>("newDev", null);
-		new TaskCreaterGUI(this);
+		Logger getLogger();
 	}
 
-	public static void main(String[] args) {
-		new TaskCreater();
-	}
-
-	public Logger getLogger() {
-		return logger;
-	}
-
-	public void addTask(Task t) {
-		taskCreater.set(t.getTaskString());
-		devCreater.set(t.getDevString());
-	}
-}
-
-class TaskCreaterGUI {
 	private JTextField textField1;
 	private JFrame frame1;
 	private JButton button1;
-	private TaskCreater taskCreater;
+	private Creator creator;
 
-	public TaskCreaterGUI(TaskCreater t) {
-		this.taskCreater = t;
+	public CreatorGUI(Creator t) {
+		this.creator = t;
 		initComponents();
 	}
 
@@ -146,13 +117,13 @@ class TaskCreaterGUI {
 		@Override
 		public void actionPerformed(ActionEvent paramActionEvent) {
 			String toTasks = textField1.getText();
-			if (Task.isValid(toTasks)) {
-				taskCreater.addTask(new Task(toTasks));
+			if (Assignment.isValid(toTasks)) {
+				creator.addAssignment(new Assignment(toTasks));
 				textField1.setText("");
 			} else {
 				textField1.setText("");
 				JOptionPane.showMessageDialog(null, "Please input the right pattern of task. (D<Int>:T<Int>)");
-				taskCreater.getLogger().info("Wrong input pattern of tasks");
+				creator.getLogger().info("Wrong input pattern of tasks");
 			}
 		}
 	}

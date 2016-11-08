@@ -1,7 +1,7 @@
 /**
  * 
  */
-package dream.examples.tasks;
+package dream.examples.tasks.inconsistent;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

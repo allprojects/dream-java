@@ -2,11 +2,16 @@ package dream.examples.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import dream.client.DreamClient;
+import dream.client.LockToken;
 import dream.common.Consts;
 import dream.locking.LockManagerLauncher;
 import dream.server.ServerLauncher;
@@ -127,6 +132,32 @@ public abstract class Client {
 
 	public String getHostName() {
 		return Consts.hostName;
+	}
+
+	private LinkedList<LockToken> lockQueue = new LinkedList<>();
+
+	public LockToken readLock(String... vars) {
+		Set<String> temp = new HashSet<>();
+		Collections.addAll(temp, vars);
+		lockQueue.addLast(DreamClient.instance.readLock(temp));
+		return lockQueue.getLast();
+	}
+
+	public void unlock(LockToken lock) {
+		lockQueue.remove(lock);
+		DreamClient.instance.unlock(lock);
+	}
+
+	public void unlock() {
+		DreamClient.instance.unlock(lockQueue.poll());
+	}
+
+	public String toVar(String host, String var) {
+		return var + "@" + host;
+	}
+
+	public String toVar(Pair<String, String> var) {
+		return toVar(var.getFirst(), var.getSecond());
 	}
 
 }

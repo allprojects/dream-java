@@ -1,4 +1,4 @@
-package dream.examples.form;
+package dream.examples.form.core;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

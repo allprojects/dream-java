@@ -1,12 +1,18 @@
-set terminal pdf enhance fsize 14
-set pointsize 2
-#set size ratio 0.8
+set terminal pdf enhance fsize 16 size 4.2,3 
+set pointsize 3
+set size ratio 0.4
 
-set style line 1 lw 4 lt rgb 'orange' pt 1
-set style line 2 lw 4 lt rgb 'black' pt 6
-set style line 3 lw 4 lt rgb 'green' pt 8
-set style line 4 lw 4 lt rgb 'blue' pt 3
-set style line 5 lw 4 lt rgb 'red' pt 2 
+set style line 1 lw 3 lt 1 lc rgb 'orange' pt 1
+set style line 2 lw 3 lt 2 lc rgb 'black' pt 6
+set style line 3 lw 3 lt 3 lc rgb 'green' pt 8
+set style line 4 lw 3 lt 4 lc rgb 'blue' pt 3
+set style line 5 lw 3 lt 5 lc rgb 'red' pt 2
+
+# set style line 1  linecolor rgb "black" lw 3 dashtype 1 pt 1
+# set style line 2  linecolor rgb "black" lw 3 dashtype 2 pt 6
+# set style line 3  linecolor rgb "black" lw 3 dashtype 3 pt 8
+# set style line 4  linecolor rgb "black" lw 3 dashtype 4 pt 3
+# set style line 5  linecolor rgb "black" lw 3 dashtype 5 pt 2
 
 set key above
 set log y

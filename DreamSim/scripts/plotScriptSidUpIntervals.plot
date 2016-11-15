@@ -1,12 +1,13 @@
-set terminal pdf enhance fsize 16 size 4.2,3 
-set pointsize 3
-set size ratio 0.4
+set terminal pdf fsize 14 size 4.2,3.6
 
-set style line 1 lw 3 lt 1 lc rgb 'orange' pt 1
-set style line 2 lw 3 lt 2 lc rgb 'black' pt 6
-set style line 3 lw 3 lt 3 lc rgb 'green' pt 8
-set style line 4 lw 3 lt 4 lc rgb 'blue' pt 3
-set style line 5 lw 3 lt 5 lc rgb 'red' pt 2
+set pointsize 3
+# set size ratio 0.4
+
+set style line 1 lw 4 lt 1 lc rgb 'orange' pt 1
+set style line 2 lw 4 lt 2 lc rgb 'black' pt 6
+set style line 3 lw 4 lt 3 lc rgb 'green' pt 8
+set style line 4 lw 4 lt 4 lc rgb 'blue' pt 3
+set style line 5 lw 4 lt 5 lc rgb 'red' pt 2
 
 # set style line 1  linecolor rgb "black" lw 3 dashtype 1 pt 1
 # set style line 2  linecolor rgb "black" lw 3 dashtype 2 pt 6
@@ -14,13 +15,14 @@ set style line 5 lw 3 lt 5 lc rgb 'red' pt 2
 # set style line 4  linecolor rgb "black" lw 3 dashtype 4 pt 3
 # set style line 5  linecolor rgb "black" lw 3 dashtype 5 pt 2
 
-set key above
 set log y
 set format y "10^%T"
 
 ############
 # LOCALITY #
 ############
+
+set key bottom left
 
 set xlabel "Degree of locality" offset 0,0.2
 
@@ -56,10 +58,13 @@ plot "../resultsAvg/locality_causal_TrafficByte" u ($1):($8/1000):($15/1000) t "
 # NUMBER OF BROKERS #
 #####################
 
+set key top right
+
 set xlabel "Number of brokers" offset 0,0.2
 
 set output "../graphs/numBrokersDelay.pdf"
 set ylabel "Average Delay (ms)" offset 0.5,0
+set xtics 5
 
 plot "../resultsAvg/numBrokers_causal_DelayAvg" u 1:2:3 t "Causal" w yerrorbars ls 1, \
 "../resultsAvg/numBrokers_single_glitch_free_DelayAvg" u 1:2:3 t "Single" w yerrorbars ls 2, \
@@ -86,14 +91,19 @@ plot "../resultsAvg/numBrokers_causal_TrafficByte" u ($1):($8/1000):($15/1000) t
 "../resultsAvg/numBrokers_atomic_TrafficByte" u ($1):($8/1000) notitle w lines ls 4, \
 "../resultsAvg/numBrokers_sid_up_TrafficByte" u ($1):($8/1000) notitle w lines ls 5
 
+set xtics auto
+
 ##################
 # NUMBER OF VARS #
 ##################
+
+set key center right
 
 set xlabel "Number of sources (vars) in the graph" offset 0,0.2
 
 set output "../graphs/numVarsDelay.pdf"
 set ylabel "Average Delay (ms)" offset 0.5,0
+set xtics 20
 
 plot "../resultsAvg/numVars_causal_DelayAvg" u 1:2:3 t "Causal" w yerrorbars ls 1, \
 "../resultsAvg/numVars_single_glitch_free_DelayAvg" u 1:2:3 t "Single" w yerrorbars ls 2, \
@@ -105,6 +115,8 @@ plot "../resultsAvg/numVars_causal_DelayAvg" u 1:2:3 t "Causal" w yerrorbars ls 
 "../resultsAvg/numVars_complete_glitch_free_DelayAvg" u 1:2 notitle w lines ls 3, \
 "../resultsAvg/numVars_atomic_DelayAvg" u 1:2 notitle w lines ls 4, \
 "../resultsAvg/numVars_sid_up_DelayAvg" u 1:2 notitle w lines ls 5
+
+set key bottom right
 
 set output "../graphs/numVarsTraffic.pdf"
 set ylabel "Overall Traffic (KB/s)" offset 0.5,0
@@ -120,9 +132,13 @@ plot "../resultsAvg/numVars_causal_TrafficByte" u ($1):($8/1000):($15/1000) t "C
 "../resultsAvg/numVars_atomic_TrafficByte" u ($1):($8/1000) notitle w lines ls 4, \
 "../resultsAvg/numVars_sid_up_TrafficByte" u ($1):($8/1000) notitle w lines ls 5
 
+set xtics auto
+
 ###############
 # GRAPH DEPTH #
 ###############
+
+set key bottom right
 
 set xlabel "Depth of the dependency graph" offset 0,0.2
 
@@ -158,6 +174,8 @@ plot "../resultsAvg/graphDepth_causal_TrafficByte" u ($1):($8/1000):($15/1000) t
 # NUMBER OF DEPENDENCIES PER SIGNAL #
 #####################################
 
+set key bottom right
+
 set xlabel "Number of dependencies per signal" offset 0,0.2
 
 set output "../graphs/numGraphDependenciesDelay.pdf"
@@ -191,6 +209,8 @@ plot "../resultsAvg/numGraphDependencies_causal_TrafficByte" u ($1):($8/1000):($
 ###########################
 # GRAPH SHARE PROBABILITY #
 ###########################
+
+set key top left
 
 set xlabel "Degree of nodes sharing" offset 0,0.2
 
@@ -226,6 +246,8 @@ plot "../resultsAvg/graphShare_causal_TrafficByte" u ($1):($8/1000):($15/1000) t
 # TIME BETWEEN EVENTS #
 #######################
 
+set key top left
+
 set xlabel "Publication frequency (k events/s)" offset 0,0.2
 set log x
 
@@ -242,6 +264,8 @@ plot "../resultsAvg/timeBetweenEvents_causal_DelayAvg" u (1000/$1):($2):($3) t "
 "../resultsAvg/timeBetweenEvents_complete_glitch_free_DelayAvg" u (1000/$1):($2) notitle w lines ls 3, \
 "../resultsAvg/timeBetweenEvents_atomic_DelayAvg" u (1000/$1):($2) notitle w lines ls 4, \
 "../resultsAvg/timeBetweenEvents_sid_up_DelayAvg" u (1000/$1):($2) notitle w lines ls 5
+
+set key bottom right
 
 set output "../graphs/pubFrequencyTraffic.pdf"
 set ylabel "Overall Traffic (KB/s)" offset 0.5,0
@@ -260,6 +284,8 @@ plot "../resultsAvg/timeBetweenEvents_causal_TrafficByte" u (1000/$1):($8/1000):
 ######################
 # TIME BETWEEN READS #
 ######################
+
+set key top left
 
 set xlabel "Signal access frequency (k reads/s)" offset 0,0.2
 set log x
@@ -306,7 +332,7 @@ set style line 4 lw 2 lt rgb 'blue' pt 3
 set style line 5 lw 2 lt rgb 'red' pt 2
 
 set style data histogram
-set style histogram cluster gap 5
+set style histogram cluster gap 1
 set style fill solid border 0
 
 set key above
@@ -314,8 +340,8 @@ set log y
 set format y "10^%T"
 
 set log y
-unset xlabel
-set xtics rotate by 35 offset -0.5,-2
+set xtics rotate by 35 offset -1.2,-1.0
+set xtics font ", 14"
 
 set output "../graphs/defaultTraffic.pdf"
 

@@ -1,4 +1,4 @@
-set terminal postscript enhance color dashed dl 4 font 16
+set terminal postscript enhance color dashed dl 4 font 1b6
 set pointsize 3
 # set size ratio 0.55
 

@@ -213,6 +213,14 @@ def avgDelay(filename, suffix, numRepetitions):
                      "\t" + str(deltaDelay) + \
                      "\n")
 
+def avgAll(filename, values):
+    global numSeeds
+    global protocols
+    for protocol in protocols:
+        avgTraffic(filename, protocol + "_Traffic", numSeeds)
+        avgTraffic(filename, protocol + "_TrafficByte", numSeeds)
+        avgDelay(filename, protocol + "_DelayAvg", numSeeds)
+
 def prepareDefaultTraffic():
     causal = open("../resultsAvg/default_causal_TrafficByte", "r").readlines()[0].replace("\n", "").split("\t")
     single = open("../resultsAvg/default_single_glitch_free_TrafficByte", "r").readlines()[0].replace("\n", "").split("\t")
@@ -222,7 +230,7 @@ def prepareDefaultTraffic():
 
     result = open("../resultsAvg/defaultTraffic", "w")
 
-    result.write("Events\t" + causal[1] + "\t" + single[1] + "\t" + complete[1] + "\t" + atomic[1] + "\t" + sidup[1] + "\n")
+    result.write("Ev.\t" + causal[1] + "\t" + single[1] + "\t" + complete[1] + "\t" + atomic[1] + "\t" + sidup[1] + "\n")
     result.write("Adv.\t" + causal[3] + "\t" + single[3] + "\t" + complete[3] + "\t" + atomic[3] + "\t" + sidup[3] + "\n")
     result.write("Subs.\t" + causal[2] + "\t" + single[2] + "\t" + complete[2] + "\t" + atomic[2] + "\t" + sidup[2] + "\n")
     result.write("Req.\t" + causal[5] + "\t" + single[5] + "\t" + complete[5] + "\t" + atomic[5] + "\t" + sidup[5] + "\n")
@@ -243,14 +251,6 @@ def prepareDefaultDelay():
     result.write("Complete\t" + complete[1] + "\t" + complete[2] + "\n")
     result.write("Atomic \t" + atomic[1] + "\t" + atomic[2] + "\n")
     result.write("Sid Up\t" + sidup[1] + "\t" + sidup[2] + "\n")
-
-def avgAll(filename, values):
-    global numSeeds
-    global protocols
-    for protocol in protocols:
-        avgTraffic(filename, protocol + "_Traffic", numSeeds)
-        avgTraffic(filename, protocol + "_TrafficByte", numSeeds)
-        avgDelay(filename, protocol + "_DelayAvg", numSeeds)
     
 # Values
 default = [0]

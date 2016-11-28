@@ -346,15 +346,11 @@ plot "../resultsAvg/timeBetweenReads_causal_TrafficByte" u (1000/$1):($8/1000):(
 reset
 set terminal pdf fsize 12 size 4.2,3.0
 
-set style line 1 lw 2 lt rgb 'orange' pt 1
-set style line 2 lw 2 lt rgb 'black' pt 6
-set style line 3 lw 2 lt rgb 'green' pt 8
-set style line 4 lw 2 lt rgb 'blue' pt 3
-set style line 5 lw 2 lt rgb 'red' pt 2
+set style line 1 lw 2 lt 1 lc rgb 'black' pt 1
 
 set style data histogram
 set style histogram cluster gap 1
-set style fill solid border 0
+# set style fill solid border 0
 
 set key above
 set log y
@@ -365,8 +361,10 @@ set xtics rotate by 35 offset -1.2,-1.6
 
 set output "../graphs/defaultTraffic.pdf"
 
-plot "../resultsAvg/defaultTraffic" u 2:xticlabel(1) ls 1 title "Causal", \
-"../resultsAvg/defaultTraffic" u 3:xticlabel(1) ls 2 title "Single", \
-"../resultsAvg/defaultTraffic" u 4:xticlabel(1) ls 3 title "Complete", \
-"../resultsAvg/defaultTraffic" u 5:xticlabel(1) ls 4 title "Atomic", \
-"../resultsAvg/defaultTraffic" u 6:xticlabel(1) ls 5 title "Sid Up"
+set ylabel "Average Delay (ms)" offset 0.5,0
+
+plot "../resultsAvg/defaultTraffic" u 2:xticlabel(1) ls 1 fs pattern 1 title "Causal", \
+"../resultsAvg/defaultTraffic" u 3:xticlabel(1) ls 1 fs pattern 2 title "Single", \
+"../resultsAvg/defaultTraffic" u 4:xticlabel(1) ls 1 fs pattern 3 title "Complete", \
+"../resultsAvg/defaultTraffic" u 5:xticlabel(1) ls 1 fs pattern 4 title "Atomic", \
+"../resultsAvg/defaultTraffic" u 6:xticlabel(1) ls 1 fs pattern 5 title "Sid Up"

@@ -361,10 +361,10 @@ set xtics rotate by 35 offset -1.2,-1.6
 
 set output "../graphs/defaultTraffic.pdf"
 
-set ylabel "Average Delay (ms)" offset 0.5,0
+set ylabel "Overall Traffic (KB/s)" offset 0.5,0
 
-plot "../resultsAvg/defaultTraffic" u 2:xticlabel(1) ls 1 fs pattern 1 title "Causal", \
-"../resultsAvg/defaultTraffic" u 3:xticlabel(1) ls 1 fs pattern 2 title "Single", \
-"../resultsAvg/defaultTraffic" u 4:xticlabel(1) ls 1 fs pattern 3 title "Complete", \
-"../resultsAvg/defaultTraffic" u 5:xticlabel(1) ls 1 fs pattern 4 title "Atomic", \
-"../resultsAvg/defaultTraffic" u 6:xticlabel(1) ls 1 fs pattern 5 title "Sid Up"
+plot "../resultsAvg/defaultTraffic" u ($2/1000):xticlabel(1) ls 1 fs pattern 1 title "Causal", \
+"../resultsAvg/defaultTraffic" u ($3/1000):xticlabel(1) ls 1 fs pattern 2 title "Single", \
+"../resultsAvg/defaultTraffic" u ($4/1000):xticlabel(1) ls 1 fs pattern 3 title "Complete", \
+"../resultsAvg/defaultTraffic" u ($5/1000):xticlabel(1) ls 1 fs pattern 4 title "Atomic", \
+"../resultsAvg/defaultTraffic" u ($6/1000):xticlabel(1) ls 1 fs pattern 5 title "Sid Up"

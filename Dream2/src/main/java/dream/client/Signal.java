@@ -59,6 +59,22 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 		clientEventForwarder.advertise(new Advertisement(Consts.hostName, object), subs, true);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Signal(String object, Supplier<T> evaluation, List<UpdateProducer<?>> prods) {
+		this.host = Consts.hostName;
+		this.object = object;
+		this.evaluation = evaluation;
+
+		final Set<Subscription<?>> subs = new HashSet<>();
+		for (final UpdateProducer prod : prods) {
+			prod.registerUpdateConsumer(this, prod.getConstraints());
+			subs.add(new Subscription(prod.getHost(), prod.getObject(), prod.getConstraints()));
+		}
+
+		clientEventForwarder = ClientEventForwarder.get();
+		clientEventForwarder.advertise(new Advertisement(Consts.hostName, object), subs, true);
+	}
+
 	private final synchronized void processNextUpdate() {
 		if (pendingAcks == 0) {
 			// Notify that the previous update has finished

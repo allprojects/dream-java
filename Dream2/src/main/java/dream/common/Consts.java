@@ -12,10 +12,10 @@ public final class Consts {
 	private static final Properties properties = new Properties();
 	private static final String LOGGING_PROPERTIES_FILE_NAME = "logging.properties";
 
-	public static final String serverAddr;
+	public static String serverAddr;
 	public static final String lockManagerAddr;
 
-	public static final int serverPort;
+	public static int serverPort;
 	public static final int lockManagerPort;
 
 	public static ConsistencyType consistencyType;

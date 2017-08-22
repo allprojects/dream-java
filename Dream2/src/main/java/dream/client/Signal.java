@@ -123,7 +123,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 				val = evaluate();
 				if (Consts.enableEvaluation) {
 					updateCount++;
-					double delay = System.nanoTime() - timestamp;
+					double delay = (System.nanoTime() - timestamp) / 1000000.0;
 					sumOfDelays += delay;
 					EvalUtils.saveDelayToFile(updateCount, sumOfDelays);
 				}

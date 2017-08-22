@@ -3,6 +3,7 @@ package dream.eval;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import dream.client.DreamClient;
 import dream.client.RemoteVar;
@@ -15,7 +16,7 @@ public class EvalSignalClient {
 	public static void main(String args[]) {
 		if (args.length < 4) {
 			System.out
-					.println("Usage: EvalSignalClient <serverAddr> <hostName> <signalName> <remoteVar>[;<remoteVar>]+");
+					.println("Usage: EvalSignalClient <serverAddr> <hostName> <signalName> <remoteVar>[:<remoteVar>]+");
 			System.exit(0);
 		}
 
@@ -30,7 +31,7 @@ public class EvalSignalClient {
 		final DreamClient client = DreamClient.instance;
 		client.connect();
 
-		StringTokenizer tokenizer = new StringTokenizer(deps, ";");
+		StringTokenizer tokenizer = new StringTokenizer(deps, ":");
 		final List<String> relevantRemoteVars = new ArrayList<>();
 
 		while (tokenizer.hasMoreTokens()) {
@@ -61,7 +62,8 @@ public class EvalSignalClient {
 			return result;
 		}, remoteVars);
 
-		signal.change().addHandler((oldVal, val) -> System.out.println("Signal: " + val));
+		final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+		signal.change().addHandler((oldVal, val) -> logger.fine("Signal: " + val));
 
 	}
 }

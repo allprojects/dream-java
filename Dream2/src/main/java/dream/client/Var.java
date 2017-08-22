@@ -29,7 +29,7 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 	private final List<SerializablePredicate<T>> constraints = new ArrayList<>();
 
 	private final Map<UpdateConsumer, List<SerializablePredicate<T>>> consumers = new HashMap<>();
-	private final Queue<Object> waitingModifications = new ArrayDeque<>();
+	private final Queue<TimestampedModification> waitingModifications = new ArrayDeque<>();
 	private int pendingAcks = 0;
 
 	private T val;
@@ -43,15 +43,17 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 	}
 
 	public final synchronized void set(T val) {
+		final long timestamp = System.nanoTime();
 		final Supplier<T> supplier = () -> val;
-		waitingModifications.add(supplier);
+		waitingModifications.add(new TimestampedModification(supplier, timestamp));
 		if (waitingModifications.size() == 1) {
 			tryToProcessNextUpdate();
 		}
 	}
 
 	public final synchronized void modify(Consumer<T> modification) {
-		waitingModifications.add(modification);
+		final long timestamp = System.nanoTime();
+		waitingModifications.add(new TimestampedModification(modification, timestamp));
 		if (waitingModifications.size() == 1) {
 			tryToProcessNextUpdate();
 		}
@@ -81,7 +83,10 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 	}
 
 	private final void processNextUpdate(UUID eventId) {
-		final Object mod = waitingModifications.poll();
+		final TimestampedModification tMod = waitingModifications.poll();
+		final Object mod = tMod.getModification();
+		final long timestamp = tMod.getTimestamp();
+
 		// Apply modification
 		if (mod instanceof Consumer) {
 			@SuppressWarnings("unchecked")
@@ -96,7 +101,7 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 		// Propagate modification to local and remote subscribers
 		final Event<? extends Serializable> ev = new Event<>(Consts.getHostName(), object, val);
 		final String source = ev.getSignature();
-		final EventPacket packet = new EventPacket(ev, eventId, source);
+		final EventPacket packet = new EventPacket(ev, eventId, source, System.nanoTime());
 		packet.setLockReleaseNodes(forwarder.getLockReleaseNodesFor(source));
 
 		final Set<UpdateConsumer> satConsumers = //
@@ -107,7 +112,7 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 		pendingAcks = satConsumers.size();
 		satConsumers.forEach(c -> c.updateFromProducer(packet, this));
 
-		forwarder.sendEvent(eventId, ev, ev.getSignature());
+		forwarder.sendEvent(eventId, ev, ev.getSignature(), timestamp);
 	}
 
 	@Override
@@ -151,6 +156,26 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 	@Override
 	public void notifyLockGranted(LockGrantPacket lockGrant) {
 		processNextUpdate(lockGrant.getLockID());
+	}
+
+	private class TimestampedModification {
+		private final Object modification;
+		private final long timestamp;
+
+		TimestampedModification(Object modification, long timestamp) {
+			super();
+			this.modification = modification;
+			this.timestamp = timestamp;
+		}
+
+		final Object getModification() {
+			return modification;
+		}
+
+		final long getTimestamp() {
+			return timestamp;
+		}
+
 	}
 
 }

@@ -25,13 +25,17 @@ public class EventPacket implements Serializable {
 	// Original source of the change
 	private final String source;
 
+	// Time (in nanosecond) when the message is generated
+	private final long generationTime;
+
 	// Nodes that should release the lock for the propagation, if any
 	private final Set<String> lockReleaseNodes = new HashSet<>();
 
-	public EventPacket(Event<?> event, UUID id, String source) {
+	public EventPacket(Event<?> event, UUID id, String source, long generationTime) {
 		this.event = event;
 		this.id = id;
 		this.source = source;
+		this.generationTime = generationTime;
 	}
 
 	public final Event<?> getEvent() {
@@ -44,6 +48,10 @@ public class EventPacket implements Serializable {
 
 	public final String getSource() {
 		return source;
+	}
+
+	public final long getGenerationTime() {
+		return generationTime;
 	}
 
 	public final void setLockReleaseNodes(Set<String> lockReleaseNodes) {

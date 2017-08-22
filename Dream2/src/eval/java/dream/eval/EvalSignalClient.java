@@ -62,5 +62,6 @@ public class EvalSignalClient {
 		}, remoteVars);
 
 		signal.change().addHandler((oldVal, val) -> System.out.println("Signal: " + val));
+
 	}
 }

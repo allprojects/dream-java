@@ -115,7 +115,7 @@ class ClientEventForwarder implements PacketForwarder {
 		return result;
 	}
 
-	final synchronized void sendEvent(UUID id, Event<?> ev, String initialVar) {
+	final synchronized void sendEvent(UUID id, Event<?> ev, String initialVar, long timestamp) {
 		logger.finer("Sending an event " + ev);
 		Set<String> lockReleaseNodes;
 		switch (Consts.consistencyType) {
@@ -130,7 +130,7 @@ class ClientEventForwarder implements PacketForwarder {
 		}
 
 		if (subTable.needsToDeliverToServer(ev)) {
-			connectionManager.sendEvent(id, ev, initialVar, lockReleaseNodes);
+			connectionManager.sendEvent(id, ev, initialVar, lockReleaseNodes, timestamp);
 		}
 	}
 

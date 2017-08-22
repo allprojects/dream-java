@@ -45,4 +45,14 @@ public class EvalUtils {
 		}
 	}
 
+	public static void saveDelayToFile(int count, double sum) {
+		try {
+			FileWriter writer = new FileWriter(Consts.delayMeasurementFile, false);
+			writer.write(sum / (1000000 * count) + "\n");
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

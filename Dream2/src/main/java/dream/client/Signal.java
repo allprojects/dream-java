@@ -21,6 +21,7 @@ import dream.common.packets.EventPacket;
 import dream.common.packets.content.Advertisement;
 import dream.common.packets.content.Event;
 import dream.common.packets.content.Subscription;
+import dream.eval.utils.EvalUtils;
 
 public class Signal<T extends Serializable> implements TimeChangingValue<T>, UpdateProducer<T>, UpdateConsumer {
 
@@ -40,6 +41,10 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 	private final Supplier<T> evaluation;
 
 	private T val;
+
+	// Variables for delay measurement
+	int updateCount = 0;
+	double sumOfDelays = 0;
 
 	private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -100,9 +105,28 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 			// Extract information from any of the packets
 			final EventPacket anyPkt = pairs.stream().findAny().get().getEventPacket();
 
+			// Extract the oldest timestamp
+			long timestamp = pairs.stream().min((a, b) -> {
+				final long aTime = a.getEventPacket().getGenerationTime();
+				final long bTime = b.getEventPacket().getGenerationTime();
+				if (aTime == bTime) {
+					return 0;
+				} else if (aTime < bTime) {
+					return -1;
+				} else {
+					return 1;
+				}
+			}).get().getEventPacket().getGenerationTime();
+
 			// Compute the new value
 			try {
 				val = evaluate();
+				if (Consts.enableEvaluation) {
+					updateCount++;
+					double delay = System.nanoTime() - timestamp;
+					sumOfDelays += delay;
+					EvalUtils.saveDelayToFile(updateCount, sumOfDelays);
+				}
 				logger.finest("New value computed for the reactive object: " + val);
 			} catch (final Exception e) {
 				logger.log(Level.INFO,
@@ -122,7 +146,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 			logger.finest("Sending event to dependent objects.");
 			final Event<T> event = new Event<T>(Consts.getHostName(), object, val);
 			// Notify remote subscribers
-			clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getSource());
+			clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getSource(), timestamp);
 
 			final Set<UpdateConsumer> satConsumers = //
 					consumers.entrySet().stream()
@@ -132,7 +156,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 			// Notify local subscribers
 			if (!satConsumers.isEmpty()) {
 				pairs.forEach(pair -> waitingProducers.add(pair.getUpdateProducer()));
-				final EventPacket newEvPkt = new EventPacket(event, anyPkt.getId(), anyPkt.getSource());
+				final EventPacket newEvPkt = new EventPacket(event, anyPkt.getId(), anyPkt.getSource(), timestamp);
 				newEvPkt.setLockReleaseNodes(anyPkt.getLockReleaseNodes());
 				pendingAcks = satConsumers.size();
 				satConsumers.forEach(c -> c.updateFromProducer(newEvPkt, this));

@@ -78,9 +78,9 @@ class ConnectionManager implements PacketForwarder {
 		return overlay.getNodeDescriptor();
 	}
 
-	final void sendEvent(UUID id, Event<? extends Serializable> event, String initialVar,
-			Set<String> lockReleaseNodes) {
-		final EventPacket pkt = new EventPacket(event, id, initialVar);
+	final void sendEvent(UUID id, Event<? extends Serializable> event, String initialVar, Set<String> lockReleaseNodes,
+			long timestamp) {
+		final EventPacket pkt = new EventPacket(event, id, initialVar, timestamp);
 		pkt.setLockReleaseNodes(lockReleaseNodes);
 		sendToServer(EventPacket.subject, pkt);
 	}

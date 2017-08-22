@@ -36,10 +36,10 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 
 	public Var(String object, T val) {
 		this.forwarder = ClientEventForwarder.get();
-		this.host = Consts.hostName;
+		this.host = Consts.getHostName();
 		this.object = object;
 		this.val = val;
-		forwarder.advertise(new Advertisement(Consts.hostName, object), true);
+		forwarder.advertise(new Advertisement(Consts.getHostName(), object), true);
 	}
 
 	public final synchronized void set(T val) {
@@ -94,15 +94,15 @@ public class Var<T extends Serializable> implements UpdateProducer<T>, LockAppli
 		}
 
 		// Propagate modification to local and remote subscribers
-		final Event<? extends Serializable> ev = new Event<>(Consts.hostName, object, val);
+		final Event<? extends Serializable> ev = new Event<>(Consts.getHostName(), object, val);
 		final String source = ev.getSignature();
 		final EventPacket packet = new EventPacket(ev, eventId, source);
 		packet.setLockReleaseNodes(forwarder.getLockReleaseNodesFor(source));
 
 		final Set<UpdateConsumer> satConsumers = //
-		consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> constr.test(val)))//
-				.map(e -> e.getKey())//
-				.collect(Collectors.toSet());
+				consumers.entrySet().stream().filter(e -> e.getValue().stream().allMatch(constr -> constr.test(val)))//
+						.map(e -> e.getKey())//
+						.collect(Collectors.toSet());
 
 		pendingAcks = satConsumers.size();
 		satConsumers.forEach(c -> c.updateFromProducer(packet, this));

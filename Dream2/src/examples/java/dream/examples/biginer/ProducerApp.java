@@ -10,7 +10,7 @@ public class ProducerApp {
 
 	public ProducerApp() throws Exception {
 		// Mention the host(node) which is producing the value
-		Consts.hostName = "Host1";
+		Consts.setHostName("Host1");
 
 		// myVar is created and registered as exVar for remote consumption.
 		// exVar is initialized to AAA

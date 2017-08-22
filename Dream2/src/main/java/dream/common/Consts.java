@@ -19,7 +19,11 @@ public final class Consts {
 	public static final int lockManagerPort;
 
 	public static ConsistencyType consistencyType;
-	public static String hostName;
+	private static String hostName;
+
+	public static boolean enableEvaluation;
+	public static String trafficMeasurementFile = "./traffic.txt";
+	public static String delayMeasurementFile = "./delay.txt";
 
 	static {
 		/**
@@ -58,6 +62,8 @@ public final class Consts {
 
 		final String hostNameProperty = properties.getProperty("hostName", "local");
 		hostName = hostNameProperty;
+		trafficMeasurementFile = "./" + hostName + "_traffic.txt";
+		delayMeasurementFile = "./" + hostName + "_delay.txt";
 
 		final String consistencyTypeProperty = properties.getProperty("consistencyType", "single_glitch_free")
 				.toLowerCase();
@@ -73,5 +79,17 @@ public final class Consts {
 			logger.warning("Unknown consistency type. Using single source glitch free as default.");
 		}
 
+		final String enableEvaluationProperty = properties.getProperty("enableEvaluation", "false");
+		enableEvaluation = Boolean.valueOf(enableEvaluationProperty);
+	}
+
+	public static final void setHostName(String name) {
+		hostName = name;
+		trafficMeasurementFile = "./" + hostName + "_traffic.txt";
+		delayMeasurementFile = "./" + hostName + "_delay.txt";
+	}
+
+	public static final String getHostName() {
+		return hostName;
 	}
 }

@@ -12,7 +12,7 @@ import dream.common.Consts;
 public class RemoteSignalExample {
 
 	public static void main(String args[]) {
-		Consts.hostName = "Signal";
+		Consts.setHostName("Signal");
 
 		final DreamClient client = DreamClient.instance;
 		client.connect();

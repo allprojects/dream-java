@@ -14,7 +14,7 @@ import dream.examples.util.VectorClock;
 public class MasterProcess {
 
 	private void init() {
-		Consts.hostName = "Host1";
+		Consts.setHostName("Host1");
 
 		VectorClock vectorClock = new VectorClock("p1");
 		Var<Message> initTask = new Var<Message>("TASK", null);

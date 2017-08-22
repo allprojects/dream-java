@@ -4,14 +4,17 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import dream.common.Consts;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
+import dream.eval.utils.EvalUtils;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.overlay.NeighborhoodChangeListener;
 import polimi.reds.broker.overlay.NotRunningException;
@@ -29,6 +32,9 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 	private final Set<AdvertisementPacket> allValidAdvertisements = new HashSet<>();
 	private final Overlay overlay;
 
+	private final Map<String, Long> trafficPkts = new HashMap<>();
+	private final Map<String, Long> trafficBytes = new HashMap<>();
+
 	public ServerEventForwarder(final Overlay overlay) {
 		this.overlay = overlay;
 	}
@@ -36,6 +42,10 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 	@Override
 	public Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender, Serializable packet,
 			Collection<NodeDescriptor> neighbors, Outbox outbox) {
+		if (Consts.enableEvaluation) {
+			EvalUtils.updateTraffic(packet, subject, trafficPkts, trafficBytes);
+			EvalUtils.saveTrafficToFile(trafficPkts, trafficBytes);
+		}
 		if (subject.equals(SubscriptionPacket.subject)) {
 			assert packet instanceof SubscriptionPacket;
 			final SubscriptionPacket subPkt = (SubscriptionPacket) packet;

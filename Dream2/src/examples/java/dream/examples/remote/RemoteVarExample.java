@@ -9,7 +9,7 @@ import dream.common.Consts;
 public class RemoteVarExample {
 
 	public static void main(String args[]) {
-		Consts.hostName = "Remote";
+		Consts.setHostName("Remote");
 		final Var<Integer> remoteInt = new Var<Integer>("remoteInt", 1);
 		final Var<String> remoteString1 = new Var<String>("remoteString1", "a");
 		final Var<String> remoteString2 = new Var<String>("remoteString2", "b");

@@ -28,6 +28,7 @@ import dream.common.utils.DependencyGraph;
 import dream.common.utils.FinalNodesDetector;
 import dream.common.utils.InterSourceDependencyDetector;
 import dream.common.utils.IntraSourceDependencyDetector;
+import dream.eval.utils.EvalUtils;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.routing.Outbox;
 import polimi.reds.broker.routing.PacketForwarder;
@@ -48,6 +49,9 @@ class ClientEventForwarder implements PacketForwarder {
 					? new AtomicDependencyDetector() //
 					: new CompleteGlitchFreeDependencyDetector();
 	private final FinalNodesDetector finalNodesDetector = new FinalNodesDetector();
+
+	private final Map<String, Long> trafficPkts = new HashMap<>();
+	private final Map<String, Long> trafficBytes = new HashMap<>();
 
 	// Lock applicants waiting for a grant
 	private final Map<UUID, LockApplicant> lockApplicants = new HashMap<>();
@@ -85,6 +89,10 @@ class ClientEventForwarder implements PacketForwarder {
 	public synchronized Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender,
 			Serializable packet, Collection<NodeDescriptor> neighbors, Outbox outbox) {
 		final Collection<NodeDescriptor> result = new ArrayList<NodeDescriptor>();
+		if (Consts.enableEvaluation) {
+			EvalUtils.updateTraffic(packet, subject, trafficPkts, trafficBytes);
+			EvalUtils.saveTrafficToFile(trafficPkts, trafficBytes);
+		}
 		if (subject.equals(AdvertisementPacket.subject)) {
 			assert packet instanceof AdvertisementPacket;
 			logger.finer("Received an advertisement packet " + packet);
@@ -258,7 +266,7 @@ class ClientEventForwarder implements PacketForwarder {
 	}
 
 	private final boolean isLocal(Subscription<?> sub) {
-		return sub.getHostId().equals(Consts.hostName);
+		return sub.getHostId().equals(Consts.getHostName());
 	}
 
 	private final void processEventFromServer(EventPacket evPkt) {

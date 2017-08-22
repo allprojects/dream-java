@@ -38,7 +38,7 @@ public abstract class Client {
 		startDream();
 
 		// set hostName
-		Consts.hostName = name;
+		Consts.setHostName(name);
 
 		// connect to the dependency graph
 		DreamClient.instance.connect();
@@ -131,7 +131,7 @@ public abstract class Client {
 	}
 
 	public String getHostName() {
-		return Consts.hostName;
+		return Consts.getHostName();
 	}
 
 	private LinkedList<LockToken> lockQueue = new LinkedList<>();

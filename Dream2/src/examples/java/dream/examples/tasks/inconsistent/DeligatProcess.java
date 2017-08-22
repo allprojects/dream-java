@@ -49,13 +49,13 @@ public class DeligatProcess {
 	}
 
 	private void init() {
-		Consts.hostName = "Host2";
+		Consts.setHostName("Host2");
 		RemoteVar<Message> rv = new RemoteVar<Message>("Host1", "TASK");
 		Var<Message> myVar = new Var<Message>("TASK_ASSIGNED", null);
 
 		Signal<Message> s = new Signal<Message>("s", () -> {
 			return rv.get();
-		} , rv);
+		}, rv);
 
 		// Register a handler which will be executed upon receiving the signal
 		s.change().addHandler((oldVal, val) -> {

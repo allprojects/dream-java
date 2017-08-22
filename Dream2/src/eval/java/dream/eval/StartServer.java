@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import dream.common.Consts;
 import dream.common.packets.AdvertisementPacket;
 import dream.common.packets.EventPacket;
 import dream.common.packets.SubscriptionPacket;
@@ -28,13 +29,14 @@ public class StartServer implements NeighborhoodChangeListener {
 	private Overlay overlay = null;
 
 	public static void main(String[] args) {
-		if (args.length < 1) {
-			System.out.println("Usage: StartServer <port> [reds-tcp:address:port]*");
+		if (args.length < 2) {
+			System.out.println("Usage: StartServer <hostName> <port> [reds-tcp:address:port]*");
 			System.exit(0);
 		}
-		int port = Integer.parseInt(args[0]);
+		Consts.setHostName(args[0]);
+		int port = Integer.parseInt(args[1]);
 		List<String> neighbors = Arrays.asList(args);
-		new StartServer(port, neighbors.subList(1, neighbors.size()));
+		new StartServer(port, neighbors.subList(2, neighbors.size()));
 	}
 
 	private StartServer(final int port, final List<String> neighbors) {

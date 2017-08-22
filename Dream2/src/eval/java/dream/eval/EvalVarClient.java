@@ -20,7 +20,7 @@ public class EvalVarClient {
 		final int sleepTime = Integer.parseInt(args[3]);
 
 		Consts.serverAddr = serverAddr;
-		Consts.hostName = hostName;
+		Consts.setHostName(hostName);
 
 		final DreamClient client = DreamClient.instance;
 		client.connect();

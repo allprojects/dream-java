@@ -63,7 +63,7 @@ public class WorkerHelper implements Runnable {
 
 	public void run() {
 		localClock = new VectorClockHelper("p3", this);
-		Consts.hostName = "Host3";
+		Consts.setHostName("Host3");
 		Thread t = new Thread(localClock);
 		t.start();
 		RemoteVar<Message> task = new RemoteVar<Message>("Host1", "TASK2");
@@ -71,10 +71,10 @@ public class WorkerHelper implements Runnable {
 
 		Signal<Message> signalFromMaster = new Signal<Message>("s", () -> {
 			return task.get();
-		} , task);
+		}, task);
 		Signal<Message> signalFromDeligator = new Signal<Message>("s1", () -> {
 			return taskDeligated.get();
-		} , taskDeligated);
+		}, taskDeligated);
 
 		// Register a handler which will be executed upon receiving the signal
 		// from master process

@@ -45,7 +45,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Signal(String object, Supplier<T> evaluation, UpdateProducer<?>... prods) {
-		this.host = Consts.hostName;
+		this.host = Consts.getHostName();
 		this.object = object;
 		this.evaluation = evaluation;
 
@@ -56,12 +56,12 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 		}
 
 		clientEventForwarder = ClientEventForwarder.get();
-		clientEventForwarder.advertise(new Advertisement(Consts.hostName, object), subs, true);
+		clientEventForwarder.advertise(new Advertisement(Consts.getHostName(), object), subs, true);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Signal(String object, Supplier<T> evaluation, List<UpdateProducer<?>> prods) {
-		this.host = Consts.hostName;
+		this.host = Consts.getHostName();
 		this.object = object;
 		this.evaluation = evaluation;
 
@@ -72,7 +72,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 		}
 
 		clientEventForwarder = ClientEventForwarder.get();
-		clientEventForwarder.advertise(new Advertisement(Consts.hostName, object), subs, true);
+		clientEventForwarder.advertise(new Advertisement(Consts.getHostName(), object), subs, true);
 	}
 
 	private final synchronized void processNextUpdate() {
@@ -91,7 +91,8 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 
 	private final void processUpdate(EventProducerPair update) {
 		logger.finest("processTask method invoked with " + update);
-		final List<EventProducerPair> pairs = queueManager.processEventPacket(update, object + "@" + Consts.hostName);
+		final List<EventProducerPair> pairs = queueManager.processEventPacket(update,
+				object + "@" + Consts.getHostName());
 		logger.finest("The queueManager returned the following pairs " + pairs);
 
 		if (!pairs.isEmpty()) {
@@ -119,7 +120,7 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 
 			// Notify local and remote dependent objects
 			logger.finest("Sending event to dependent objects.");
-			final Event<T> event = new Event<T>(Consts.hostName, object, val);
+			final Event<T> event = new Event<T>(Consts.getHostName(), object, val);
 			// Notify remote subscribers
 			clientEventForwarder.sendEvent(anyPkt.getId(), event, anyPkt.getSource());
 

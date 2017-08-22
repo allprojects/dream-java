@@ -25,7 +25,7 @@ public class EvalSignalClient {
 		final String deps = args[3];
 
 		Consts.serverAddr = serverAddr;
-		Consts.hostName = hostName;
+		Consts.setHostName(hostName);
 
 		final DreamClient client = DreamClient.instance;
 		client.connect();

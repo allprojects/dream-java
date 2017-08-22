@@ -55,18 +55,17 @@ public class WorkerHelper implements Runnable {
 	}
 
 	public void run() {
-
-		Consts.hostName = "Host3";
+		Consts.setHostName("Host3");
 
 		RemoteVar<Message> task = new RemoteVar<Message>("Host1", "TASK2");
 		RemoteVar<Message> taskDeligated = new RemoteVar<Message>("Host2", "TASK_ASSIGNED");
 
 		Signal<Message> signalFromMaster = new Signal<Message>("s", () -> {
 			return task.get();
-		} , task);
+		}, task);
 		Signal<Message> signalFromDeligator = new Signal<Message>("s1", () -> {
 			return taskDeligated.get();
-		} , taskDeligated);
+		}, taskDeligated);
 
 		// Register a handler which will be executed upon receiving the signal
 		// from master process

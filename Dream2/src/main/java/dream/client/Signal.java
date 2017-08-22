@@ -49,9 +49,10 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 	private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Signal(String object, Supplier<T> evaluation, UpdateProducer<?>... prods) {
+	public Signal(String object, Supplier<T> evaluation, T defaultVal, UpdateProducer<?>... prods) {
 		this.host = Consts.getHostName();
 		this.object = object;
+		this.val = defaultVal;
 		this.evaluation = evaluation;
 
 		final Set<Subscription<?>> subs = new HashSet<>();
@@ -65,9 +66,10 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Signal(String object, Supplier<T> evaluation, List<UpdateProducer<?>> prods) {
+	public Signal(String object, Supplier<T> evaluation, T defaultVal, List<UpdateProducer<?>> prods) {
 		this.host = Consts.getHostName();
 		this.object = object;
+		this.val = defaultVal;
 		this.evaluation = evaluation;
 
 		final Set<Subscription<?>> subs = new HashSet<>();
@@ -129,17 +131,17 @@ public class Signal<T extends Serializable> implements TimeChangingValue<T>, Upd
 				}
 				logger.finest("New value computed for the reactive object: " + val);
 			} catch (final Exception e) {
-				logger.log(Level.INFO,
-						"Exception during the evaluation of the expression. Acknowledging the producers, releasing the locks, and returning.",
-						e);
-				pairs.forEach(pair -> pair.getUpdateProducer().notifyUpdateFinished());
-				// Release locks, if needed
-				if ((Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
-						Consts.consistencyType == ConsistencyType.ATOMIC) && //
-						anyPkt.getLockReleaseNodes().contains(object + "@" + host)) {
-					clientEventForwarder.sendLockRelease(anyPkt.getId());
-				}
-				return;
+				logger.log(Level.INFO, "Exception during the evaluation of the expression.", e);
+				// pairs.forEach(pair ->
+				// pair.getUpdateProducer().notifyUpdateFinished());
+				// // Release locks, if needed
+				// if ((Consts.consistencyType ==
+				// ConsistencyType.COMPLETE_GLITCH_FREE || //
+				// Consts.consistencyType == ConsistencyType.ATOMIC) && //
+				// anyPkt.getLockReleaseNodes().contains(object + "@" + host)) {
+				// clientEventForwarder.sendLockRelease(anyPkt.getId());
+				// }
+				// return;
 			}
 
 			// Notify local and remote dependent objects

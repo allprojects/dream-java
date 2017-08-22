@@ -57,7 +57,7 @@ public class LockManager extends Client {
 				return rv.get();
 			else
 				return false;
-		}, rv);
+		}, false, rv);
 		s.change().addHandler((oldValue, newValue) -> {
 			if (newValue) {
 				// client requesting a lock

@@ -26,18 +26,18 @@ public class LocalTest {
 		final Var<String> varString2 = new Var<>("varString2", "");
 
 		final Signal<Integer> signalInt = new Signal<Integer>("signalInt",
-				() -> 10 - 2 + (varInt.get() * 2 + varInt.get()) / 2, varInt);
+				() -> 10 - 2 + (varInt.get() * 2 + varInt.get()) / 2, 1, varInt);
 		final Signal<String> signalString = new Signal<String>("signalString",
-				() -> varString1.get() + varString2.get(), varString1, varString2);
-		final Signal<Integer> signalInt2 = new Signal<Integer>("signalInt2", () -> signalInt.get() * 2, signalInt);
+				() -> varString1.get() + varString2.get(), "", varString1, varString2);
+		final Signal<Integer> signalInt2 = new Signal<Integer>("signalInt2", () -> signalInt.get() * 2, 1, signalInt);
 
 		final Var<Integer> varStart = new Var<>("varStart", Integer.valueOf(1));
-		final Signal<Integer> signalMid1 = new Signal<Integer>("signalMid1", () -> varStart.get() * 2, varStart);
-		final Signal<Integer> signalMid2 = new Signal<Integer>("signalMid2", () -> signalMid1.get() * 2, signalMid1);
+		final Signal<Integer> signalMid1 = new Signal<Integer>("signalMid1", () -> varStart.get() * 2, 1, varStart);
+		final Signal<Integer> signalMid2 = new Signal<Integer>("signalMid2", () -> signalMid1.get() * 2, 1, signalMid1);
 		final Signal<Integer> signalFinal = new Signal<Integer>("signalFinal",
-				() -> signalMid1.get() + signalMid2.get(), signalMid1, signalMid2);
+				() -> signalMid1.get() + signalMid2.get(), 1, signalMid1, signalMid2);
 		final Signal<Integer> signalFinal2 = new Signal<Integer>("signalFinal2",
-				() -> signalMid1.get() + varStart.get(), signalMid1, varStart);
+				() -> signalMid1.get() + varStart.get(), 1, signalMid1, varStart);
 
 		try {
 			Thread.sleep(500);

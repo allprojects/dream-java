@@ -55,7 +55,7 @@ public class DeligatProcess {
 
 		Signal<Message> s = new Signal<Message>("s", () -> {
 			return rv.get();
-		}, rv);
+		}, new Message(), rv);
 
 		// Register a handler which will be executed upon receiving the signal
 		s.change().addHandler((oldVal, val) -> {

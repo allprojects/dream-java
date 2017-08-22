@@ -44,14 +44,14 @@ public abstract class FormClient extends Client {
 				return salary.get();
 			else
 				return 0.0;
-		}, salary);
+		}, 0.0, salary);
 
 		remoteSettings = new Signal<>("remoteSettings", () -> {
 			if (settings.get() != null)
 				return settings.get();
 			else
 				return false;
-		}, settings);
+		}, false, settings);
 
 		gui.setText("Salary: ");
 		gui.setColor(Color.red);

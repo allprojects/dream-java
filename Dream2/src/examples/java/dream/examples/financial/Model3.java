@@ -28,7 +28,7 @@ public class Model3 extends Client {
 			} else {
 				return marketIndex.get() + news.get();
 			}
-		} , marketIndex, news);
+		}, 1, marketIndex, news);
 
 		f3.change().addHandler((oldVal, newVal) -> System.out.println("New value for f3: " + newVal));
 	}

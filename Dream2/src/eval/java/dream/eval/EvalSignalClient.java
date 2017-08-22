@@ -14,18 +14,21 @@ import dream.common.Consts;
 public class EvalSignalClient {
 
 	public static void main(String args[]) {
-		if (args.length < 4) {
-			System.out
-					.println("Usage: EvalSignalClient <serverAddr> <hostName> <signalName> <remoteVar>[:<remoteVar>]+");
+		if (args.length < 5) {
+			System.out.println(
+					"Usage: EvalSignalClient <serverAddr> <lockMgsAddr> <hostName> <signalName> <remoteVar>[:<remoteVar>]+");
 			System.exit(0);
 		}
 
 		final String serverAddr = args[0];
-		final String hostName = args[1];
-		final String signalName = args[2];
-		final String deps = args[3];
+		final String lockMgrAddr = args[1];
+		final String hostName = args[2];
+		final String signalName = args[3];
+		final String deps = args[4];
 
 		Consts.serverAddr = serverAddr;
+		Consts.lockManagerAddr = lockMgrAddr;
+
 		Consts.setHostName(hostName);
 
 		final DreamClient client = DreamClient.instance;
@@ -60,7 +63,7 @@ public class EvalSignalClient {
 				result += ((RemoteVar<Integer>) remoteVar).get();
 			}
 			return result;
-		}, remoteVars);
+		}, 1, remoteVars);
 
 		final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		signal.change().addHandler((oldVal, val) -> logger.fine("Signal: " + val));

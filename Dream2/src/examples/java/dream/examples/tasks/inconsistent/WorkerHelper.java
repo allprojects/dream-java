@@ -62,10 +62,10 @@ public class WorkerHelper implements Runnable {
 
 		Signal<Message> signalFromMaster = new Signal<Message>("s", () -> {
 			return task.get();
-		}, task);
+		}, new Message(), task);
 		Signal<Message> signalFromDeligator = new Signal<Message>("s1", () -> {
 			return taskDeligated.get();
-		}, taskDeligated);
+		}, new Message(), taskDeligated);
 
 		// Register a handler which will be executed upon receiving the signal
 		// from master process

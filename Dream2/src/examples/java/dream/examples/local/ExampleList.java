@@ -9,7 +9,8 @@ public class ExampleList {
 
 	public static void main(String args[]) {
 		final Var<ArrayList<Integer>> varList = new Var<>("varList", new ArrayList<Integer>());
-		final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 1000 + varList.get().size(), varList);
+		final Signal<Integer> signalInt = new Signal<Integer>("signalInt", () -> 1000 + varList.get().size(), 1,
+				varList);
 
 		signalInt.change().addHandler((oldVal, val) -> System.out.println(val));
 

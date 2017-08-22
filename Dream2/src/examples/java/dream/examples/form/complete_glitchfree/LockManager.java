@@ -60,7 +60,7 @@ public class LockManager extends Client {
 				return rv.get();
 			else
 				return null;
-		}, rv);
+		}, null, rv);
 		s.change().addHandler((oldValue, newValue) -> {
 			if (newValue.isLockRequest()) {
 				// client requesting a lock

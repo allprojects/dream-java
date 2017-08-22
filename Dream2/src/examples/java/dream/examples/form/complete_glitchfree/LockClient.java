@@ -26,7 +26,7 @@ public abstract class LockClient extends Client {
 				return new ArrayList<Pair<String, String>>();
 			else
 				return registeredClients.get();
-		}, registeredClients);
+		}, new ArrayList<Pair<String, String>>(), registeredClients);
 		s.change().addHandler((o, n) -> {
 			if (n.contains(new Pair<>(this.getHostName(), LockManager.VAR_requestLock)) && setup == false)
 				lockSetup();
@@ -42,7 +42,7 @@ public abstract class LockClient extends Client {
 		RemoteVar<Lock> lock = new RemoteVar<>(LockManager.NAME, LockManager.VAR_lock);
 		Signal<Lock> sLock = new Signal<>("lock", () -> {
 			return lock.get();
-		}, lock);
+		}, null, lock);
 		sLock.change().addHandler((oldValue, newValue) -> {
 			newValue.forEach((var, client) -> {
 				if (client.equals(getHostName()))

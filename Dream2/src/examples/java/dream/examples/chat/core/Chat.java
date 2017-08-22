@@ -43,7 +43,7 @@ public class Chat extends Client {
 				return new ArrayList<String>();
 			else
 				return registeredClients.get();
-		}, registeredClients);
+		}, new ArrayList<String>(), registeredClients);
 		onlineList.change().addHandler((o, n) -> {
 			if (n.contains("toServerVar@" + username) && gui == null)
 				setup();
@@ -95,7 +95,7 @@ public class Chat extends Client {
 				return remote.get();
 			else
 				return "";
-		}, remote);
+		}, "", remote);
 		fromServer.change().addHandler((oldValue, newValue) -> receivedServerMessage(newValue));
 
 		logger.fine("Setup: Starting GUI");
@@ -170,7 +170,7 @@ public class Chat extends Client {
 				return r.get();
 			else
 				return "";
-		}, r);
+		}, "", r);
 		s.change().addHandler((oldValue, newValue) -> receivedChatMessage(roomNumber, clientName, newValue));
 	}
 

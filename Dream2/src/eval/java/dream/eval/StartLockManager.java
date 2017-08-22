@@ -24,6 +24,12 @@ public class StartLockManager implements NeighborhoodChangeListener {
 	private final Overlay overlay;
 
 	public static void main(String args[]) {
+		if (args.length < 2) {
+			System.out.println("Usage: StartLockManager <hostName> <port>");
+			System.exit(0);
+		}
+		Consts.setHostName(args[0]);
+		Consts.lockManagerPort = Integer.parseInt(args[1]);
 		new StartLockManager();
 	}
 

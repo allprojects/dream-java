@@ -36,12 +36,12 @@ public class RemoteSignalExample {
 		final RemoteVar<ArrayList<Integer>> remoteList = new RemoteVar<>("Remote", "remoteList");
 
 		final Signal<Integer> signal1 = new Signal<Integer>("signal1",
-				() -> remoteInt.get() + remoteString1.get().length(), remoteInt, remoteString1);
-		final Signal<Integer> signal2 = new Signal<Integer>("signal2", () -> remoteInt.get(), remoteInt);
+				() -> remoteInt.get() + remoteString1.get().length(), 1, remoteInt, remoteString1);
+		final Signal<Integer> signal2 = new Signal<Integer>("signal2", () -> remoteInt.get(), 1, remoteInt);
 		final Signal<String> signal3 = new Signal<String>("signal3", () -> remoteString1.get() + remoteString2.get(),
-				remoteString1, remoteString2);
+				"", remoteString1, remoteString2);
 		final Signal<Integer> signal4 = new Signal<Integer>("signal4",
-				() -> remoteString1.get().length() + remoteList.get().size(), remoteString1, remoteList);
+				() -> remoteString1.get().length() + remoteList.get().size(), 1, remoteString1, remoteList);
 
 		signal1.change().addHandler((oldVal, val) -> System.out.println("Signal1: " + val));
 		signal2.change().addHandler((oldVal, val) -> System.out.println("Signal2: " + val));

@@ -27,7 +27,7 @@ public class Model1 extends Client {
 			} else {
 				return marketIndex.get() * 2 + stockOpts.get();
 			}
-		} , marketIndex, stockOpts);
+		}, 1, marketIndex, stockOpts);
 
 		f1.change().addHandler((oldVal, newVal) -> System.out.println("New value for f1: " + newVal));
 	}

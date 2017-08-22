@@ -27,7 +27,7 @@ public class UnknownVar {
 				return "";
 			else
 				return listener.get();
-		} , listener);
+		}, "", listener);
 		listenerSignal.change().addHandler((o, n) -> System.out.println(o + "->" + n));
 	}
 

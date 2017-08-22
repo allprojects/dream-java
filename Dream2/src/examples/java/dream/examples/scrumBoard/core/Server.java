@@ -14,8 +14,8 @@ import dream.examples.util.Pair;
 
 /**
  * Holds a list of tasks and a list of developers each indicated by a simple
- * integer. Searches for new clients (TaskCreater) and registers to their
- * "task creation channels"
+ * integer. Searches for new clients (TaskCreater) and registers to their "task
+ * creation channels"
  * 
  * @author Min Yang
  * @author Tobias Becker
@@ -78,7 +78,7 @@ public class Server extends Client {
 				temp.addAll(rv2.get());
 			Collections.sort(temp);
 			return temp.stream().map(a -> a.getDevString()).collect(Collectors.joining(":"));
-		}, rv1, rv2);
+		}, "", rv1, rv2);
 
 		Signal<String> tasks = new Signal<String>(VAR_tasks, () -> {
 			LinkedList<Assignment> temp = new LinkedList<>();
@@ -88,7 +88,7 @@ public class Server extends Client {
 				temp.addAll(rv2.get());
 			Collections.sort(temp);
 			return temp.stream().map(a -> a.getTaskString()).collect(Collectors.joining(":"));
-		}, rv1, rv2);
+		}, "", rv1, rv2);
 
 	}
 

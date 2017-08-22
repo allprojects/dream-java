@@ -13,10 +13,10 @@ public class ExampleGlitch {
 	public void launch() {
 		final Var<Double> var = new Var<>("var", 1.0);
 
-		final Signal<Double> mid1 = new Signal<>("mid1", () -> var.get() * 2, var);
-		final Signal<Double> mid2 = new Signal<>("mid2", () -> var.get() * 3, var);
+		final Signal<Double> mid1 = new Signal<>("mid1", () -> var.get() * 2, 1.0, var);
+		final Signal<Double> mid2 = new Signal<>("mid2", () -> var.get() * 3, 1.0, var);
 
-		final Signal<Double> finalResult = new Signal<>("final", () -> mid1.get() + mid2.get(), mid1, mid2);
+		final Signal<Double> finalResult = new Signal<>("final", () -> mid1.get() + mid2.get(), 1.0, mid1, mid2);
 		finalResult.change().addHandler((oldVal, val) -> System.out.println(val));
 
 		try {

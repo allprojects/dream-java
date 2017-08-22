@@ -13,12 +13,12 @@ public class Example1 {
 		final Var<String> varString2 = new Var<>("varString2", "");
 
 		final Signal<Integer> signalInt = new Signal<Integer>("signalInt",
-				() -> 10 - 2 + (varInt.get() * 2 + varInt.get()) / 2, varInt);
+				() -> 10 - 2 + (varInt.get() * 2 + varInt.get()) / 2, 1, varInt);
 		final Signal<Double> signalDouble = new Signal<Double>("signalDouble",
-				() -> varDouble.get() + varDouble.get() * 2, varDouble);
-		final Signal<Boolean> signalBool = new Signal<Boolean>("signalBool", () -> !varBool.get(), varBool);
+				() -> varDouble.get() + varDouble.get() * 2, 1.0, varDouble);
+		final Signal<Boolean> signalBool = new Signal<Boolean>("signalBool", () -> !varBool.get(), false, varBool);
 		final Signal<String> signalString = new Signal<String>("signalString",
-				() -> varString1.get() + varString2.get(), varString1, varString2);
+				() -> varString1.get() + varString2.get(), "", varString1, varString2);
 
 		signalInt.change()
 				.addHandler((oldVal, val) -> System.out.println("signalInt: " + val + " (correct value: 158)"));

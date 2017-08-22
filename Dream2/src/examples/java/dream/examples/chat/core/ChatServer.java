@@ -83,7 +83,7 @@ public class ChatServer extends Client {
 				return var.get();
 			else
 				return "";
-		}, var);
+		}, "", var);
 		sig.change().addHandler((oldValue, newValue) -> receivedMessage(clientName, newValue));
 
 		// add client as registered

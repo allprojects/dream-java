@@ -23,15 +23,15 @@ public class GlitchFreeFormServer extends FormServer {
 
 		minimumEuroPerHour = new Signal<>(MinimumEuroPerHour, () -> {
 			return euro_per_hour.get() > 10;
-		}, euro_per_hour);
+		}, false, euro_per_hour);
 
 		final Signal<Boolean> minimumHours = new Signal<>(MinimumHours, () -> {
 			return working_hours.get() > 10;
-		}, working_hours);
+		}, false, working_hours);
 
 		final Signal<Boolean> maximumHours = new Signal<>(MaximumHours, () -> {
 			return working_hours.get() < 60;
-		}, working_hours);
+		}, false, working_hours);
 
 		minimumEuroPerHour.change().addHandler((o, n) -> updateSettingsOkay());
 
@@ -50,7 +50,7 @@ public class GlitchFreeFormServer extends FormServer {
 				return working_hours.get() * euro_per_hour.get();
 			else
 				return 0.0;
-		}, working_hours, euro_per_hour);
+		}, 0.0, working_hours, euro_per_hour);
 
 		logger.fine("Finished building Dependencies");
 	}

@@ -20,7 +20,7 @@ public class ConsumerApp {
 		// trigger appropriate action
 		Signal<String> s = new Signal<String>("s", () -> {
 			return rv.get() + "ABC";
-		}, rv);
+		}, "", rv);
 
 		// Register a handler which will be executed upon receiving the signal
 		s.change().addHandler((oldVal, val) -> System.out.println("Signal1: " + val));

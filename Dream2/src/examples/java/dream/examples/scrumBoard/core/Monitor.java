@@ -36,12 +36,12 @@ public class Monitor extends Client implements dream.examples.scrumBoard.common.
 		devs = new RemoteVar<String>(Server.NAME, Server.VAR_developers);
 		sigDevs = new Signal<String>("sigDevs", () -> {
 			return devs.get();
-		}, devs);
+		}, "", devs);
 
 		tasks = new RemoteVar<String>(Server.NAME, Server.VAR_tasks);
 		sigTasks = new Signal<String>("sigTests", () -> {
 			return tasks.get();
-		}, tasks);
+		}, "", tasks);
 
 		sigDevs.change().addHandler((oldVa, newVal) -> {
 			System.out.println("newVal devs:" + newVal);

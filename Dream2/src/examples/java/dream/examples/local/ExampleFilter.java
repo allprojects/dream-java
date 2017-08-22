@@ -7,9 +7,9 @@ public class ExampleFilter {
 	public static void main(String args[]) {
 
 		final Var<Integer> varInt = new Var<>("varInt", 1);
-		final Signal<Integer> signalInt = new Signal<>("signalInt", () -> varInt.get() + 1,
+		final Signal<Integer> signalInt = new Signal<>("signalInt", () -> varInt.get() + 1, 1,
 				varInt.filter(val -> val > 10));
-		final Signal<Integer> signalInt2 = new Signal<>("signalInt2", () -> signalInt.get() + 1,
+		final Signal<Integer> signalInt2 = new Signal<>("signalInt2", () -> signalInt.get() + 1, 1,
 				signalInt.filter(val -> val > 20));
 
 		signalInt.change().addHandler((oldVal, val) -> System.out.println("SignalInt: " + val));

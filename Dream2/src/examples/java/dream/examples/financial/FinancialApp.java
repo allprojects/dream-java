@@ -36,9 +36,9 @@ public class FinancialApp extends Client implements ChangeEventHandler<Integer> 
 		f2 = new RemoteVar<>("Model2", "f2");
 		f3 = new RemoteVar<>("Model3", "f3");
 
-		f1Signal = new Signal<>("f1Signal", () -> f1.get(), f1);
-		f2Signal = new Signal<>("f2Signal", () -> f2.get(), f2);
-		f3Signal = new Signal<>("f3Signal", () -> f3.get(), f3);
+		f1Signal = new Signal<>("f1Signal", () -> f1.get(), 1, f1);
+		f2Signal = new Signal<>("f2Signal", () -> f2.get(), 1, f2);
+		f3Signal = new Signal<>("f3Signal", () -> f3.get(), 1, f3);
 
 		f1Signal.change().addHandler(this);
 		f2Signal.change().addHandler(this);

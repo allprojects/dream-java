@@ -3,12 +3,16 @@ package dream.locking;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import dream.common.Consts;
 import dream.common.packets.locking.LockGrantPacket;
 import dream.common.packets.locking.LockReleasePacket;
 import dream.common.packets.locking.LockRequestPacket;
+import dream.eval.utils.EvalUtils;
 import polimi.reds.NodeDescriptor;
 import polimi.reds.broker.routing.Outbox;
 import polimi.reds.broker.routing.PacketForwarder;
@@ -17,9 +21,16 @@ public class LockManagerForwarder implements PacketForwarder {
 	private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private final LockManager lockManager = new LockManager();
 
+	private final Map<String, Long> trafficPkts = new HashMap<>();
+	private final Map<String, Long> trafficBytes = new HashMap<>();
+
 	@Override
 	public final Collection<NodeDescriptor> forwardPacket(String subject, NodeDescriptor sender, Serializable packet,
 			Collection<NodeDescriptor> neighbors, Outbox outbox) {
+		if (Consts.enableEvaluation) {
+			EvalUtils.updateTraffic(packet, subject, trafficPkts, trafficBytes);
+			EvalUtils.saveTrafficToFile(trafficPkts, trafficBytes);
+		}
 		if (subject.equals(LockRequestPacket.subject)) {
 			assert packet instanceof LockRequestPacket;
 			final LockRequestPacket reqPkt = (LockRequestPacket) packet;

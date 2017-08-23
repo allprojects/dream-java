@@ -280,26 +280,26 @@ class ClientEventForwarder implements PacketForwarder {
 	}
 
 	private final void processAdvertisementFromServer(AdvertisementPacket advPkt) {
+		final Set<Subscription<?>> subs = advPkt.getSubscriptions();
+		switch (advPkt.getAdvType()) {
+		case ADV:
+			if (subs.isEmpty()) {
+				dependencyGraph.processAdv(advPkt.getAdvertisement());
+			} else {
+				dependencyGraph.processAdv(advPkt.getAdvertisement(), subs);
+			}
+			break;
+		case UNADV:
+			if (subs.isEmpty()) {
+				dependencyGraph.processUnAdv(advPkt.getAdvertisement());
+			} else {
+				dependencyGraph.processUnAdv(advPkt.getAdvertisement(), subs);
+			}
+			break;
+		}
 		if (Consts.consistencyType == ConsistencyType.SINGLE_SOURCE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.COMPLETE_GLITCH_FREE || //
 				Consts.consistencyType == ConsistencyType.ATOMIC) {
-			final Set<Subscription<?>> subs = advPkt.getSubscriptions();
-			switch (advPkt.getAdvType()) {
-			case ADV:
-				if (subs.isEmpty()) {
-					dependencyGraph.processAdv(advPkt.getAdvertisement());
-				} else {
-					dependencyGraph.processAdv(advPkt.getAdvertisement(), subs);
-				}
-				break;
-			case UNADV:
-				if (subs.isEmpty()) {
-					dependencyGraph.processUnAdv(advPkt.getAdvertisement());
-				} else {
-					dependencyGraph.processUnAdv(advPkt.getAdvertisement(), subs);
-				}
-				break;
-			}
 			updateDetectors();
 		}
 	}

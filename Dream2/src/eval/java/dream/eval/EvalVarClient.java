@@ -1,12 +1,14 @@
 package dream.eval;
 
 import java.util.Random;
+import java.util.logging.Logger;
 
 import dream.client.DreamClient;
 import dream.client.Var;
 import dream.common.Consts;
 
 public class EvalVarClient {
+	private static final int numChanges = 3000;
 
 	public static void main(String args[]) {
 		if (args.length < 5) {
@@ -37,7 +39,7 @@ public class EvalVarClient {
 			e.printStackTrace();
 		}
 
-		while (true) {
+		for (int i = 0; i < numChanges; ++i) {
 			remoteInt.set(random.nextInt(1000));
 			try {
 				Thread.sleep(sleepTime);
@@ -46,6 +48,8 @@ public class EvalVarClient {
 			}
 		}
 
+		final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+		logger.info(hostName + " finished sending updates");
 	}
 
 }

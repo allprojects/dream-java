@@ -10,13 +10,13 @@ public enum ConsistencyType {
 	SINGLE_SOURCE_GLITCH_FREE {
 		@Override
 		public final String toString() {
-			return "Single source glitch free";
+			return "Single_source_glitch_free";
 		}
 	},
 	COMPLETE_GLITCH_FREE {
 		@Override
 		public final String toString() {
-			return "Complete glitch free";
+			return "Complete_glitch_free";
 		}
 	},
 	ATOMIC {

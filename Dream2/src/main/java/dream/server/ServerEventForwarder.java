@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class ServerEventForwarder implements PacketForwarder, NeighborhoodChange
 	protected final SubscriptionTable brokersSubTable = new SubscriptionTable();
 	protected final AdvertisementTable advTable = new AdvertisementTable();
 
-	private final Set<AdvertisementPacket> allValidAdvertisements = new HashSet<>();
+	private final Set<AdvertisementPacket> allValidAdvertisements = Collections.synchronizedSet(new HashSet<>());
 	private final Overlay overlay;
 
 	private final Map<String, Long> trafficPkts = new HashMap<>();

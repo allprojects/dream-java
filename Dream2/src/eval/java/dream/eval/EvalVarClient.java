@@ -8,11 +8,12 @@ import dream.client.Var;
 import dream.common.Consts;
 
 public class EvalVarClient {
-	private static final int numChanges = 3000;
+	private static final int numChanges = 1000;
 
 	public static void main(String args[]) {
-		if (args.length < 5) {
-			System.out.println("Usage: EvalVarClient <serverAddr> <lockMgrAddr> <hostName> <varName> <sleepTime>");
+		if (args.length < 6) {
+			System.out.println(
+					"Usage: EvalVarClient <serverAddr> <lockMgrAddr> <hostName> <varName> <startTime> <sleepTime>");
 			System.exit(1);
 		}
 
@@ -20,7 +21,8 @@ public class EvalVarClient {
 		final String lockMgrAddr = args[1];
 		final String hostName = args[2];
 		final String varName = args[3];
-		final int sleepTime = Integer.parseInt(args[4]);
+		final int startTime = Integer.parseInt(args[4]);
+		final int sleepTime = Integer.parseInt(args[5]);
 
 		Consts.serverAddr = serverAddr;
 		Consts.lockManagerAddr = lockMgrAddr;
@@ -34,7 +36,7 @@ public class EvalVarClient {
 		final Random random = new Random();
 
 		try {
-			Thread.sleep(10000);
+			Thread.sleep(startTime);
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}

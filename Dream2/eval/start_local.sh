@@ -4,9 +4,9 @@ java -cp DREAM.jar dream.eval.StartServer server1 9001 &
 sleep 1
 java -cp DREAM.jar dream.eval.StartServer server2 9002 reds-tcp:localhost:9001 &
 sleep 1
-java -cp DREAM.jar dream.eval.EvalVarClient reds-tcp:localhost:9001 reds-tcp:localhost:9999 client1 v1 100 &
+java -cp DREAM.jar dream.eval.EvalVarClient reds-tcp:localhost:9001 reds-tcp:localhost:9999 client1 v1 10000 500 &
 sleep 1
-java -cp DREAM.jar dream.eval.EvalVarClient reds-tcp:localhost:9002 reds-tcp:localhost:9999 client2 v2 100 &
+java -cp DREAM.jar dream.eval.EvalVarClient reds-tcp:localhost:9002 reds-tcp:localhost:9999 client2 v2 10000 500 &
 sleep 1
 java -cp DREAM.jar dream.eval.EvalSignalClient reds-tcp:localhost:9001 reds-tcp:localhost:9999 client3 v3 v1@client1:v2@client2 &
 sleep 1

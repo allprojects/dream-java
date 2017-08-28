@@ -261,6 +261,10 @@ class ClientEventForwarder implements PacketForwarder {
 		}
 	}
 
+	final synchronized boolean isConnected() {
+		return connectionManager.isConnected();
+	}
+
 	private final boolean needToSendToServer(Subscription<?> sub) {
 		return !isLocal(sub);
 	}

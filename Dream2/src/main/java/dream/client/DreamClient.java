@@ -54,6 +54,10 @@ public enum DreamClient {
 		}
 	}
 
+	public final boolean isConnected() {
+		return eventForwarder.isConnected();
+	}
+
 	private class Lock {
 		private boolean unlocked = false;
 

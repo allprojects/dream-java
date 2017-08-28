@@ -8,7 +8,7 @@ import dream.client.Var;
 import dream.common.Consts;
 
 public class EvalVarClient {
-	private static final int numChanges = 1000;
+	private static final int numChanges = 300;
 
 	public static void main(String args[]) {
 		if (args.length < 6) {
@@ -31,6 +31,13 @@ public class EvalVarClient {
 
 		final DreamClient client = DreamClient.instance;
 		client.connect();
+
+		// TODO ...
+		try {
+			Thread.sleep(80000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
 
 		final Var<Integer> remoteInt = new Var<Integer>(varName, 1);
 		final Random random = new Random();

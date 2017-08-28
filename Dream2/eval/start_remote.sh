@@ -43,20 +43,30 @@ sleep 1
 
 ###
 
-ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker4 $reds_lock_manager v1 v1 60000 500 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker4 $reds_lock_manager v1 v1 80000 2000 &
 sleep 1
-ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker5 $reds_lock_manager v2 v2 60000 500 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker5 $reds_lock_manager v2 v2 80000 2000 &
 sleep 1
-ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker6 $reds_lock_manager v3 v3 60000 500 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker6 $reds_lock_manager v3 v3 80000 2000 &
 sleep 1
-ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker7 $reds_lock_manager v4 v4 60000 500 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker7 $reds_lock_manager v4 v4 80000 2000 &
 sleep 1
-ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker7 $reds_lock_manager v5 v5 60000 500 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker7 $reds_lock_manager v5 v5 80000 2000 &
+sleep 1
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker4 $reds_lock_manager v6 v6 80000 2000 &
+sleep 1
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker5 $reds_lock_manager v7 v7 80000 2000 &
+sleep 1
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker6 $reds_lock_manager v8 v8 80000 2000 &
+sleep 1
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker7 $reds_lock_manager v9 v9 80000 2000 &
+sleep 1
+ssh $client $j -cp DREAM.jar dream.eval.EvalVarClient $reds_broker7 $reds_lock_manager v10 v10 80000 2000 &
 sleep 1
 
 ###
 
-ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker6 $reds_lock_manager a11 a11 v1@v1 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker6 $reds_lock_manager a11 a11 v1@v1:v6@v6 &
 sleep 1
 ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker7 $reds_lock_manager a12 a12 v1@v1 &
 sleep 1
@@ -75,7 +85,7 @@ sleep 1
 
 ###
 
-ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker6 $reds_lock_manager b11 b11 v2@v2 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker6 $reds_lock_manager b11 b11 v2@v2:v7@v7 &
 sleep 1
 ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker5 $reds_lock_manager b12 b12 v2@v2 &
 sleep 1
@@ -93,7 +103,7 @@ ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker7 $reds_loc
 
 ###
 
-ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker5 $reds_lock_manager c11 c11 v3@v3 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker5 $reds_lock_manager c11 c11 v3@v3:v8@v8 &
 sleep 1
 ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker7 $reds_lock_manager c12 c12 v3@v3 &
 sleep 1
@@ -111,7 +121,7 @@ ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker9 $reds_loc
 
 ###
 
-ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker8 $reds_lock_manager d11 d11 v4@v4 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker8 $reds_lock_manager d11 d11 v4@v4:v9@v9 &
 sleep 1
 ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker8 $reds_lock_manager d12 d12 v4@v4 &
 sleep 1
@@ -129,7 +139,7 @@ ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker9 $reds_loc
 
 ###
 
-ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker8 $reds_lock_manager e11 e11 v5@v5 &
+ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker8 $reds_lock_manager e11 e11 v5@v5:v10@v10 &
 sleep 1
 ssh $client $j -cp DREAM.jar dream.eval.EvalSignalClient $reds_broker8 $reds_lock_manager e12 e12 v5@v5 &
 sleep 1

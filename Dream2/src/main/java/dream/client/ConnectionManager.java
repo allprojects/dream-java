@@ -177,6 +177,13 @@ class ConnectionManager implements PacketForwarder {
 		return new ArrayList<>();
 	}
 
+	final boolean isConnected() {
+		return server != null && //
+				(lockManager != null || //
+						(Consts.consistencyType != ConsistencyType.COMPLETE_GLITCH_FREE && //
+								Consts.consistencyType != ConsistencyType.ATOMIC));
+	}
+
 	private class PacketSubjectPair {
 		private final String subject;
 		private final Serializable packet;

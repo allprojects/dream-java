@@ -3,7 +3,7 @@ import os
 import scipy.stats
 
 results_dir = "./results/"
-running_time = 1000 * 0.5
+running_time = 300 * 2
 
 def extractList(predicate):
     global results_dir
@@ -19,7 +19,7 @@ def extractList(predicate):
     return lst
 
 
-def sumTraffic(predicate):
+def sumTraffic(predicate, column):
     global results_dir
     trafficMap = {}
     for file in filter(predicate, os.listdir(results_dir)):
@@ -29,15 +29,21 @@ def sumTraffic(predicate):
             for i in range(0, len(lines)):
                 line = lines[i]
                 pkt = line.split()[0]
-                val = float(line.split()[2])
+                val = float(line.split()[column])
                 if pkt in trafficMap:
                     val = val + trafficMap[pkt]
-                    trafficMap[pkt] = val
-                else:
-                    trafficMap[pkt] = 0
+                trafficMap[pkt] = val
             f.close()
 
     return trafficMap
+
+
+def sumTrafficPkts(predicate):
+    return sumTraffic(predicate, 1)
+
+
+def sumTrafficKBS(predicate):
+    return sumTraffic(predicate, 2)
 
 
 def confidenceDelay(lst):
@@ -64,14 +70,19 @@ def printDelay(protocol):
         avg = sum(lst)/len(lst)
         confidence = confidenceDelay(lst)
         print(str(level) + " " + str(avg) + " " + str(confidence))
+    lst = extractList(lambda x: "delay" in x and protocol in x)
+    avg = sum(lst)/len(lst)
+    confidence = confidenceDelay(lst)
+    print("Total " + str(avg) + " " + str(confidence))
 
 
 def printTraffic(protocol):
     global running_time
     print(protocol)
-    trafficMap = sumTraffic(lambda x: "traffic" in x and protocol in x)
-    for (k, v) in trafficMap.items():
-        print(k + " " + str(v/(running_time*1000)) + " KB/s")
+    pktsMap = sumTrafficPkts(lambda x: "traffic" in x and protocol in x)
+    kbsMap = sumTrafficKBS(lambda x: "traffic" in x and protocol in x)
+    for (k, v) in pktsMap.items():
+        print(k + "\t" + str(v) + " pkts\t" + str(kbsMap[k]/(running_time*1000)) + " KB/s")
 
 
 print("*** Delay ***")

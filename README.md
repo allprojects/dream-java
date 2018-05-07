@@ -26,6 +26,11 @@ semantics in terms of consistency guarantees that constrain the order and
 isolation of value updates. 
 
 
+## Accademic Publications
+
+A. Margara, G. Salvaneschi, On the Semantics of Distributed Reactive Programming: the Cost of Consistency, IEEE Transactions on Software Engineering, 2018.
+
+A. Margara and G. Salvaneschi, We have a DREAM: Distributed Reactive Programming with Consistency Guarantees, In Proceedings of the 8th International Conference on Distributed Event-Based Systems (DEBS ’14). Mumbay, India, May 26–29, 2014.
 
 ## Getting Started
 
@@ -131,9 +136,15 @@ public class OtherClass extends Client {
 
 Alessandro Margara
 
+Guido Salvaneschi
+
 Tobias Becker
 
-Kim Berninger and Michael Raulf - IMPL Project
+Kim Berninger 
+
+Michael Raulf
+
+Ram Kamath
 
 
 

@@ -1,4 +1,33 @@
-# dream-java
+# DREAM Reactive Programming Framework
+
+DREAM - distributed reactive programming
+middleware with flexible consistency guarantees.
+
+## Why DREAM?
+
+Different applications require different levels of consistency
+and that manually implementing the required level on a middleware that
+provides a lower one annuls the abstraction improvements of reactive
+programming. DREAM enables the developers to select
+the best trade-off between consistency and overhead for the problem at
+hand.
+
+The reactive programming paradigm aims to simplify the development of reactive
+systems. It provides abstractions to define time-changing values that are
+automatically updated by the runtime according to their dependencies.
+
+The benefits of reactive programming in distributed settings have been
+recognized for long. Most solutions for distributed reactive
+programming enforce the same semantics as in single processes, introducing
+communication and synchronization costs that hamper scalability.
+
+DREAM defines precise propagation
+semantics in terms of consistency guarantees that constrain the order and
+isolation of value updates. 
+
+
+
+## Getting Started
 
 The relevant source code is in the Dream2 folder. 
 

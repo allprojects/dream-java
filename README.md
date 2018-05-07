@@ -25,6 +25,21 @@ DREAM defines precise propagation
 semantics in terms of consistency guarantees that constrain the order and
 isolation of value updates. 
 
+## Consistency Levels
+
+Consistency levels supported by DREAM explained in a nutshell. For a precise definition see the academic publications.
+
+**FIFO Consistency** Ensures that a signal reflects the changes to a single variable in the order in which they occur.
+
+**Causal Consistency** Analogous to causal consistency in replicated data stores, which guarantees that operations that are causally related with each other take place in the same order in all the replicas, and this order reflects the causal dependency.
+
+**Single-source Glitch Freedom** All the effects caused by an update on a node become visible at the same time. This means that a reader cannot observe the effects of an update on a node in an order that violates causality.
+
+**Complete Glitch Freedom** Ensures that the results of two propagations are the same as if the propagations took place in some sequential order, without interleaving at any node.
+
+**Atomic Consistency** Complete Glitch Freedom plus a read operation cannot observe only *some* of the effects of the change in a source: either it observes all of them, or none.
+
+
 
 ## Accademic Publications
 
@@ -134,17 +149,7 @@ public class OtherClass extends Client {
 
 ## Contributors
 
-Alessandro Margara
-
-Guido Salvaneschi
-
-Tobias Becker
-
-Kim Berninger 
-
-Michael Raulf
-
-Ram Kamath
+Alessandro Margara, Guido Salvaneschi, Tobias Becker, Kim Berninger, Michael Raulf, Ram Kamath.
 
 
 

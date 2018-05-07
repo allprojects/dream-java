@@ -47,7 +47,7 @@ A. Margara, G. Salvaneschi, On the Semantics of Distributed Reactive Programming
 
 A. Margara and G. Salvaneschi, We have a DREAM: Distributed Reactive Programming with Consistency Guarantees, In Proceedings of the 8th International Conference on Distributed Event-Based Systems (DEBS ’14). Mumbay, India, May 26–29, 2014.
 
-## Getting Started
+## Examples
 
 The relevant source code is in the Dream2 folder. 
 
@@ -99,7 +99,7 @@ Signal<Integer> n =
     });
 ```
 	  
-## Locks
+### Locks
 When using Atomic_Consistency it is required to lock a Var before reading its value.
 ```
 	LockToken lock = DreamClient.instance.readLock(new HashSet<>("exVar@Host1"));
@@ -107,7 +107,7 @@ When using Atomic_Consistency it is required to lock a Var before reading its va
 	DreamClient.instance.unlock(lock);
 ```
 
-## Utility Class
+### Getting Started
 In the dream.examples.util-package you can find the class Client which does all the needed setup for Dream.
 It starts the DreamServer if it is not already running, sets the Client Name and connects to the Dependency Graph.
 It also provides some additional utilities.

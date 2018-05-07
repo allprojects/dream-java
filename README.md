@@ -41,7 +41,7 @@ Consistency levels supported by DREAM explained in a nutshell. For a precise def
 
 
 
-## Accademic Publications
+## Academic Publications
 
 A. Margara, G. Salvaneschi, On the Semantics of Distributed Reactive Programming: the Cost of Consistency, IEEE Transactions on Software Engineering, 2018.
 
